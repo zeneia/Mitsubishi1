@@ -77,14 +77,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       width: 100%;
       margin: 0;
       padding: 0;
-      overflow: visible !important;
-      scroll-behavior: smooth;
+      overflow: hidden;
     }
 
     body {
-      background: linear-gradient(to bottom, #1c1c1c, #b80000);
+      background: #dbdbdbff;
       color: white;
-      zoom: 80%;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -100,14 +98,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     .login-box {
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: #5f5c5cb0;
+      margin: 0 auto;
       padding: 28px 24px;
       border-radius: 15px;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
       text-align: center;
-      width: 100%;
-      max-width: 400px;
-      min-width: 280px;
+
+      max-width: 800px;
+      min-width: 800px;
+      max-height: 950px;
+
     }
 
     .logo {
@@ -121,13 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       line-height: 1.2;
     }
 
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      width: 100%;
-      margin: 0 auto;
-    }
+
 
     form>div {
       display: flex;

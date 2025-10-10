@@ -163,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $show_form) {
 		}
 
 		body {
-			background: linear-gradient(to bottom, #1c1c1c, #b80000);
+			background: #dbdbdbff;
 			background-attachment: fixed;
 			color: white;
 			zoom: 90%;
@@ -177,12 +177,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $show_form) {
 		}
 
 		.verification-box {
-			background-color: rgba(255, 255, 255, 0.1);
-			margin: 0 auto;
+			background-color: #5f5c5cb0;
+	
 			padding: 28px 24px;
 			border-radius: 15px;
 			box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 			text-align: center;
+			margin-top: 50px;
+			margin-bottom: 50px;
 		}
 
 		h2 {
@@ -310,6 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $show_form) {
 			height: 100%;
 			background-color: rgba(0, 0, 0, 0.8);
 			backdrop-filter: blur(5px);
+			
 		}
 
 		.modal-content {
@@ -322,15 +325,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $show_form) {
 			max-height: 95vh;
 			overflow: hidden;
 			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-			border: 1px solid rgba(255, 215, 0, 0.3);
+			border: 1px solid rgba(85, 85, 85, 0.95);
 			display: flex;
 			flex-direction: column;
 		}
 
 		.modal-header {
-			background: rgba(0, 0, 0, 0.4);
+			background: #5f5d5dff;
 			padding: 15px 20px;
-			border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+			border-bottom: 2px solid rgba(255, 215, 0, 0.2);
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
@@ -357,18 +360,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $show_form) {
 		}
 
 		.modal-body {
+			background: #ffffff;
 			padding: 20px;
 			overflow-y: auto;
 			line-height: 1.6;
-			font-size: 0.9rem;
+			color: #000000Be;
+			font-size: 1rem;
 			flex: 1;
 			min-height: 0;
 		}
 
 		.modal-body h4 {
-			color: #ffd700;
+			color: #f51919cc;
 			margin: 20px 0 10px 0;
-			font-size: 1rem;
+			font-size: 1.3rem;
 		}
 
 		.modal-body h4:first-child {
@@ -401,7 +406,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $show_form) {
 		}
 
 		::-webkit-scrollbar-thumb:hover {
-			background: rgba(255, 215, 0, 0.5);
+			background: rgba(10, 10, 10, 0.5);
 		}
 
 		::-webkit-scrollbar-corner {
@@ -727,25 +732,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $show_form) {
 			</div>
 			<div class="modal-body">
 				<h4>1. Account Usage and Responsibilities</h4>
-				<p>By using your Mitsubishi Motors account, you agree to provide accurate information, keep credentials secure, and use the platform for legitimate automotive purposes only.</p>
+				<p>Creating and using a Mitsubishi Motors account, you agree to keep your account information correct and up-to-date. You also promise to keep your username and password safe and not share them with anyone. You agree to use this account only for legitimate car-related activities, such as browsing, reserving, or purchasing a vehicle. Misusing your account or using it for illegal activities is not allowed.</p>
 
 				<h4>2. Privacy and Data Protection</h4>
-				<p>Your personal data is encrypted and stored securely. We never share information with third parties without consent and you have the right to access, update, or delete your data.</p>
+				<p>Your privacy is important to us. All personal information you provide to us is encrypted to protect it. We take extra measures to ensure your data is safe. We will never share your personal information with other companies or people unless we have your permission. You also have the right to access your information at any time, update it if it changes, or delete it if you no longer want us to have it.</p>
 
-				<h4>3. Vehicle Reservations and Purchases</h4>
-				<p>Pricing and availability are subject to change. Reservations require approval and may involve credit checks. Final terms are confirmed at the dealership.</p>
+				<h4>3. Inquiries and Loans</h4>
+				<p>When you use the platform to inquire about vehicles or apply for loans, please be aware that prices and availability are subject to change. Your inquiries will be processed and shared with the dealership, who will provide you with the most accurate information. If you choose to apply for a loan through our platform, the loan approval process may include credit checks. The final terms of any loan or vehicle inquiry, including interest rates, loan amounts, and repayment plans, will be confirmed directly by the dealership or financing partner.</p>
 
 				<h4>4. Payment Terms</h4>
-				<p>Payments must be made on time according to agreed schedules. Late payments may incur additional fees. Payment confirmations are provided via email and notifications.</p>
+				<p>When making payments, you agree to pay on time according to the payment plan you’ve agreed to. If payments are late, extra fees may be charged. You will receive email notifications and confirmation receipts for every payment you make, so you always know where you stand.</p>
 
 				<h4>5. Platform Usage Guidelines</h4>
-				<p>Use respectful language, don't circumvent security measures, report technical issues, and follow support team instructions.</p>
+				<p>We ask that you use respectful and polite language when interacting on our platform. Don’t try to bypass any security systems, and if you notice any technical problems, let us know right away. Please follow the instructions from our support team to ensure your experience on the platform is as smooth as possible.</p>
 
 				<h4>6. Limitation of Liability</h4>
-				<p>Mitsubishi Motors Philippines reserves the right to modify terms, suspend accounts for violations, and limit liability for technical issues beyond our control.</p>
+				<p>While we strive to provide the best service possible, Mitsubishi Motors Philippines cannot be held responsible for any issues caused by things beyond our control, like technical problems, errors, or other unforeseen circumstances. We also reserve the right to change these terms, suspend accounts if they’re misused, or limit our liability if issues arise.</p>
 
 				<h4>7. Customer Support and Dispute Resolution</h4>
-				<p>Contact our support team first for resolution. Disputes are handled according to Philippine law with mediation services available for complex issues.</p>
+				<p>If you face any issues or have questions about your account, feel free to reach out to our customer support team. We’re here to assist you and will try to resolve your concerns as quickly as possible. If we can't fix the problem right away, we’ll work with you to find a fair solution.</p>
 
 				<p style="text-align: center; margin-top: 20px; font-size: 0.8rem; color: #aaa;">Last updated: January 2025</p>
 			</div>
