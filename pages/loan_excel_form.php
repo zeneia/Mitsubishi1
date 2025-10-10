@@ -73,19 +73,21 @@ $interest_rates = [
 		}
 
 		body {
-			background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 25%, #2d1b1b 50%, #8b0000 75%, #b80000 100%);
-			min-height: 100vh;
-			color: white;
+			background:#ffffff;
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
 		}
 
 		.header {
-			background: rgba(0, 0, 0, 0.4);
-			padding: 20px 30px;
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			backdrop-filter: blur(20px);
-			border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+			background: #ffffff;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #CC0000;
+            position: relative;
+            z-index: 10;
 		}
 
 		.logo-section {
@@ -97,22 +99,19 @@ $interest_rates = [
 		.logo {
 			width: 60px;
 			height: auto;
-			filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
+			filter: drop-shadow(0 0 3px rgba(204, 48, 27, 0.93));
 		}
 
 		.brand-text {
 			font-size: 1.4rem;
-			font-weight: 700;
-			background: linear-gradient(45deg, #ffd700, #ffed4e);
-			-webkit-background-clip: text;
-			-webkit-text-fill-color: transparent;
-			background-clip: text;
+            font-weight: 700;
+            color: #E60012;
 		}
 
 		.container {
-			max-width: 1400px;
+			max-width: 1200px;
 			margin: 0 auto;
-			padding: 30px;
+			padding: 40px 30px;
 		}
 
 		.page-header {
@@ -123,7 +122,7 @@ $interest_rates = [
 		.page-title {
 			font-size: 2.5rem;
 			margin-bottom: 20px;
-			background: linear-gradient(45deg, #ffd700, #ffed4e, #fff);
+			background: #e60013c9;
 			-webkit-background-clip: text;
 			-webkit-text-fill-color: transparent;
 			background-clip: text;
@@ -131,20 +130,20 @@ $interest_rates = [
 		}
 
 		.vehicle-info {
-			background: rgba(255, 255, 255, 0.1);
+			background: rgba(102, 102, 102, 0.92);
 			padding: 20px;
 			border-radius: 15px;
 			text-align: center;
-			margin-bottom: 30px;
+			margin-bottom: 40px;
 			backdrop-filter: blur(20px);
-			border: 1px solid rgba(255, 215, 0, 0.2);
 		}
 
 		.applicant-type-container {
-			background: rgba(255, 255, 255, 0.1);
+			background: rgba(102, 102, 102, 0.92);
 			padding: 20px;
 			border-radius: 15px;
-			margin-bottom: 30px;
+			text-align: center;
+			margin-bottom: 40px;
 			backdrop-filter: blur(20px);
 			border: 1px solid rgba(255, 215, 0, 0.2);
 			text-align: center;
@@ -196,9 +195,11 @@ $interest_rates = [
 		}
 
 		.form-container {
-			background: rgba(255, 255, 255, 0.1);
-			border-radius: 20px;
-			padding: 30px;
+			background: rgba(102, 102, 102, 0.92);
+			padding: 20px;
+			border-radius: 15px;
+
+			margin-bottom: 40px;
 			backdrop-filter: blur(20px);
 			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 			border: 1px solid rgba(255, 215, 0, 0.1);
@@ -237,7 +238,7 @@ $interest_rates = [
 		}
 
 		.form-input, .form-select, .form-textarea {
-			background: rgba(255, 255, 255, 0.1);
+			background: rgba(179, 169, 169, 0.1);
 			border: 1px solid rgba(255, 215, 0, 0.3);
 			border-radius: 8px;
 			padding: 12px 15px;
@@ -262,8 +263,15 @@ $interest_rates = [
 			outline: none;
 			border-color: #ffd700;
 			box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-			background: rgba(255, 255, 255, 0.15);
+			background: rgba(223, 196, 196, 0.15);
 		}
+
+
+
+        .form-textarea::placeholder {
+            color: #c4c4c4ff;  /* Light gray */
+            opacity: 1;
+        }
 
 		.form-file {
 			background: rgba(255, 255, 255, 0.1);
@@ -410,9 +418,9 @@ $interest_rates = [
 		}
 
 		.btn-submit {
-			background: linear-gradient(45deg, #27ae60, #2ecc71);
+			background: #E60012;
 			color: white;
-			box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+			box-shadow: 0 4px 15px rgba(182, 33, 33, 0.4);
 		}
 
 		.btn-submit:hover {
@@ -471,7 +479,58 @@ $interest_rates = [
 				width: 100%;
 				max-width: 300px;
 			}
+
+			
 		}
+
+		    /* Tablet */
+    @media (max-width: 1024px) {
+        .container {
+            max-width: 95%;
+        }
+    }
+
+    /* Phones */
+    @media (max-width: 768px) {
+        .header {
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px 20px;
+        }
+
+        .user-section {
+            flex-direction: column;
+            gap: 12px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .container {
+            padding: 20px 15px;
+        }
+
+        .form-container {
+            padding: 20px;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Large Desktops */
+    @media (min-width: 1200px) {
+        .container {
+            max-width: 1100px;
+        }
+
+        .inquiry-card {
+            max-width: 100%;
+        }
+
+        .form-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
 	</style>
 </head>
 
@@ -482,7 +541,7 @@ $interest_rates = [
 			<div class="brand-text">MITSUBISHI MOTORS</div>
 		</div>
 		<div class="user-section">
-			<span style="color: #ffd700;">Welcome, <?php echo htmlspecialchars($displayName); ?>!</span>
+			<span style="color: #E60012; font-weight: 600;">Welcome, <?php echo htmlspecialchars($displayName); ?>!</span>
 		</div>
 	</header>
 
