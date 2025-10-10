@@ -325,7 +325,7 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
 			<div class="brand-text">MITSUBISHI MOTORS</div>
 		</div>
 		<div class="user-section">
-			<span style="color: #ffd700;">Welcome, <?php echo htmlspecialchars($displayName); ?>!</span>
+			<span style="color: #E60012;">Welcome, <?php echo htmlspecialchars($displayName); ?>!</span>
 		</div>
 	</header>
 
