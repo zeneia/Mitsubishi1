@@ -69,23 +69,61 @@ $dashboardLabel = ($_SESSION['user_role'] === 'Customer') ? 'Customer Dashboard'
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         /* Common styles */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Inter', 'Segoe UI', sans-serif; }
+
         body { 
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 25%, #2d1b1b 50%, #8b0000 75%, #b80000 100%); 
-            min-height: 100vh; 
-            color: white;
-            overflow: visible !important;
-            height: auto !important;
-            scroll-behavior: smooth;
+        background: #f5f5f5;
+        color: #333333;
+        min-height: 100vh;
         }
-        .header { background: rgba(0, 0, 0, 0.4); padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 215, 0, 0.2); }
+
+        .header { background: rgba(0, 0, 0, 0.4); 
+        background: #ffffff;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 3px solid #E60012;
+        position: relative;
+        z-index: 10; }
+
         .logo-section { display: flex; align-items: center; gap: 20px; }
+
         .logo { width: 60px; }
-        .brand-text { font-size: 1.4rem; font-weight: 700; background: linear-gradient(45deg, #ffd700, #ffed4e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .brand-text { font-size: 1.4rem; 
+            font-weight: 700; background: #E60012; 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; }
+
         .user-section { display: flex; align-items: center; gap: 20px; }
-        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(45deg, #ffd700, #ffed4e); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #b80000; font-size: 1.2rem; }
-        .welcome-text { font-size: 1rem; }
-        .logout-btn { background: linear-gradient(45deg, #d60000, #b30000); color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.3s ease; }
+
+        .user-avatar { width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            background: #E60012; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: bold; 
+            color: #ffffff; 
+            font-size: 1.2rem; }
+
+        .welcome-text { font-size: 1.1rem; }
+        .logout-btn { background: linear-gradient(45deg, #d60000, #b30000); 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            font-size: 0.9rem; 
+            font-weight: 600; 
+            transition: all 0.3s ease; }
+
         .container { 
             max-width: 900px; 
             margin: 0 auto; 
@@ -93,9 +131,22 @@ $dashboardLabel = ($_SESSION['user_role'] === 'Customer') ? 'Customer Dashboard'
             height: auto !important;
             min-height: 100vh;
         }
-        .back-btn { display: inline-block; margin-bottom: 30px; background: rgba(255, 255, 255, 0.1); color: #ffd700; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; }
+        .back-btn { 
+            display: inline-block; 
+            margin-bottom: 30px; 
+            background: #E60012; 
+            color: #ffffff; 
+            padding: 10px 20px; 
+            border-radius: 10px; 
+            text-decoration: none; 
+            font-weight: 600; 
+            transition: all 0.3s ease; }
+
         .back-btn:hover { background: #ffd700; color: #1a1a1a; }
-        .page-title { text-align: center; font-size: 2.8rem; color: #ffd700; margin-bottom: 40px; }
+        .page-title { text-align: center; 
+            font-size: 2.8rem; 
+            color: #E60012; 
+            margin-bottom: 40px; }
 
         /* User Info Debug (remove in production) */
         .debug-info {
@@ -128,12 +179,16 @@ $dashboardLabel = ($_SESSION['user_role'] === 'Customer') ? 'Customer Dashboard'
 
         /* Notifications List */
         .notifications-container { margin-top: 20px; }
-        .notification-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+
+        .notification-tabs { display: flex; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.61); 
+            margin-bottom: 20px; }
+
         .tab-button { 
             padding: 10px 20px; 
             background: none; 
             border: none; 
-            color: #fff; 
+            color: #000000; 
             cursor: pointer; 
             border-bottom: 2px solid transparent;
             opacity: 0.7;
@@ -141,23 +196,33 @@ $dashboardLabel = ($_SESSION['user_role'] === 'Customer') ? 'Customer Dashboard'
         }
         .tab-button.active { 
             opacity: 1; 
-            border-bottom-color: #ffd700;
-            color: #ffd700;
+            border-bottom-color: #E60012;
+            color: #E60012;
         }
         .tab-content { display: none; }
+
         .tab-content.active { display: block; }
+
         .notifications-list { display: flex; flex-direction: column; gap: 10px; }
+
         .notification-item { 
             display: flex; 
             flex-direction: column;
-            background: rgba(0,0,0,0.3); 
+            background: rgba(194, 194, 194, 0.48); 
             border-radius: 10px; 
-            border-left: 5px solid #ffd700; 
+            border-left: 5px solid #E60012; 
             overflow: hidden;
             transition: all 0.3s ease;
+            color: #333
         }
-        .notification-item.read { opacity: 0.7; }
-        .notification-item.unread { border-left-width: 8px; }
+        .notification-item.read { opacity: 0.7; 
+            color: #666;
+        }
+
+        .notification-item.unread { border-left-width: 8px; 
+            font-weight: 600;
+            color: #222;
+        }
         .notification-header { 
             display: flex; 
             align-items: center; 
@@ -165,7 +230,9 @@ $dashboardLabel = ($_SESSION['user_role'] === 'Customer') ? 'Customer Dashboard'
             padding: 15px 20px;
             cursor: pointer;
         }
-        .notification-icon { font-size: 1.8rem; color: #ffd700; min-width: 30px; text-align: center; }
+        .notification-icon { font-size: 1.8rem; 
+            color: #E60012; min-width: 30px; text-align: center; }
+
         .notification-item.approved .notification-icon { color: #28a745; }
         .notification-item.reminder .notification-icon { color: #ffc107; }
         .notification-item.loan-approval .notification-icon { color: #6c5ce7; }
@@ -197,8 +264,8 @@ $dashboardLabel = ($_SESSION['user_role'] === 'Customer') ? 'Customer Dashboard'
         }
         .mark-read-btn {
             background: none;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #fff;
+            border: 1px solid rgba(170, 35, 35, 0.69);
+            color: #E60012;
             padding: 5px 10px;
             border-radius: 4px;
             font-size: 0.8rem;
@@ -206,7 +273,7 @@ $dashboardLabel = ($_SESSION['user_role'] === 'Customer') ? 'Customer Dashboard'
             transition: all 0.3s ease;
         }
         .mark-read-btn:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(170, 35, 35, 0.81);
         }
         .no-notifications {
             text-align: center;
@@ -218,6 +285,58 @@ $dashboardLabel = ($_SESSION['user_role'] === 'Customer') ? 'Customer Dashboard'
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+            /* Tablet */
+    @media (max-width: 1024px) {
+        .container {
+            max-width: 95%;
+        }
+    }
+
+    /* Phones */
+    @media (max-width: 768px) {
+        .header {
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px 20px;
+        }
+
+        .user-section {
+            flex-direction: column;
+            gap: 12px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .container {
+            padding: 20px 15px;
+        }
+
+        .form-container {
+            padding: 20px;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Large Desktops */
+    @media (min-width: 1200px) {
+        .container {
+            max-width: 1100px;
+        }
+
+        .inquiry-card {
+            max-width: 100%;
+        }
+
+        .form-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+
     </style>
 </head>
 <body>
@@ -249,7 +368,7 @@ $dashboardLabel = ($_SESSION['user_role'] === 'Customer') ? 'Customer Dashboard'
         </div>
         */ ?>
         
-        <a href="<?php echo htmlspecialchars($dashboardUrl); ?>" class="back-btn"><i class="fas fa-arrow-left"></i> Back to <?php echo htmlspecialchars($dashboardLabel); ?></a>
+        <a href="<?php echo htmlspecialchars($dashboardUrl); ?>" class="back-btn"><i class="fas fa-arrow-left"></i> Back </a>
         <h1 class="page-title">Notifications</h1>
         <div class="notifications-container">
             <div class="notification-tabs">
