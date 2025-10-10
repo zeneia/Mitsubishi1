@@ -15,6 +15,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Handled Records - Mitsubishi</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="../../includes/css/common-styles.css" rel="stylesheet">
   <style>
 	  html, body {
@@ -162,6 +163,18 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
       border-bottom: 1px solid var(--border-light);
     }
 
+    /* Align table cells consistently and keep actions inline */
+    .data-table td { 
+      vertical-align: middle; 
+    }
+
+    /* Reserve consistent space for Actions column and prevent wrapping */
+    .data-table th:last-child,
+    .data-table td:last-child {
+      width: 220px;
+      white-space: nowrap;
+    }
+
     .data-table th {
       background-color: #f9fafb;
       font-weight: 600;
@@ -204,6 +217,13 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
     .table-actions {
       display: flex;
       gap: 8px;
+      align-items: center;
+      justify-content: flex-start;
+      flex-wrap: nowrap;
+    }
+
+    .table-actions .btn {
+      white-space: nowrap;
     }
 
     .btn {
@@ -369,6 +389,202 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
+    }
+
+    /* Modal Enhancements */
+    .modal-dialog-centered {
+      display: flex;
+      align-items: center;
+      min-height: calc(100% - 3.5rem);
+    }
+
+    .modal-content {
+      border-radius: 12px;
+      border: none;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, var(--primary-red), #b91c3c);
+      color: white;
+      border-bottom: none;
+      border-radius: 12px 12px 0 0;
+      padding: 20px 30px;
+    }
+
+    .modal-header .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .modal-header .btn-close {
+      filter: brightness(0) invert(1);
+      opacity: 0.8;
+    }
+
+    .modal-header .btn-close:hover {
+      opacity: 1;
+    }
+
+    .modal-body {
+      padding: 30px;
+      background-color: #f8f9fa;
+    }
+
+    .modal-body h6 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary-red);
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--primary-red);
+    }
+
+    .modal-body p {
+      margin-bottom: 12px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .modal-body strong {
+      color: var(--text-dark);
+      font-weight: 600;
+      display: inline-block;
+      min-width: 140px;
+    }
+
+    .modal-footer {
+      border-top: 1px solid #dee2e6;
+      padding: 15px 30px;
+      background-color: white;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .modal-backdrop.show {
+      opacity: 0.7;
+    }
+
+    /* Info Cards in Modal */
+    .info-section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-section:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Table in Modal */
+    .modal-body .table {
+      background: white;
+      margin-bottom: 0;
+    }
+
+    .modal-body .table thead {
+      background-color: #f8f9fa;
+    }
+
+    .modal-body .table thead th {
+      font-weight: 600;
+      color: var(--text-dark);
+      border-bottom: 2px solid #dee2e6;
+      padding: 12px;
+    }
+
+    .modal-body .table tbody td {
+      padding: 12px;
+      vertical-align: middle;
+    }
+
+    .modal-body .table tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    /* Status Badge in Modal */
+    .modal-body .status {
+      font-size: 11px;
+      padding: 4px 10px;
+    }
+
+    /* Responsive Modal */
+    @media (max-width: 768px) {
+      .modal-dialog {
+        margin: 10px;
+      }
+
+      .modal-body {
+        padding: 20px;
+      }
+
+      .modal-body strong {
+        min-width: auto;
+        display: block;
+        margin-bottom: 3px;
+      }
+
+      /* Restore spacing on small screens while keeping centering */
+      .cm-modal {
+        width: calc(100% - 20px);
+      }
+    }
+
+    /* Custom centered modal (conflict-free, modeled after inquiries.php) */
+    .cm-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1055;
+    }
+    .cm-modal-overlay.active { display: flex; }
+
+    .cm-modal {
+      background: #fff;
+      border-radius: 12px;
+      width: 900px;
+      max-width: 95vw;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+    .cm-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, var(--primary-red), #b91c3c);
+      color: #fff;
+      padding: 16px 22px;
+    }
+    .cm-modal-title { font-size: 18px; font-weight: 700; margin: 0; }
+    .cm-modal-close {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      opacity: 0.9;
+    }
+    .cm-modal-close:hover { opacity: 1; }
+    .cm-modal-body {
+      padding: 22px;
+      overflow-y: auto;
+      background: #f8f9fa;
+      flex: 1;
+    }
+    .cm-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 14px 22px;
+      background: #fff;
+      border-top: 1px solid #e5e7eb;
     }
   </style>
 </head>
@@ -599,32 +815,25 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Select Client <span class="required">*</span></label>
-                <select class="form-select" required>
+                <select class="form-select" name="client_id" id="reassign_client_select" required>
                   <option value="">Choose client to reassign</option>
-                  <option value="CL-2024-001">John Doe - Montero Sport Interest</option>
-                  <option value="CL-2024-003">Robert Cruz - Mirage G4 Interest</option>
-                  <option value="CL-2024-004">Anna Reyes - Strada Interest</option>
                 </select>
               </div>
               <div class="form-group">
                 <label class="form-label">Current Agent</label>
-                <input type="text" class="form-input" placeholder="Current assigned agent" readonly>
+                <input type="text" class="form-input" id="current_agent_display" placeholder="Current assigned agent" readonly>
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">New Agent <span class="required">*</span></label>
-                <select class="form-select" required>
+                <select class="form-select" name="new_agent_id" required>
                   <option value="">Select new agent</option>
-                  <option value="carlos">Carlos Mendoza (23 active clients)</option>
-                  <option value="ana">Ana Santos (19 active clients)</option>
-                  <option value="juan">Juan Reyes (15 active clients)</option>
-                  <option value="maria">Maria Gonzales (12 active clients)</option>
                 </select>
               </div>
               <div class="form-group">
                 <label class="form-label">Reassignment Reason <span class="required">*</span></label>
-                <select class="form-select" required>
+                <select class="form-select" name="reason" required>
                   <option value="">Select reason</option>
                   <option value="workload">Workload Balancing</option>
                   <option value="expertise">Agent Expertise Match</option>
@@ -636,7 +845,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
             </div>
             <div class="form-group">
               <label class="form-label">Additional Notes</label>
-              <textarea class="form-textarea" rows="3" placeholder="Enter any additional notes for the reassignment..."></textarea>
+              <textarea class="form-textarea" name="notes" rows="3" placeholder="Enter any additional notes for the reassignment..."></textarea>
             </div>
             <div class="action-area">
               <button type="submit" class="btn btn-primary">Reassign Client</button>
@@ -785,9 +994,17 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../../includes/js/common-scripts.js"></script>
   <script>
+    // Global variables
+    let clientsData = [];
+    let agentsData = [];
+
     document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the page
+      initializePage();
+      
       // Tab navigation functionality
       document.querySelectorAll('.tab-button').forEach(function(button) {
         button.addEventListener('click', function() {
@@ -806,16 +1023,514 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
           });
           // Show the target tab content
           document.getElementById(tabId).classList.add('active');
+          
+          // Load data for specific tabs
+          if (tabId === 'handled-clients') {
+            loadClientAssignments();
+          } else if (tabId === 'handled-workload') {
+            loadWorkloadStats();
+          }
         });
       });
 
       // Form submission for reassignment
       document.getElementById('reassignForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        alert('Client reassignment completed successfully!');
-        this.reset();
+        handleReassignment();
+      });
+
+      // Search and filter functionality
+      const searchInput = document.querySelector('.search-input input');
+      if (searchInput) {
+        searchInput.addEventListener('input', debounce(loadClientAssignments, 300));
+      }
+
+      const filterSelects = document.querySelectorAll('.filter-select');
+      filterSelects.forEach(select => {
+        select.addEventListener('change', loadClientAssignments);
       });
     });
+
+    function initializePage() {
+      loadClientAssignments();
+      loadAvailableAgents();
+      loadWorkloadStats();
+    }
+
+    async function loadClientAssignments() {
+      try {
+        const search = document.querySelector('.search-input input')?.value || '';
+        const agentFilter = document.querySelector('.filter-select')?.value || '';
+        const statusFilter = document.querySelectorAll('.filter-select')[1]?.value || '';
+
+        const params = new URLSearchParams({
+          action: 'get_clients',
+          search: search,
+          agent: agentFilter,
+          status: statusFilter
+        });
+
+        const response = await fetch(`../../api/client_management.php?${params}`);
+        const result = await response.json();
+
+        if (result.success) {
+          clientsData = result.data;
+          renderClientTable(result.data);
+          updateClientSelect(result.data);
+        } else {
+          showError('Failed to load client assignments: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error loading client assignments:', error);
+        showError('Error loading client assignments');
+      }
+    }
+
+    async function loadAvailableAgents() {
+      try {
+        const response = await fetch('../../api/client_management.php?action=get_agents');
+        const result = await response.json();
+
+        if (result.success) {
+          agentsData = result.data;
+          updateAgentSelects(result.data);
+        }
+      } catch (error) {
+        console.error('Error loading agents:', error);
+      }
+    }
+
+    async function loadWorkloadStats() {
+      try {
+        const response = await fetch('../../api/client_management.php?action=get_workload_stats');
+        const result = await response.json();
+
+        if (result.success) {
+          renderWorkloadStats(result.data);
+        }
+      } catch (error) {
+        console.error('Error loading workload stats:', error);
+      }
+    }
+
+    function renderClientTable(clients) {
+      const tbody = document.querySelector('#handled-clients .data-table tbody');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+
+      clients.forEach(client => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${client.client_name}<br><small>${client.client_code}</small></td>
+          <td>${client.email}<br><small>${client.phone}</small></td>
+          <td>Vehicle Interest<br><small>Status: ${client.status}</small></td>
+          <td>${client.agent_name}<br><small>${client.agent_position}</small></td>
+          <td>${formatDate(client.assignment_date)}</td>
+          <td><span class="status ${getStatusClass(client.status)}">${client.status}</span></td>
+          <td>${formatDate(client.last_activity)}</td>
+          <td class="table-actions">
+            <button class="btn btn-small btn-outline" onclick="viewClientDetails(${client.client_id})">View Details</button>
+            ${getActionButton(client.status, client.client_id)}
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function getActionButton(status, clientId) {
+      switch (status) {
+        case 'Active':
+          return `<button class="btn btn-small btn-primary" onclick="reassignClient(${clientId})">Reassign</button>`;
+        case 'Completed':
+          return `<button class="btn btn-small btn-secondary" onclick="archiveClient(${clientId})">Archive</button>`;
+        case 'Pending':
+          return `<button class="btn btn-small btn-primary" onclick="escalateClient(${clientId})">Escalate</button>`;
+        default:
+          return `<button class="btn btn-small btn-outline" onclick="viewClientDetails(${clientId})">View Details</button>`;
+      }
+    }
+
+    function getStatusClass(status) {
+      switch (status) {
+        case 'Active': return 'approved';
+        case 'Completed': return 'completed';
+        case 'Pending': return 'pending';
+        case 'Escalated': return 'overdue';
+        case 'Archived': return 'secondary';
+        default: return 'pending';
+      }
+    }
+
+    function renderWorkloadStats(stats) {
+      const workloadStats = document.querySelector('.workload-stats');
+      if (!workloadStats) return;
+
+      workloadStats.innerHTML = '';
+
+      stats.forEach(stat => {
+        const workloadClass = getWorkloadClass(stat.active_clients);
+        const card = document.createElement('div');
+        card.className = `workload-card ${workloadClass}`;
+        card.innerHTML = `
+          <div class="workload-value">${stat.active_clients}</div>
+          <div class="workload-label">${stat.first_name} ${stat.last_name} - Active Clients</div>
+        `;
+        workloadStats.appendChild(card);
+      });
+    }
+
+    function getWorkloadClass(activeClients) {
+      if (activeClients >= 20) return 'high';
+      if (activeClients >= 15) return 'medium';
+      if (activeClients >= 10) return 'normal';
+      return 'low';
+    }
+
+    function updateAgentSelects(agents) {
+      const agentSelects = document.querySelectorAll('select[name="new_agent_id"]');
+      agentSelects.forEach(select => {
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">Select new agent</option>';
+        
+        agents.forEach(agent => {
+          const option = document.createElement('option');
+          option.value = agent.account_id;
+          option.textContent = `${agent.first_name} ${agent.last_name} (${agent.active_clients} active clients)`;
+          select.appendChild(option);
+        });
+        
+        select.value = currentValue;
+      });
+    }
+
+    function updateClientSelect(clients) {
+      const clientSelect = document.getElementById('reassign_client_select');
+      if (!clientSelect) return;
+
+      const currentValue = clientSelect.value;
+      clientSelect.innerHTML = '<option value="">Choose client to reassign</option>';
+      
+      clients.forEach(client => {
+        const option = document.createElement('option');
+        option.value = client.client_id;
+        option.textContent = `${client.client_name} - ${client.agent_name} (${client.status})`;
+        clientSelect.appendChild(option);
+      });
+      
+      clientSelect.value = currentValue;
+    }
+
+    // Add event listener for client selection change
+    document.addEventListener('DOMContentLoaded', function() {
+      const clientSelect = document.getElementById('reassign_client_select');
+      if (clientSelect) {
+        clientSelect.addEventListener('change', function() {
+          const selectedClientId = this.value;
+          const selectedClient = clientsData.find(c => c.client_id == selectedClientId);
+          
+          const currentAgentDisplay = document.getElementById('current_agent_display');
+          if (currentAgentDisplay && selectedClient) {
+            currentAgentDisplay.value = selectedClient.agent_name;
+          } else if (currentAgentDisplay) {
+            currentAgentDisplay.value = '';
+          }
+        });
+      }
+    });
+
+    async function viewClientDetails(clientId) {
+      try {
+        const response = await fetch(`../../api/client_management.php?action=get_client_details&client_id=${clientId}`);
+        const result = await response.json();
+
+        if (result.success) {
+          showClientDetailsModal(result.data);
+        } else {
+          showError('Failed to load client details: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error loading client details:', error);
+        showError('Error loading client details');
+      }
+    }
+
+    async function reassignClient(clientId) {
+      const client = clientsData.find(c => c.client_id == clientId);
+      if (!client) return;
+
+      const newAgentId = prompt(`Reassign ${client.client_name} to which agent?`, '');
+      if (!newAgentId) return;
+
+      const reason = prompt('Reason for reassignment:', '');
+      if (!reason) return;
+
+      const notes = prompt('Additional notes (optional):', '');
+
+      try {
+        const response = await fetch('../../api/client_management.php?action=reassign_client', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            client_id: clientId,
+            new_agent_id: newAgentId,
+            reason: reason,
+            notes: notes
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showSuccess('Client successfully reassigned');
+          loadClientAssignments();
+        } else {
+          showError('Failed to reassign client: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error reassigning client:', error);
+        showError('Error reassigning client');
+      }
+    }
+
+    async function escalateClient(clientId) {
+      const client = clientsData.find(c => c.client_id == clientId);
+      if (!client) return;
+
+      const reason = prompt('Reason for escalation:', '');
+      if (!reason) return;
+
+      const priority = prompt('Priority (Low/Medium/High/Critical):', 'High');
+      const notes = prompt('Additional notes (optional):', '');
+
+      try {
+        const response = await fetch('../../api/client_management.php?action=escalate_client', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            client_id: clientId,
+            escalation_reason: reason,
+            priority: priority,
+            notes: notes
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showSuccess('Client successfully escalated');
+          loadClientAssignments();
+        } else {
+          showError('Failed to escalate client: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error escalating client:', error);
+        showError('Error escalating client');
+      }
+    }
+
+    async function archiveClient(clientId) {
+      const client = clientsData.find(c => c.client_id == clientId);
+      if (!client) return;
+
+      if (!confirm(`Are you sure you want to archive ${client.client_name}?`)) return;
+
+      const reason = prompt('Reason for archiving:', '');
+      if (!reason) return;
+
+      try {
+        const response = await fetch('../../api/client_management.php?action=archive_client', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            client_id: clientId,
+            archive_reason: reason
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showSuccess('Client successfully archived');
+          loadClientAssignments();
+        } else {
+          showError('Failed to archive client: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error archiving client:', error);
+        showError('Error archiving client');
+      }
+    }
+
+    async function handleReassignment() {
+      const form = document.getElementById('reassignForm');
+      const formData = new FormData(form);
+      
+      const data = {
+        client_id: formData.get('client_id'),
+        new_agent_id: formData.get('new_agent_id'),
+        reason: formData.get('reason'),
+        notes: formData.get('notes')
+      };
+
+      try {
+        const response = await fetch('../../api/client_management.php?action=reassign_client', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showSuccess('Client successfully reassigned');
+          form.reset();
+          loadClientAssignments();
+        } else {
+          showError('Failed to reassign client: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error reassigning client:', error);
+        showError('Error reassigning client');
+      }
+    }
+
+    function showClientDetailsModal(client) {
+      // Remove existing modal if any
+      const existing = document.getElementById('cmClientDetailsModal');
+      if (existing) existing.remove();
+
+      const modalHtml = `
+        <div class="cm-modal-overlay active" id="cmClientDetailsModal" role="dialog" aria-modal="true">
+          <div class="cm-modal" role="document">
+            <div class="cm-modal-header">
+              <h3 class="cm-modal-title">Client Details - ${client.firstname} ${client.lastname}</h3>
+              <button class="cm-modal-close" aria-label="Close" onclick="closeClientDetailsModal()">&times;</button>
+            </div>
+            <div class="cm-modal-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="info-section">
+                    <h6><i class="fas fa-user"></i> Personal Information</h6>
+                    <p><strong>Full Name:</strong> ${client.firstname} ${client.lastname}</p>
+                    <p><strong>Email:</strong> ${client.email || 'N/A'}</p>
+                    <p><strong>Phone:</strong> ${client.mobile_number || 'N/A'}</p>
+                    <p><strong>Status:</strong> <span class="status ${getStatusClass(client.status)}">${client.status}</span></p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-section">
+                    <h6><i class="fas fa-user-tie"></i> Assignment Information</h6>
+                    <p><strong>Assigned Agent:</strong> ${client.agent_first_name} ${client.agent_last_name}</p>
+                    <p><strong>Agent Position:</strong> ${client.agent_position}</p>
+                    <p><strong>Assignment Date:</strong> ${formatDate(client.created_at)}</p>
+                    <p><strong>Last Activity:</strong> ${formatDate(client.updated_at)}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="row mt-3">
+                <div class="col-12">
+                  <div class="info-section">
+                    <h6><i class="fas fa-comments"></i> Conversation History</h6>
+                    ${client.conversations && client.conversations.length > 0 ? `
+                      <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                          <thead>
+                            <tr>
+                              <th>Conversation ID</th>
+                              <th>Status</th>
+                              <th>Messages</th>
+                              <th>Last Message</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            ${client.conversations.map(conv => `
+                              <tr>
+                                <td>#${conv.conversation_id}</td>
+                                <td><span class="status ${getStatusClass(conv.conversation_status)}">${conv.conversation_status}</span></td>
+                                <td><i class="fas fa-envelope"></i> ${conv.message_count}</td>
+                                <td>${formatDate(conv.last_message_at)}</td>
+                              </tr>
+                            `).join('')}
+                          </tbody>
+                        </table>
+                      </div>
+                    ` : `
+                      <p style="text-align: center; color: var(--text-light); padding: 20px;">
+                        <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.3;"></i><br>
+                        No conversation history available
+                      </p>
+                    `}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="cm-modal-footer">
+              <button type="button" class="btn btn-secondary" onclick="closeClientDetailsModal()">Close</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+      // Close on overlay click
+      const overlay = document.getElementById('cmClientDetailsModal');
+      overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) closeClientDetailsModal();
+      });
+
+      // Close on Escape
+      document.addEventListener('keydown', escCloseHandler);
+    }
+
+    function escCloseHandler(e) {
+      if (e.key === 'Escape') {
+        closeClientDetailsModal();
+      }
+    }
+
+    function closeClientDetailsModal() {
+      const overlay = document.getElementById('cmClientDetailsModal');
+      if (overlay) overlay.remove();
+      document.removeEventListener('keydown', escCloseHandler);
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      const date = new Date(dateString);
+      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    }
+
+    function showSuccess(message) {
+      // You can replace this with your preferred notification system
+      alert('Success: ' + message);
+    }
+
+    function showError(message) {
+      // You can replace this with your preferred notification system
+      alert('Error: ' + message);
+    }
+
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
   </script>
 </body>
 </html>
