@@ -19,22 +19,74 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Requirements Guide - Mitsubishi Motors</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
+        <style>
         /* Common styles */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
-        body { background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 25%, #2d1b1b 50%, #8b0000 75%, #b80000 100%); min-height: 100vh; color: white; }
-        .header { background: rgba(0, 0, 0, 0.4); padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 215, 0, 0.2); }
+
+        body { background: #ffffff; 
+            min-height: 100vh; 
+            color: white; }
+
+        .header { background: #ffffff; 
+            padding: 20px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            backdrop-filter: blur(20px); 
+            border-bottom: 3px solid #b30000; }
+
         .logo-section { display: flex; align-items: center; gap: 20px; }
+
         .logo { width: 60px; }
-        .brand-text { font-size: 1.4rem; font-weight: 700; background: linear-gradient(45deg, #ffd700, #ffed4e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .brand-text { font-size: 1.4rem; 
+            font-weight: 700; background: 
+            linear-gradient(45deg, #d60000, #b30000); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; }
+
         .user-section { display: flex; align-items: center; gap: 20px; }
-        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(45deg, #ffd700, #ffed4e); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #b80000; font-size: 1.2rem; }
-        .welcome-text { font-size: 1rem; }
-        .logout-btn { background: linear-gradient(45deg, #d60000, #b30000); color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.3s ease; }
-        .container { max-width: 1000px; margin: 0 auto; padding: 50px 30px; }
-        .back-btn { display: inline-block; margin-bottom: 30px; background: rgba(255, 255, 255, 0.1); color: #ffd700; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; }
+
+        .user-avatar { width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            background: linear-gradient(45deg, #d60000, #b30000); 
+            display: flex; align-items: center; 
+            justify-content: center; 
+            font-weight: bold; 
+            color: #ffffff; font-size: 1.2rem; }
+
+        .welcome-text { font-size: 1rem;
+            color: #000000
+         }
+
+        .logout-btn { background: linear-gradient(45deg, #d60000, #b30000); 
+            color: white; 
+            border: none; 
+            padding: 12px 50px; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            font-size: 0.9rem; 
+            font-weight: 600; 
+            transition: all 0.3s ease; }
+
+        .container { max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 50px 30px; }
+
+        .back-btn { display: inline-block; 
+            margin-bottom: 30px; 
+            background: linear-gradient(45deg, #d60000, #b30000); 
+            color: #ffffff; padding: 10px 20px; 
+            border-radius: 10px; text-decoration: none; 
+            font-weight: 600; 
+            transition: all 0.3s ease; }
+
         .back-btn:hover { background: #ffd700; color: #1a1a1a; }
-        .page-title { text-align: center; font-size: 2.8rem; color: #ffd700; margin-bottom: 40px; }
+
+        .page-title { text-align: center; 
+            font-size: 2.8rem; color: #b30000; 
+            margin-bottom: 40px; }
 
         /* Requirements Guide Styles */
         .requirements-container {
@@ -47,27 +99,33 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
             margin-bottom: 40px;
             opacity: 0.9;
             line-height: 1.6;
+            color: #020202ff
         }
         .requirements-card {
-            background: rgba(0,0,0,0.3);
+            background: #4A4A4A;
             border-radius: 15px;
-            border: 1px solid rgba(255,215,0,0.1);
+            border: 2px solid rgba(253, 253, 253, 0.67);
+            max-width: 1000px;
             overflow: hidden;
             margin-bottom: 30px;
             transition: all 0.3s ease;
+            box-shadow: 0 10px 15px rgb(0, 0, 0, 0.2);
+
+              
+ 
         }
         .requirements-card:hover {
-            border-color: rgba(255,215,0,0.3);
+            border-color: rgba(255, 255, 255, 0.73);
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
         .card-header {
-            background: rgba(0,0,0,0.4);
+            background: rgba(77, 77, 77, 0.62);
             padding: 20px 30px;
             border-bottom: 1px solid rgba(255,215,0,0.1);
         }
         .card-header h2 {
             font-size: 1.8rem;
-            color: #ffd700;
+            color: #ffffff;
             margin: 0;
             display: flex;
             align-items: center;
@@ -75,18 +133,20 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
         }
         .card-header i {
             font-size: 2rem;
-            color: #ffd700;
+            color: #ffffff;
         }
         .card-content {
             padding: 30px;
+            background: #ffffff;
         }
         .requirements-table {
             width: 100%;
             border-collapse: collapse;
+            color: #585757ff;
         }
         .requirements-table th {
             background: rgba(255,215,0,0.1);
-            color: #ffd700;
+            color: #4d4a4aff;
             padding: 15px;
             text-align: left;
             font-weight: 700;
@@ -94,10 +154,11 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
             border-bottom: 2px solid rgba(255,215,0,0.2);
         }
         .requirements-table td {
-            padding: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            font-size: 1rem;
-            line-height: 1.6;
+            color: #464444ff;
+            padding: 12px 15px;
+           
+            border-bottom: 1px solid rgba(255, 255, 255, 0.54);
+            
         }
         .requirements-table tr:hover {
             background: rgba(255,215,0,0.05);
@@ -108,7 +169,7 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
             gap: 12px;
         }
         .req-item i {
-            color: #ffd700;
+            color: #000000;
             margin-top: 3px;
             font-size: 1.1rem;
         }
@@ -125,20 +186,22 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
             line-height: 1.4;
         }
         .highlight-note {
-            background: rgba(255,215,0,0.1);
-            border-left: 4px solid #ffd700;
+            background: #b4b2a3e5;
+            border-left: 4px solid #70706eb6;
+            opacity: 0.8;
             padding: 20px;
             margin: 20px 0;
             border-radius: 0 10px 10px 0;
         }
         .highlight-note h4 {
-            color: #ffd700;
+            color: #e60013e1;
             margin-bottom: 10px;
             font-size: 1.1rem;
         }
         .highlight-note p {
             margin: 0;
             line-height: 1.6;
+            color: #000000;
         }
 
         /* Custom Scrollbar Styles */
@@ -178,7 +241,58 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
             .requirements-table td { padding: 12px; }
             .intro-text { font-size: 1rem; }
         }
+
+            /* Tablet */
+    @media (max-width: 1024px) {
+        .container {
+            max-width: 95%;
+        }
+    }
+
+    /* Phones */
+    @media (max-width: 768px) {
+        .header {
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px 20px;
+        }
+
+        .user-section {
+            flex-direction: column;
+            gap: 12px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .container {
+            padding: 20px 15px;
+        }
+
+        .form-container {
+            padding: 20px;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Large Desktops */
+    @media (min-width: 1200px) {
+        .container {
+            max-width: 1100px;
+        }
+
+        .inquiry-card {
+            max-width: 100%;
+        }
+
+        .form-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
     </style>
+
 </head>
 <body>
     <header class="header">
@@ -210,58 +324,53 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
                             <tr>
                                 <td>
                                     <div class="req-item">
-                                        <i class="fas fa-id-card"></i>
-                                        <div class="req-item-content">
-                                            <div class="req-item-title">Valid ID</div>
-                                            <div class="req-item-desc">Two (2) government-issued IDs with photos and signatures</div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="req-item">
-                                        <i class="fas fa-file-invoice"></i>
-                                        <div class="req-item-content">
-                                            <div class="req-item-title">Copy Of Source of Income</div>
-                                            <div class="req-item-desc">Latest payslips, bank statements, or business income documents</div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="req-item">
                                         <i class="fas fa-briefcase"></i>
                                         <div class="req-item-content">
-                                            <div class="req-item-title"><span style="color: #dc3545;">*If employed</span><br>Certificate of Employment</div>
-                                            <div class="req-item-desc">With salary indication and length of service</div>
+                                            <div class="req-item-title">EMPLOYED</div>
+                                            <div class="req-item-desc">Two (2) Valid ID's (GOV'T ISSUED)</div>
+                                            <div class="req-item-desc">COEC or Three (3) Months Latest Payslip</div>
+                                            <div class="req-item-desc">ITR (2316)</div>
+                                            <div class="req-item-desc">Proof Of Billing (ORIGINAL)</div>
+                                            <div class="req-item-desc">ADA/PDC</div>
                                         </div>
                                     </div>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>
-                                    <div class="req-item">
-                                        <i class="fas fa-receipt"></i>
-                                        <div class="req-item-content">
-                                            <div class="req-item-title">Payslip</div>
-                                            <div class="req-item-desc">Latest 3 months payslips or salary certificate</div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
+
                             <tr>
                                 <td>
                                     <div class="req-item">
                                         <i class="fas fa-building"></i>
                                         <div class="req-item-content">
-                                            <div class="req-item-title">Company ID</div>
-                                            <div class="req-item-desc">Valid company identification card or employment badge</div>
+                                            <div class="req-item-title">BUSINESS</div>
+                                            <div class="req-item-desc">Two (2) Valid ID's (GOV'T ISSUES)</div>
+                                            <div class="req-item-desc">Bank Statement (LATEST 3 MONTHS)</div>
+                                            <div class="req-item-desc">ITR(1701)</div>
+                                            <div class="req-item-desc">DTI Permit</div>
+                                            <div class="req-item-desc">Proof of Billing (ORIGINAL)</div>
+                                            <div class="req-item-desc">ADA/PDC</div>
                                         </div>
                                     </div>
                                 </td>
-                            </tr> 
+                            </tr>
+
+
+                                <td>
+                                    <div class="req-item">
+                                        <i class="fas fa-earth-asia"></i>
+                                        <div class="req-item-content">
+                                            <div class="req-item-title">OFW</div>
+                                            <div class="req-item-desc">Two (2) Valid ID's (GOV'T ISSUES)</div>
+                                            <div class="req-item-desc">Proof Of Remittance (LATEST 3 MONTHS)</div>
+                                            <div class="req-item-desc">Latest Contract</div>
+                                            <div class="req-item-desc">SPA</div>
+                                            <div class="req-item-desc">Proof Of Billing (ORIGINAL)</div>
+                                            <div class="req-item-desc">ADA/PDC</div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+ 
                         </tbody>
                     </table>
                 </div>
