@@ -57,20 +57,19 @@ try {
         }
 
         body {
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 25%, #2d1b1b 50%, #8b0000 75%, #b80000 100%);
+            background: #ffffff;
             min-height: 100vh;
             color: white;
             overflow-x: hidden;
         }
 
         .header {
-            background: rgba(0, 0, 0, 0.4);
+            background: #ffffff;
             padding: 20px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            border-bottom: 3px solid #CC0000;
             position: relative;
             z-index: 10;
         }
@@ -82,18 +81,14 @@ try {
         }
 
         .logo {
-            width: 60px;
-            height: auto;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
+           width: 60px;
+           height: auto;
         }
 
         .brand-text {
-            font-size: 1.4rem;
-            font-weight: 700;
-            background: linear-gradient(45deg, #ffd700, #ffed4e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+           font-size: 1.4rem;
+           font-weight: 700;
+           color: #E60012;
         }
 
         .user-section {
@@ -106,18 +101,19 @@ try {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            background: #E60012;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            color: #b80000;
+            color: #ffffff;
             font-size: 1.2rem;
         }
         
         .welcome-text {
             font-size: 1rem;
             font-weight: 500;
+            color: #000000
         }
 
         .logout-btn {
@@ -139,22 +135,27 @@ try {
         }
 
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 50px 30px;
+            background: #ffffff;
+            max-width: 2000px;
+            margin: 30px auto;
+            padding: 20px 30px;
             position: relative;
-            z-index: 5;
+            z-index: 0;
+
+            border: 3px solid #777373cc;
+            border-radius: 50px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) 
         }
 
         .page-title {
             font-size: 3.5rem;
             margin-bottom: 20px;
-            background: linear-gradient(45deg, #ffd700, #ffed4e, #fff);
+            background: #000000;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             font-weight: 800;
-            text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            text-shadow: 0 0 5px rgba(8, 6, 6, 0.87);
             text-align: center;
         }
 
@@ -169,8 +170,8 @@ try {
 
         .tab-btn {
             background: transparent;
-            border: 2px solid rgba(255, 215, 0, 0.5);
-            color: rgba(255, 215, 0, 0.8);
+            border: 2px solid #837a7ae3;
+            color: #E60012;
             padding: 12px 25px;
             border-radius: 25px;
             cursor: pointer;
@@ -180,9 +181,9 @@ try {
         }
 
         .tab-btn.active {
-            background: #ffd700;
-            color: #1a1a1a;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            background: #E60012;
+            color: #ffffff;
+            box-shadow: 0 0 5px rgba(2, 1, 1, 1);
         }
 
         .tab-btn:active:not(.active) {
@@ -224,16 +225,7 @@ try {
             transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
         }
 
-        /* Enhanced focus states for accessibility */
-        .tab-btn:focus {
-            outline: 2px solid #ffd700;
-            outline-offset: 2px;
-        }
 
-        .swiper-button-next:focus, .swiper-button-prev:focus {
-            outline: 2px solid #ffd700;
-            outline-offset: 2px;
-        }
 
         /* Car Model Viewing Menu */
         .car-model-swiper {
@@ -268,43 +260,31 @@ try {
             height: 200px;
             object-fit: contain;
             margin-bottom: 20px;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.4));
-            /* Added user-select: none to prevent text selection */
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
+            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.3));
             user-select: none;
             pointer-events: none;
-            -webkit-user-drag: none;
-            -khtml-user-drag: none;
-            -moz-user-drag: none;
-            -o-user-drag: none;
             -webkit-user-drag: none;
         }
 
         .car-name {
-            color: #ffd700;
+            color: #000000;
             font-size: 2rem;
             font-weight: 700;
-            margin-bottom: 15px;
-            /* Added user-select: none to prevent text selection */
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+            margin-bottom: 10px;e;
         }
 
         .car-details {
             line-height: 1.7;
-            opacity: 0.9;
-            font-weight: 300;
-            margin-bottom: 25px;
-            flex-grow: 1;
-            /* Added user-select: none to prevent text selection */
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+            color: #333333;
+            font-weight: 400;
+            margin-bottom: 15px;
+        }
+
+        .car-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #E60012;
+            margin-bottom: 20px;
         }
 
         .action-buttons {
@@ -315,8 +295,8 @@ try {
         }
 
         .action-btn {
-            background: linear-gradient(45deg, #ffd700, #ffed4e);
-            color: #1a1a1a;
+            background: #E60012;
+            color: #ffffff;
             border: none;
             padding: 15px 20px;
             border-radius: 15px;
@@ -339,9 +319,9 @@ try {
 
         /* Enhanced Swiper custom styles */
         :root {
-            --swiper-navigation-color: #ffd700;
-            --swiper-pagination-color: #ffd700;
-            --swiper-theme-color: #ffd700;
+            --swiper-navigation-color: #E60012;
+            --swiper-pagination-color: #E60012;
+            --swiper-theme-color: #E60012;
         }
 
         .swiper-button-next, .swiper-button-prev {
@@ -426,8 +406,8 @@ try {
         .back-btn {
             display: inline-block;
             margin-bottom: 30px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffd700;
+            background: #E60012;
+            color: #ffffff;
             padding: 10px 20px;
             border-radius: 10px;
             text-decoration: none;
@@ -563,8 +543,22 @@ try {
                 font-size: 3rem;
             }
             .swiper-slide {
-                width: 340px !important;
-                padding: 28px;
+                background: #ffffff;
+                padding: 30px;
+                border-radius: 15px;
+                backdrop-filter: none;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+                border: 1px solid rgba(0, 0, 0, 0.08);
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: space-between;
+                min-height: 550px;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                width: 350px !important;
+                user-select: none;
+                
             }
             .car-name {
                 font-size: 1.6rem;
@@ -572,7 +566,7 @@ try {
             .category-tabs {
                 overflow-x: auto;
                 scrollbar-width: thin;
-                scrollbar-color: #ffd700 transparent;
+                scrollbar-color: #888781ff transparent;
             }
             .category-tabs::-webkit-scrollbar {
                 height: 4px;
@@ -600,7 +594,61 @@ try {
             }
         }
 
+            /* Tablet */
+    @media (max-width: 1024px) {
+        .container {
+            max-width: 95%;
+        }
+    }
+
+    /* Phones */
+    @media (max-width: 768px) {
+        .header {
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px 20px;
+        }
+
+        .user-section {
+            flex-direction: column;
+            gap: 12px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .container {
+            padding: 20px 15px;
+        }
+
+        .form-container {
+            padding: 20px;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Large Desktops */
+    @media (min-width: 1200px) {
+        .container {
+            max-width: 1500px;
+        }
+
+        .inquiry-card {
+            max-width: 100%;
+        }
+
+        .form-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+        
+        
+
     </style>
+  
 </head>
 <body>
     <header class="header">
@@ -709,13 +757,13 @@ try {
                             <div>
                                 <h2 class="car-name"><?php echo htmlspecialchars($vehicle['model_name']); ?></h2>
                                 <?php if (!empty($vehicle['variant'])): ?>
-                                    <p style="color: #ffd700; font-size: 1.1rem; margin-bottom: 10px;"><?php echo htmlspecialchars($vehicle['variant']); ?></p>
+                                    <p style="color: #E60012; font-size: 1.1rem; margin-bottom: 10px;"><?php echo htmlspecialchars($vehicle['variant']); ?></p>
                                 <?php endif; ?>
                                 <p class="car-details">
                                     <?php echo !empty($vehicle['key_features']) ? htmlspecialchars(substr($vehicle['key_features'], 0, 150)) . '...' : 'Premium vehicle with advanced features and exceptional performance.'; ?>
                                 </p>
                                 <?php if ($vehicle['base_price']): ?>
-                                    <p style="color: #ffd700; font-size: 1.2rem; font-weight: bold; margin-top: 10px;">
+                                    <p style="color: #E60012; font-size: 1.2rem; font-weight: bold; margin-top: 10px;">
                                         <?php if ($vehicle['promotional_price'] && $vehicle['promotional_price'] < $vehicle['base_price']): ?>
                                             ₱<?php echo number_format($vehicle['promotional_price'], 2); ?>
                                             <span style="color: #ff6b6b; text-decoration: line-through; font-size: 0.9rem; margin-left: 10px;">₱<?php echo number_format($vehicle['base_price'], 2); ?></span>
