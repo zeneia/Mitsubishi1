@@ -148,14 +148,19 @@ try {
         }
 
         .page-title {
-            font-size: 3.5rem;
+
+            font-weight: 400;
+            background: #E60012;
+
+       
+
             margin-bottom: 20px;
-            background: #000000;
+
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             font-weight: 800;
-            text-shadow: 0 0 5px rgba(8, 6, 6, 0.87);
+            text-shadow: 0 0 2px rgba(226, 22, 22, 0.66);
             text-align: center;
         }
 
