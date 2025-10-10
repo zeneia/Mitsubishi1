@@ -5,7 +5,7 @@ include_once(dirname(dirname(__DIR__)) . '/includes/database/customer_operations
 
 // Check if user is Admin
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
-    header("Location: ../../auth/login.php");
+    header("Location: ../../pages/login.php");
     exit();
 }
 

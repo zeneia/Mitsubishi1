@@ -3,7 +3,7 @@ include_once('../../includes/init.php');
 
 // Check if user is logged in and has proper role
 if (!isLoggedIn() || !hasRole('SalesAgent')) {
-	header('Location: ../../pages/auth/login.php');
+	header('Location: ../login.php');
 	exit();
 }
 
