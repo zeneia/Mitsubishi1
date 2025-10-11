@@ -13,6 +13,7 @@ include 'header.php';
     padding: 32px;
   }
   .page-title {
+    color: #000000e0;
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 24px;
@@ -79,7 +80,7 @@ include 'header.php';
     margin-bottom: 16px;
   }
   .contact-info {
-    font-weight: bold;
+
     color: #ccc;
     line-height: 1.8;
   }
@@ -549,6 +550,8 @@ include 'header.php';
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <div class="container">
+  <h1 class="page-title">About Us</h1>
+
   <div class="hero-section">
     <h1 class="hero-title">About Mitsubishi Motors San Pablo</h1>
     <p class="hero-subtitle">Driving Innovation and Excellence in Automotive Service</p>

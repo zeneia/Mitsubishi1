@@ -32,11 +32,14 @@
   }
 
   .contact-info {
+    color: #ffffff;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 8px;
     margin-bottom: 8px;
     font-size: 0.85rem;
+    text-align: left;
   }
 
   .social-links {

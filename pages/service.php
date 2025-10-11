@@ -13,11 +13,14 @@ include 'header.php';
     padding: 32px;
   }
   .page-title {
+    color: #000000;
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 24px;
     text-align: center;
   }
+  
+
   .services-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -510,10 +513,10 @@ include 'header.php';
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <div class="container">
-  <h1 class="page-title">Service Center</h1>
+  <h1 class="page-title">Service Offer</h1>
   
-  <div class="page-intro">
-    <p>Trust your Mitsubishi to the experts. Our certified technicians use genuine parts and specialized equipment to keep your vehicle performing at its best.</p>
+  <div class="page-intro;">
+    <p style = "color: #000000; text-align: center;">Trust your Mitsubishi to the experts. Our certified technicians use genuine parts and specialized equipment to keep your vehicle performing at its best.</p>
   </div>
   
   <div class="services-grid">
@@ -571,47 +574,12 @@ include 'header.php';
       <button class="service-btn"><i class="fas fa-stopwatch"></i> Express Booking</button>
     </div>
   </div>
-
-  <div class="appointment-section">
-    <h2 class="service-title">Schedule Your Service Appointment</h2>
-    <p style="color: #ddd; margin-bottom: 30px; text-align: center;">
-      Book your appointment in just a few quick steps for priority scheduling and faster service.
-    </p>
     
-    <div class="form-progress">
-      <div class="progress-step step-1 active">1</div>
-      <div class="progress-step step-2">2</div>
-      <div class="progress-step step-3">3</div>
-    </div>
-    
-    <form class="appointment-form">
-      <!-- Step 1: Personal Information -->
-      <div class="form-step step-1 active">
-        <h3 style="color: #ffd700; margin-bottom: 20px; text-align: center;">Your Information</h3>
-        
-        <div class="form-group">
-          <label for="name">Full Name</label>
-          <input type="text" id="name" class="form-control" placeholder="Enter your full name" required>
-          <span class="input-icon"><i class="fas fa-user"></i></span>
+      <!--<div class="form-actions">
+          <div></div>  Empty div to maintain space-between alignment -->
+       <!--   <button type="button" class="btn-next" id="to-step-2">Continue <i class="fas fa-arrow-right"></i></button>
         </div>
-        
-        <div class="form-group">
-          <label for="phone">Phone Number</label>
-          <input type="tel" id="phone" class="form-control" placeholder="Enter your phone number" required>
-          <span class="input-icon"><i class="fas fa-phone"></i></span>
-        </div>
-        
-        <div class="form-group">
-          <label for="email">Email Address</label>
-          <input type="email" id="email" class="form-control" placeholder="Enter your email address" required>
-          <span class="input-icon"><i class="fas fa-envelope"></i></span>
-        </div>
-        
-        <div class="form-actions">
-          <div></div> <!-- Empty div to maintain space-between alignment -->
-          <button type="button" class="btn-next" id="to-step-2">Continue <i class="fas fa-arrow-right"></i></button>
-        </div>
-      </div>
+      </div>-->
       
       <!-- Step 2: Vehicle & Service -->
       <div class="form-step step-2">

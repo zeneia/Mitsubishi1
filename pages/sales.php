@@ -13,6 +13,7 @@ include 'header.php';
     padding: 32px;
   }
   .page-title {
+    color: #000000ef;
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 24px;
@@ -23,7 +24,7 @@ include 'header.php';
   }
   .section-title {
     font-size: 1.8rem;
-    color: #ffd700;
+    color: #ff0000ef;
     margin-bottom: 16px;
   }
   .promo-grid {
@@ -65,7 +66,7 @@ include 'header.php';
     color: #ffd700;
   }
   .contact-section {
-    background: rgba(255, 255, 255, 0.05);
+    background: #5a5a5aec;
     border-radius: 12px;
     padding: 24px;
     margin-top: 32px;
@@ -132,12 +133,13 @@ include 'header.php';
 
   /* Modern UI Enhancements */
   .page-intro {
+    color: #000000;
     text-align: center;
     margin-bottom: 40px;
   }
 
   .page-intro p {
-    color: #ddd;
+    color: #000000bb;
     max-width: 800px;
     margin: 15px auto 0;
     font-size: 1.1rem;
@@ -389,10 +391,11 @@ include 'header.php';
 
   .contact-section {
     position: relative;
-    background: linear-gradient(135deg, rgba(24, 24, 24, 0.8), rgba(139, 0, 0, 0.3));
+    background: #5a5a5aec;
     border-radius: 15px;
     padding: 40px;
     margin-top: 50px;
+    margin-bottom: 20px;
     text-align: center;
     border: 1px solid rgba(255, 215, 0, 0.3);
     overflow: hidden;
@@ -560,45 +563,7 @@ include 'header.php';
     <p>Discover exclusive Mitsubishi deals and financing options at our San Pablo City dealership. Take advantage of our limited-time offers to drive home your dream car today.</p>
   </div>
   
-  <!-- Featured Promotion with Countdown -->
-  <div class="featured-promo">
-    <div class="featured-promo-content">
-      <div class="promo-badge">Limited Offer</div>
-      <h2 class="featured-promo-title">Summer Drive Special</h2>
-      <p class="featured-promo-subtitle">Up to ₱150,000 Cash Discount</p>
-      <p class="featured-promo-description">
-        Enjoy our biggest savings of the season on select Montero Sport and Strada models. 
-        Plus, get free 3-year maintenance package and accessory bundle.
-      </p>
-      
-      <div class="countdown-container">
-        <div class="countdown-title">Offer Ends In</div>
-        <div class="countdown" id="promotion-countdown">
-          <div class="countdown-item">
-            <div class="countdown-value" id="days">05</div>
-            <div class="countdown-label">Days</div>
-          </div>
-          <div class="countdown-item">
-            <div class="countdown-value" id="hours">12</div>
-            <div class="countdown-label">Hours</div>
-          </div>
-          <div class="countdown-item">
-            <div class="countdown-value" id="minutes">36</div>
-            <div class="countdown-label">Minutes</div>
-          </div>
-          <div class="countdown-item">
-            <div class="countdown-value" id="seconds">45</div>
-            <div class="countdown-label">Seconds</div>
-          </div>
-        </div>
-      </div>
-      
-      <button class="promo-btn">Claim This Offer</button>
-    </div>
-    <div class="featured-promo-image">
-      <div class="featured-promo-badge">₱150K OFF</div>
-    </div>
-  </div>
+
   
   <div class="sales-section">
     <h2 class="section-title">Current Promotions</h2>
@@ -661,7 +626,7 @@ include 'header.php';
   </div>
 
   <div class="contact-section">
-    <h2 class="section-title">Schedule a Test Drive</h2>
+    <h2 class="section-title; color: #ffffffff;">Contact Or Visit Us</h2>
     <p style="color: #ddd; position: relative; z-index: 1;">
       Experience the performance and comfort of a Mitsubishi vehicle firsthand. 
       Fill out the form below and our sales team will contact you shortly.
@@ -686,46 +651,8 @@ include 'header.php';
       </div>
     </div>
     
-    <form class="test-drive-form">
-      <div class="form-group">
-        <input type="text" class="form-control" placeholder="Full Name" required>
-        <span class="input-icon"><i class="fas fa-user"></i></span>
-      </div>
-      
-      <div class="form-group">
-        <input type="tel" class="form-control" placeholder="Phone Number" required>
-        <span class="input-icon"><i class="fas fa-phone"></i></span>
-      </div>
-      
-      <div class="form-group">
-        <input type="email" class="form-control" placeholder="Email Address" required>
-        <span class="input-icon"><i class="fas fa-envelope"></i></span>
-      </div>
-      
-      <div class="form-group">
-        <select class="form-control" required>
-          <option value="" disabled selected>Select Vehicle</option>
-          <option value="mirage">Mitsubishi Mirage</option>
-          <option value="xpander">Mitsubishi Xpander</option>
-          <option value="montero">Mitsubishi Montero Sport</option>
-          <option value="strada">Mitsubishi Strada</option>
-          <option value="eclipse">Mitsubishi Eclipse Cross</option>
-          <option value="outlander">Mitsubishi Outlander</option>
-        </select>
-        <span class="input-icon"><i class="fas fa-car"></i></span>
-      </div>
-      
-      <button type="submit" class="test-drive-btn">Schedule Test Drive <i class="fas fa-arrow-right"></i></button>
-    </form>
     
-    <div class="financing-options">
-      <img src="../../includes/images/banks/bdo.png" alt="BDO" class="financing-logo">
-      <img src="../../includes/images/banks/bpi.png" alt="BPI" class="financing-logo">
-      <img src="../../includes/images/banks/maybank.png" alt="Maybank" class="financing-logo">
-      <img src="../../includes/images/banks/eastwest.png" alt="EastWest Bank" class="financing-logo">
-      <img src="../../includes/images/banks/rcbc.png" alt="RCBC" class="financing-logo">
-    </div>
-  </div>
+    
 </div>
 
 <script>

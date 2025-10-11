@@ -25,6 +25,7 @@ $stmt = $connect->prepare("SELECT * FROM vehicles WHERE availability_status = 'a
     padding: 32px;
   }
   .page-title {
+    color: #000000;
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 24px;
@@ -204,10 +205,10 @@ $stmt = $connect->prepare("SELECT * FROM vehicles WHERE availability_status = 'a
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(255, 215, 0, 0.3);
+    border: 1px solid rgba(0, 0, 0, 0.73);
     border-radius: 8px;
     background: rgba(0, 0, 0, 0.2);
-    color: #fff;
+    color: #000000;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -220,6 +221,7 @@ $stmt = $connect->prepare("SELECT * FROM vehicles WHERE availability_status = 'a
 
   /* Modern UI Enhancements */
   .filter-section {
+    color: #000000be;
     margin-bottom: 30px;
     display: flex;
     flex-wrap: wrap;
@@ -234,7 +236,7 @@ $stmt = $connect->prepare("SELECT * FROM vehicles WHERE availability_status = 'a
   .filter-label {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #ffd700;
+    color: #000000e1;
     margin-right: 10px;
   }
 
@@ -246,8 +248,8 @@ $stmt = $connect->prepare("SELECT * FROM vehicles WHERE availability_status = 'a
 
   .filter-btn {
     background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 215, 0, 0.3);
-    color: #fff;
+    border: 1px solid #313131ff;
+    color: #000000e8;
     padding: 8px 16px;
     border-radius: 20px;
     cursor: pointer;
