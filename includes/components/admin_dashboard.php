@@ -664,6 +664,7 @@ $accountStats = getAccountStats($connect);
   <div class="tab-navigation">
     <button class="tab-button active" data-tab="transaction-pending">Pending Payments</button>
     <button class="tab-button" data-tab="transaction-verified">Verified Payments</button>
+    <button class="tab-button" data-tab="transaction-customers">All Loan Customers</button>
   </div>
 
   <div class="tab-content active" id="transaction-pending">
@@ -683,23 +684,92 @@ $accountStats = getAccountStats($connect);
         <tr>
           <th>Payment ID</th>
           <th>Customer</th>
+          <th>Agent</th>
+          <th>Vehicle</th>
           <th>Amount</th>
-          <th>Payment Method</th>
+          <th>Method</th>
           <th>Reference</th>
-          <th>Date Submitted</th>
+          <th>Date</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody id="pendingPaymentsTable">
         <tr>
-          <td colspan="7" class="text-center">Loading pending payments...</td>
+          <td colspan="9" class="text-center">Loading pending payments...</td>
         </tr>
       </tbody>
     </table>
   </div>
 
   <div class="tab-content" id="transaction-verified">
-    <p>Verified payments content will be displayed here.</p>
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="info-card-title">Total Verified</div>
+        <div class="info-card-value" id="verifiedCount">0</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">Total Verified Amount</div>
+        <div class="info-card-value" id="verifiedAmount">₱0.00</div>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Payment ID</th>
+          <th>Customer</th>
+          <th>Agent</th>
+          <th>Vehicle</th>
+          <th>Amount</th>
+          <th>Payment Date</th>
+          <th>Verified By</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="verifiedPaymentsTable">
+        <tr>
+          <td colspan="8" class="text-center">Loading verified payments...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tab-content" id="transaction-customers">
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="info-card-title">Total Loan Customers</div>
+        <div class="info-card-value" id="loanCustomersCount">0</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">Active Loans</div>
+        <div class="info-card-value" id="activeLoansCount">0</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">Overdue Payments</div>
+        <div class="info-card-value" id="overdueCount">0</div>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Order #</th>
+          <th>Customer</th>
+          <th>Agent</th>
+          <th>Vehicle</th>
+          <th>Monthly Payment</th>
+          <th>Progress</th>
+          <th>Next Due</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="loanCustomersTable">
+        <tr>
+          <td colspan="9" class="text-center">Loading loan customers...</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -1130,13 +1200,13 @@ $accountStats = getAccountStats($connect);
         } else {
           console.error('Error loading pending payments:', data.error);
           document.getElementById('pendingPaymentsTable').innerHTML = 
-            '<tr><td colspan="7" class="text-center">Error loading payments</td></tr>';
+            '<tr><td colspan="9" class="text-center">Error loading payments</td></tr>';
         }
       })
       .catch(error => {
         console.error('Error:', error);
         document.getElementById('pendingPaymentsTable').innerHTML = 
-          '<tr><td colspan="7" class="text-center">Error loading payments</td></tr>';
+          '<tr><td colspan="9" class="text-center">Error loading payments</td></tr>';
       });
   }
 
@@ -1144,22 +1214,30 @@ $accountStats = getAccountStats($connect);
     const tbody = document.getElementById('pendingPaymentsTable');
     
     if (payments.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center">No pending payments</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" class="text-center">No pending payments</td></tr>';
       return;
     }
 
     tbody.innerHTML = payments.map(payment => `
       <tr>
-        <td>PAY-${payment.id}</td>
-        <td>${payment.customer_name}</td>
-        <td>₱${parseFloat(payment.amount_paid).toLocaleString()}</td>
+        <td>${payment.payment_number || 'PAY-' + payment.id}</td>
+        <td>${payment.customer_name}<br><small>${payment.Email || ''}</small></td>
+        <td>${payment.agent_name || 'N/A'}</td>
+        <td>${payment.vehicle_display || 'N/A'}</td>
+        <td>₱${parseFloat(payment.amount_paid).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
         <td>${payment.payment_method}</td>
         <td>${payment.reference_number || 'N/A'}</td>
         <td>${new Date(payment.payment_date).toLocaleDateString()}</td>
         <td class="table-actions">
-          <button class="btn btn-small btn-success" onclick="approvePayment(${payment.id})">Approve</button>
-          <button class="btn btn-small btn-danger" onclick="rejectPayment(${payment.id})">Reject</button>
-          <button class="btn btn-small btn-info" onclick="viewPaymentDetails(${payment.id})">Details</button>
+          <button class="btn btn-small btn-success" onclick="approvePayment(${payment.id})" title="Approve Payment">
+            <i class="fas fa-check"></i>
+          </button>
+          <button class="btn btn-small btn-danger" onclick="rejectPayment(${payment.id})" title="Reject Payment">
+            <i class="fas fa-times"></i>
+          </button>
+          <button class="btn btn-small btn-info" onclick="viewPaymentDetails(${payment.id})" title="View Details">
+            <i class="fas fa-eye"></i>
+          </button>
         </td>
       </tr>
     `).join('');
@@ -1170,7 +1248,148 @@ $accountStats = getAccountStats($connect);
     const totalAmount = payments.reduce((sum, payment) => sum + parseFloat(payment.amount_paid), 0);
     
     document.getElementById('pendingCount').textContent = count;
-    document.getElementById('pendingAmount').textContent = '₱' + totalAmount.toLocaleString();
+    document.getElementById('pendingAmount').textContent = '₱' + totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  }
+
+  function loadVerifiedPayments() {
+    fetch('../includes/api/payment_approval_api.php?action=getVerifiedPayments')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          displayVerifiedPayments(data.data);
+          updateVerifiedStats(data.data);
+        } else {
+          console.error('Error loading verified payments:', data.error);
+          document.getElementById('verifiedPaymentsTable').innerHTML = 
+            '<tr><td colspan="8" class="text-center">Error loading payments</td></tr>';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('verifiedPaymentsTable').innerHTML = 
+          '<tr><td colspan="8" class="text-center">Error loading payments</td></tr>';
+      });
+  }
+
+  function displayVerifiedPayments(payments) {
+    const tbody = document.getElementById('verifiedPaymentsTable');
+    
+    if (payments.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center">No verified payments found</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = payments.map(payment => `
+      <tr>
+        <td>${payment.payment_number || 'PAY-' + payment.id}</td>
+        <td>${payment.customer_name}<br><small>${payment.Email || ''}</small></td>
+        <td>${payment.agent_name || 'N/A'}</td>
+        <td>${payment.vehicle_display || 'N/A'}</td>
+        <td>₱${parseFloat(payment.amount_paid).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+        <td>${new Date(payment.payment_date).toLocaleDateString()}</td>
+        <td>${payment.processor_name || 'N/A'}<br><small>${payment.updated_at ? new Date(payment.updated_at).toLocaleDateString() : ''}</small></td>
+        <td class="table-actions">
+          <button class="btn btn-small btn-info" onclick="viewPaymentDetails(${payment.id})" title="View Details">
+            <i class="fas fa-eye"></i> Details
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function updateVerifiedStats(payments) {
+    const count = payments.length;
+    const totalAmount = payments.reduce((sum, payment) => sum + parseFloat(payment.amount_paid), 0);
+    
+    document.getElementById('verifiedCount').textContent = count;
+    document.getElementById('verifiedAmount').textContent = '₱' + totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  }
+
+  function loadLoanCustomers() {
+    fetch('../includes/api/payment_approval_api.php?action=getAllLoanCustomers')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          displayLoanCustomers(data.data);
+          updateLoanCustomerStats(data.data);
+        } else {
+          console.error('Error loading loan customers:', data.error);
+          document.getElementById('loanCustomersTable').innerHTML = 
+            '<tr><td colspan="9" class="text-center">Error loading loan customers</td></tr>';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('loanCustomersTable').innerHTML = 
+          '<tr><td colspan="9" class="text-center">Error loading loan customers</td></tr>';
+      });
+  }
+
+  function displayLoanCustomers(customers) {
+    const tbody = document.getElementById('loanCustomersTable');
+    
+    if (customers.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" class="text-center">No loan customers found</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = customers.map(customer => {
+      const statusClass = customer.payment_status === 'overdue' ? 'status rejected' : 
+                         customer.payment_status === 'completed' ? 'status approved' : 
+                         customer.payment_status === 'in_progress' ? 'status pending' : 
+                         'status';
+      
+      const progressColor = customer.payment_status === 'overdue' ? '#dc3545' : 
+                           customer.payment_status === 'completed' ? '#28a745' : 
+                           '#ffc107';
+      
+      return `
+        <tr>
+          <td>${customer.order_number}</td>
+          <td>${customer.customer_name}<br><small>${customer.Email || ''}</small></td>
+          <td>${customer.agent_name || 'N/A'}</td>
+          <td>${customer.vehicle_display}</td>
+          <td>₱${parseFloat(customer.monthly_payment || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div style="flex: 1; background: #e0e0e0; border-radius: 0.5rem; height: 1.25rem; overflow: hidden;">
+                <div style="width: ${customer.payment_progress}%; background: ${progressColor}; height: 100%; transition: width 0.3s;"></div>
+              </div>
+              <span style="font-size: 0.875rem; font-weight: 600;">${customer.payment_progress}%</span>
+            </div>
+            <small>${customer.payments_made || 0} of ${customer.total_payments_due || 0} payments</small>
+          </td>
+          <td>${customer.next_due_date ? new Date(customer.next_due_date).toLocaleDateString() : 'N/A'}</td>
+          <td><span class="${statusClass}">${customer.payment_status_label}</span></td>
+          <td class="table-actions">
+            <button class="btn btn-small btn-primary" onclick="viewLoanDetails(${customer.order_id})" title="View Loan Details">
+              <i class="fas fa-file-invoice"></i> Details
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function updateLoanCustomerStats(customers) {
+    const totalCount = customers.length;
+    const activeCount = customers.filter(c => c.payment_status === 'in_progress' || c.payment_status === 'pending').length;
+    const overdueCount = customers.filter(c => c.payment_status === 'overdue').length;
+    
+    document.getElementById('loanCustomersCount').textContent = totalCount;
+    document.getElementById('activeLoansCount').textContent = activeCount;
+    document.getElementById('overdueCount').textContent = overdueCount;
+  }
+
+  function viewLoanDetails(orderId) {
+    // Implementation for viewing full loan details with payment schedule
+    Swal.fire({
+      title: 'Loan Details',
+      text: 'Loading loan details...',
+      icon: 'info',
+      confirmButtonColor: '#dc143c'
+    });
+    // TODO: Implement full loan details view with payment schedule
   }
 
   function approvePayment(paymentId) {
@@ -1344,16 +1563,33 @@ $accountStats = getAccountStats($connect);
       });
   }
 
-  // Load pending payments when the transaction update interface is opened
+  // Load data when the transaction update interface is opened
   document.addEventListener('DOMContentLoaded', function() {
-    const transactionUpdateBtn = document.querySelector('[data-interface="transactionUpdateInterface"]');
+    const transactionUpdateBtn = document.getElementById('transactionUpdateBtn');
     if (transactionUpdateBtn) {
       transactionUpdateBtn.addEventListener('click', function() {
         setTimeout(() => {
           loadPendingPayments();
+          loadVerifiedPayments();
+          loadLoanCustomers();
         }, 100);
       });
     }
+    
+    // Handle tab switching to reload data
+    const transactionTabs = document.querySelectorAll('#transactionUpdateInterface .tab-button');
+    transactionTabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        const tabId = this.getAttribute('data-tab');
+        if (tabId === 'transaction-pending') {
+          loadPendingPayments();
+        } else if (tabId === 'transaction-verified') {
+          loadVerifiedPayments();
+        } else if (tabId === 'transaction-customers') {
+          loadLoanCustomers();
+        }
+      });
+    });
   });
 
     const SwalError = Swal.mixin({

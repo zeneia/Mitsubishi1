@@ -252,11 +252,11 @@ foreach ($new_inquiries as $inquiry) {
   <div class="dashboard-card">
     <div class="card-header">
       <div class="card-icon blue">
-        <i class="fas fa-calculator"></i>
+        <i class="fas fa-credit-card"></i>
       </div>
-      <div class="card-title">Client Amortization</div>
+      <div class="card-title">Payment Transactions</div>
     </div>
-    <p>Update and manage customer payment schedules and amortization plans.</p>
+    <p>Verify and manage customer loan payments and transaction records.</p>
   </div>
 
   <div class="dashboard-card">
@@ -275,9 +275,9 @@ foreach ($new_inquiries as $inquiry) {
     <i class="fas fa-car"></i>
     Test Drive Booking Review
   </button>
-  <button class="action-btn" id="amortizationBtn">
-    <i class="fas fa-calculator"></i>
-    Amortization Management
+  <button class="action-btn" id="paymentTransactionBtn">
+    <i class="fas fa-credit-card"></i>
+    Payment Transactions
   </button>
   <button class="action-btn" id="inquiryBtn">
     <i class="fas fa-question-circle"></i>
@@ -506,6 +506,125 @@ foreach ($new_inquiries as $inquiry) {
         </tbody>
       </table>
     </div>
+  </div>
+</div>
+
+<!-- Payment Transaction Interface -->
+<div class="interface-container" id="paymentTransactionInterface">
+  <div class="interface-header">
+    <h2 class="interface-title">
+      <i class="fas fa-credit-card"></i>
+      Payment Transaction Management
+    </h2>
+    <button class="interface-close" id="closePaymentTransaction">&times;</button>
+  </div>
+
+  <div class="tab-navigation">
+    <button class="tab-button active" data-tab="payment-pending">Pending Payments</button>
+    <button class="tab-button" data-tab="payment-verified">Verified Payments</button>
+    <button class="tab-button" data-tab="payment-customers">My Loan Customers</button>
+  </div>
+
+  <div class="tab-content active" id="payment-pending">
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="info-card-title">Pending Verifications</div>
+        <div class="info-card-value" id="agentPendingCount">Loading...</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">Total Pending Amount</div>
+        <div class="info-card-value" id="agentPendingAmount">Loading...</div>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Payment ID</th>
+          <th>Customer</th>
+          <th>Vehicle</th>
+          <th>Amount</th>
+          <th>Method</th>
+          <th>Reference</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="agentPendingPaymentsTable">
+        <tr>
+          <td colspan="8" class="text-center">Loading pending payments...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tab-content" id="payment-verified">
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="info-card-title">Total Verified</div>
+        <div class="info-card-value" id="agentVerifiedCount">0</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">Total Verified Amount</div>
+        <div class="info-card-value" id="agentVerifiedAmount">₱0.00</div>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Payment ID</th>
+          <th>Customer</th>
+          <th>Vehicle</th>
+          <th>Amount</th>
+          <th>Payment Date</th>
+          <th>Verified By</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="agentVerifiedPaymentsTable">
+        <tr>
+          <td colspan="7" class="text-center">Loading verified payments...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tab-content" id="payment-customers">
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="info-card-title">My Loan Customers</div>
+        <div class="info-card-value" id="agentLoanCustomersCount">0</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">Active Loans</div>
+        <div class="info-card-value" id="agentActiveLoansCount">0</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">Overdue Payments</div>
+        <div class="info-card-value" id="agentOverdueCount">0</div>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Order #</th>
+          <th>Customer</th>
+          <th>Vehicle</th>
+          <th>Monthly Payment</th>
+          <th>Progress</th>
+          <th>Next Due</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="agentLoanCustomersTable">
+        <tr>
+          <td colspan="8" class="text-center">Loading loan customers...</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -813,21 +932,21 @@ foreach ($new_inquiries as $inquiry) {
   document.addEventListener('DOMContentLoaded', function() {
     // Interface toggle buttons
     const testDriveBtn = document.getElementById('testDriveBtn');
-    const amortizationBtn = document.getElementById('amortizationBtn');
+    const paymentTransactionBtn = document.getElementById('paymentTransactionBtn');
     const inquiryBtn = document.getElementById('inquiryBtn');
 
     const testDriveInterface = document.getElementById('testDriveInterface');
-    const amortizationInterface = document.getElementById('amortizationInterface');
+    const paymentTransactionInterface = document.getElementById('paymentTransactionInterface');
     const inquiryInterface = document.getElementById('inquiryInterface');
 
     const closeTestDrive = document.getElementById('closeTestDrive');
-    const closeAmortization = document.getElementById('closeAmortization');
+    const closePaymentTransaction = document.getElementById('closePaymentTransaction');
     const closeInquiry = document.getElementById('closeInquiry');
 
     // Hide all interfaces
     function hideAllInterfaces() {
       if (testDriveInterface) testDriveInterface.style.display = 'none';
-      if (amortizationInterface) amortizationInterface.style.display = 'none';
+      if (paymentTransactionInterface) paymentTransactionInterface.style.display = 'none';
       if (inquiryInterface) inquiryInterface.style.display = 'none';
     }
 
@@ -839,10 +958,16 @@ foreach ($new_inquiries as $inquiry) {
       });
     }
 
-    if (amortizationBtn) {
-      amortizationBtn.addEventListener('click', function() {
+    if (paymentTransactionBtn) {
+      paymentTransactionBtn.addEventListener('click', function() {
         hideAllInterfaces();
-        amortizationInterface.style.display = 'block';
+        paymentTransactionInterface.style.display = 'block';
+        // Load payment data when opening interface
+        setTimeout(() => {
+          loadAgentPendingPayments();
+          loadAgentVerifiedPayments();
+          loadAgentLoanCustomers();
+        }, 100);
       });
     }
 
@@ -860,9 +985,9 @@ foreach ($new_inquiries as $inquiry) {
       });
     }
 
-    if (closeAmortization) {
-      closeAmortization.addEventListener('click', function() {
-        amortizationInterface.style.display = 'none';
+    if (closePaymentTransaction) {
+      closePaymentTransaction.addEventListener('click', function() {
+        paymentTransactionInterface.style.display = 'none';
       });
     }
 
@@ -871,6 +996,21 @@ foreach ($new_inquiries as $inquiry) {
         inquiryInterface.style.display = 'none';
       });
     }
+    
+    // Handle payment transaction tab switching
+    const paymentTabs = document.querySelectorAll('#paymentTransactionInterface .tab-button');
+    paymentTabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        const tabId = this.getAttribute('data-tab');
+        if (tabId === 'payment-pending') {
+          loadAgentPendingPayments();
+        } else if (tabId === 'payment-verified') {
+          loadAgentVerifiedPayments();
+        } else if (tabId === 'payment-customers') {
+          loadAgentLoanCustomers();
+        }
+      });
+    });
 
     // Tab switching functionality
     document.querySelectorAll('.tab-button').forEach(button => {
@@ -1532,6 +1672,395 @@ document.head.appendChild(modalInspiredStyle);
     };
 
   });
+
+    // Sales Agent Payment Management Functions
+    window.loadAgentPendingPayments = function() {
+      fetch('../../includes/api/payment_approval_api.php?action=getPendingPayments')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            displayAgentPendingPayments(data.data);
+            updateAgentPendingStats(data.data);
+          } else {
+            console.error('Error loading pending payments:', data.error);
+            document.getElementById('agentPendingPaymentsTable').innerHTML = 
+              '<tr><td colspan="8" class="text-center">Error loading payments</td></tr>';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          document.getElementById('agentPendingPaymentsTable').innerHTML = 
+            '<tr><td colspan="8" class="text-center">Error loading payments</td></tr>';
+        });
+    };
+
+    function displayAgentPendingPayments(payments) {
+      const tbody = document.getElementById('agentPendingPaymentsTable');
+      
+      if (payments.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">No pending payments</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = payments.map(payment => `
+        <tr>
+          <td>${payment.payment_number || 'PAY-' + payment.id}</td>
+          <td>${payment.customer_name}<br><small>${payment.Email || ''}</small></td>
+          <td>${payment.vehicle_display || 'N/A'}</td>
+          <td>₱${parseFloat(payment.amount_paid).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+          <td>${payment.payment_method}</td>
+          <td>${payment.reference_number || 'N/A'}</td>
+          <td>${new Date(payment.payment_date).toLocaleDateString()}</td>
+          <td class="table-actions">
+            <button class="btn btn-small btn-success" onclick="approveAgentPayment(${payment.id})" title="Approve Payment">
+              <i class="fas fa-check"></i>
+            </button>
+            <button class="btn btn-small btn-danger" onclick="rejectAgentPayment(${payment.id})" title="Reject Payment">
+              <i class="fas fa-times"></i>
+            </button>
+            <button class="btn btn-small btn-info" onclick="viewAgentPaymentDetails(${payment.id})" title="View Details">
+              <i class="fas fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateAgentPendingStats(payments) {
+      const count = payments.length;
+      const totalAmount = payments.reduce((sum, payment) => sum + parseFloat(payment.amount_paid), 0);
+      
+      document.getElementById('agentPendingCount').textContent = count;
+      document.getElementById('agentPendingAmount').textContent = '₱' + totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
+    window.loadAgentVerifiedPayments = function() {
+      fetch('../../includes/api/payment_approval_api.php?action=getVerifiedPayments')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            displayAgentVerifiedPayments(data.data);
+            updateAgentVerifiedStats(data.data);
+          } else {
+            console.error('Error loading verified payments:', data.error);
+            document.getElementById('agentVerifiedPaymentsTable').innerHTML = 
+              '<tr><td colspan="7" class="text-center">Error loading payments</td></tr>';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          document.getElementById('agentVerifiedPaymentsTable').innerHTML = 
+            '<tr><td colspan="7" class="text-center">Error loading payments</td></tr>';
+        });
+    };
+
+    function displayAgentVerifiedPayments(payments) {
+      const tbody = document.getElementById('agentVerifiedPaymentsTable');
+      
+      if (payments.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No verified payments found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = payments.map(payment => `
+        <tr>
+          <td>${payment.payment_number || 'PAY-' + payment.id}</td>
+          <td>${payment.customer_name}<br><small>${payment.Email || ''}</small></td>
+          <td>${payment.vehicle_display || 'N/A'}</td>
+          <td>₱${parseFloat(payment.amount_paid).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+          <td>${new Date(payment.payment_date).toLocaleDateString()}</td>
+          <td>${payment.processor_name || 'N/A'}<br><small>${payment.updated_at ? new Date(payment.updated_at).toLocaleDateString() : ''}</small></td>
+          <td class="table-actions">
+            <button class="btn btn-small btn-info" onclick="viewAgentPaymentDetails(${payment.id})" title="View Details">
+              <i class="fas fa-eye"></i> Details
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateAgentVerifiedStats(payments) {
+      const count = payments.length;
+      const totalAmount = payments.reduce((sum, payment) => sum + parseFloat(payment.amount_paid), 0);
+      
+      document.getElementById('agentVerifiedCount').textContent = count;
+      document.getElementById('agentVerifiedAmount').textContent = '₱' + totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
+    window.loadAgentLoanCustomers = function() {
+      fetch('../../includes/api/payment_approval_api.php?action=getAllLoanCustomers')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            displayAgentLoanCustomers(data.data);
+            updateAgentLoanCustomerStats(data.data);
+          } else {
+            console.error('Error loading loan customers:', data.error);
+            document.getElementById('agentLoanCustomersTable').innerHTML = 
+              '<tr><td colspan="8" class="text-center">Error loading loan customers</td></tr>';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          document.getElementById('agentLoanCustomersTable').innerHTML = 
+            '<tr><td colspan="8" class="text-center">Error loading loan customers</td></tr>';
+        });
+    };
+
+    function displayAgentLoanCustomers(customers) {
+      const tbody = document.getElementById('agentLoanCustomersTable');
+      
+      if (customers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">No loan customers found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = customers.map(customer => {
+        const statusClass = customer.payment_status === 'overdue' ? 'status rejected' : 
+                           customer.payment_status === 'completed' ? 'status approved' : 
+                           customer.payment_status === 'in_progress' ? 'status pending' : 
+                           'status';
+        
+        const progressColor = customer.payment_status === 'overdue' ? '#dc3545' : 
+                             customer.payment_status === 'completed' ? '#28a745' : 
+                             '#ffc107';
+        
+        return `
+          <tr>
+            <td>${customer.order_number}</td>
+            <td>${customer.customer_name}<br><small>${customer.Email || ''}</small></td>
+            <td>${customer.vehicle_display}</td>
+            <td>₱${parseFloat(customer.monthly_payment || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="flex: 1; background: #e0e0e0; border-radius: 0.5rem; height: 1.25rem; overflow: hidden;">
+                  <div style="width: ${customer.payment_progress}%; background: ${progressColor}; height: 100%; transition: width 0.3s;"></div>
+                </div>
+                <span style="font-size: 0.875rem; font-weight: 600;">${customer.payment_progress}%</span>
+              </div>
+              <small>${customer.payments_made || 0} of ${customer.total_payments_due || 0} payments</small>
+            </td>
+            <td>${customer.next_due_date ? new Date(customer.next_due_date).toLocaleDateString() : 'N/A'}</td>
+            <td><span class="${statusClass}">${customer.payment_status_label}</span></td>
+            <td class="table-actions">
+              <button class="btn btn-small btn-primary" onclick="viewAgentLoanDetails(${customer.order_id})" title="View Loan Details">
+                <i class="fas fa-file-invoice"></i> Details
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateAgentLoanCustomerStats(customers) {
+      const totalCount = customers.length;
+      const activeCount = customers.filter(c => c.payment_status === 'in_progress' || c.payment_status === 'pending').length;
+      const overdueCount = customers.filter(c => c.payment_status === 'overdue').length;
+      
+      document.getElementById('agentLoanCustomersCount').textContent = totalCount;
+      document.getElementById('agentActiveLoansCount').textContent = activeCount;
+      document.getElementById('agentOverdueCount').textContent = overdueCount;
+    }
+
+    // Shared payment action functions for sales agents
+    window.approveAgentPayment = function(paymentId) {
+      Swal.fire({
+        title: 'Approve Payment?',
+        text: 'Are you sure you want to approve this payment?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#dc143c',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, approve it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const formData = new FormData();
+          formData.append('action', 'approvePayment');
+          formData.append('payment_id', paymentId);
+          
+          fetch('../../includes/api/payment_approval_api.php', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire({
+                title: 'Approved!',
+                text: 'Payment has been approved successfully.',
+                icon: 'success',
+                confirmButtonColor: '#dc143c'
+              });
+              loadAgentPendingPayments();
+              loadAgentVerifiedPayments();
+              loadAgentLoanCustomers();
+            } else {
+              Swal.fire({
+                title: 'Error!',
+                text: data.error || 'Failed to approve payment',
+                icon: 'error',
+                confirmButtonColor: '#dc143c'
+              });
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+              title: 'Error!',
+              text: 'Network error occurred',
+              icon: 'error',
+              confirmButtonColor: '#dc143c'
+            });
+          });
+        }
+      });
+    };
+
+    window.rejectAgentPayment = function(paymentId) {
+      Swal.fire({
+        title: 'Reject Payment?',
+        text: 'Please provide a reason for rejection:',
+        input: 'textarea',
+        inputPlaceholder: 'Enter rejection reason...',
+        inputValidator: (value) => {
+          if (!value) {
+            return 'You need to provide a reason for rejection!';
+          }
+        },
+        showCancelButton: true,
+        confirmButtonColor: '#dc143c',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Reject Payment'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const formData = new FormData();
+          formData.append('action', 'rejectPayment');
+          formData.append('payment_id', paymentId);
+          formData.append('rejection_reason', result.value);
+          
+          fetch('../../includes/api/payment_approval_api.php', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire({
+                title: 'Rejected!',
+                text: 'Payment has been rejected.',
+                icon: 'success',
+                confirmButtonColor: '#dc143c'
+              });
+              loadAgentPendingPayments();
+            } else {
+              Swal.fire({
+                title: 'Error!',
+                text: data.error || 'Failed to reject payment',
+                icon: 'error',
+                confirmButtonColor: '#dc143c'
+              });
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+              title: 'Error!',
+              text: 'Network error occurred',
+              icon: 'error',
+              confirmButtonColor: '#dc143c'
+            });
+          });
+        }
+      });
+    };
+
+    window.viewAgentPaymentDetails = function(paymentId) {
+      fetch(`../../includes/api/payment_approval_api.php?action=getPaymentDetails&payment_id=${paymentId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const payment = data.data;
+            
+            let receiptSection = '';
+            if (payment.has_receipt && payment.receipt_filename) {
+              const receiptUrl = payment.receipt_url;
+              const isImage = /\.(jpg|jpeg|png|gif)$/i.test(payment.receipt_filename);
+              
+              if (isImage) {
+                receiptSection = `
+                  <p><strong>Receipt:</strong></p>
+                  <div style="margin: 0.625rem 0; text-align: center;">
+                    <img src="${receiptUrl}" alt="Payment Receipt" style="max-width: 100%; max-height: 12.5rem; border: 0.0625rem solid #ddd; border-radius: 0.25rem; cursor: pointer;" onclick="window.open('${receiptUrl}', '_blank')" />
+                    <br><small style="color: #666;">Click to view full size</small>
+                  </div>
+                `;
+              } else {
+                receiptSection = `
+                  <p><strong>Receipt:</strong> 
+                    <a href="${receiptUrl}" target="_blank" style="color: #dc143c; text-decoration: none;">
+                      📄 ${payment.receipt_filename}
+                    </a>
+                  </p>
+                `;
+              }
+            } else {
+              receiptSection = '<p><strong>Receipt:</strong> <span style="color: #999;">No receipt uploaded</span></p>';
+            }
+            
+            Swal.fire({
+              title: 'Payment Details',
+              html: `
+                <div style="text-align: left; max-height: 31.25rem; overflow-y: auto;">
+                  <p><strong>Payment Number:</strong> ${payment.payment_number}</p>
+                  <p><strong>Customer:</strong> ${payment.customer_name}</p>
+                  <p><strong>Mobile:</strong> ${payment.customer_mobile}</p>
+                  <p><strong>Email:</strong> ${payment.customer_email}</p>
+                  <p><strong>Vehicle:</strong> ${payment.vehicle_model} ${payment.vehicle_variant}</p>
+                  <p><strong>Amount:</strong> ₱${parseFloat(payment.amount_paid).toLocaleString()}</p>
+                  <p><strong>Payment Method:</strong> ${payment.payment_method}</p>
+                  <p><strong>Payment Type:</strong> ${payment.payment_type}</p>
+                  <p><strong>Reference Number:</strong> ${payment.reference_number || 'N/A'}</p>
+                  <p><strong>Bank:</strong> ${payment.bank_name || 'N/A'}</p>
+                  ${receiptSection}
+                  <p><strong>Date Submitted:</strong> ${new Date(payment.payment_date).toLocaleString()}</p>
+                  <p><strong>Status:</strong> <span style="padding: 0.125rem 0.5rem; border-radius: 0.25rem; background: ${payment.status === 'Pending' ? '#ffc107' : payment.status === 'Confirmed' ? '#28a745' : '#dc3545'}; color: white; font-size: 0.75rem;">${payment.status}</span></p>
+                  <p><strong>Notes:</strong> ${payment.notes || 'None'}</p>
+                  ${payment.processor_name ? `<p><strong>Processed By:</strong> ${payment.processor_name}</p>` : ''}
+                </div>
+              `,
+              width: '43.75rem',
+              confirmButtonColor: '#dc143c'
+            });
+          } else {
+            Swal.fire({
+              title: 'Error!',
+              text: 'Failed to load payment details',
+              icon: 'error',
+              confirmButtonColor: '#dc143c'
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          Swal.fire({
+            title: 'Error!',
+            text: 'Network error occurred',
+            icon: 'error',
+            confirmButtonColor: '#dc143c'
+          });
+        });
+    };
+
+    window.viewAgentLoanDetails = function(orderId) {
+      Swal.fire({
+        title: 'Loan Details',
+        text: 'Loading loan details...',
+        icon: 'info',
+        confirmButtonColor: '#dc143c'
+      });
+      // TODO: Implement full loan details view with payment schedule
+    };
+
 </script>
 
 <style>
