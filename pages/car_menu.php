@@ -247,7 +247,6 @@ try {
             justify-content: space-between;
             min-height: 550px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            width: 350px !important; /* Fixed width for coverflow effect */
             /* Added user-select: none to prevent text highlighting during swipe */
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -270,7 +269,7 @@ try {
             color: #000000;
             font-size: 2rem;
             font-weight: 700;
-            margin-bottom: 10px;e;
+            margin-bottom: 10px;
         }
 
         .car-details {
@@ -439,7 +438,6 @@ try {
             .swiper-slide {
                 min-height: auto;
                 padding: 20px;
-                width: 280px !important;
             }
             .car-name {
                 font-size: 1.3rem;
@@ -500,7 +498,6 @@ try {
                 font-size: 2.5rem;
             }
             .swiper-slide {
-                width: 320px !important;
                 padding: 25px;
             }
             .car-name {
@@ -556,7 +553,6 @@ try {
                 justify-content: space-between;
                 min-height: 550px;
                 transition: transform 0.3s ease, box-shadow 0.3s ease;
-                width: 350px !important;
                 user-select: none;
                 
             }
@@ -586,7 +582,6 @@ try {
                 font-size: 3.5rem;
             }
             .swiper-slide {
-                width: 350px !important;
                 padding: 30px;
             }
             .car-name {
@@ -629,7 +624,7 @@ try {
         }
     }
 
-    /* Large Desktops */
+            /* Large Desktops */
     @media (min-width: 1200px) {
         .container {
             max-width: 1500px;
@@ -646,7 +641,20 @@ try {
 
         
         
-
+    
+    /* Fix Swiper width clamp on mobile to allow multiple cards */
+    @media (max-width: 767px) {
+        .car-model-swiper,
+        .car-model-swiper .swiper-wrapper,
+        .car-model-swiper .swiper-slide {
+            max-width: none !important;
+        }
+        .car-model-swiper .swiper-wrapper {
+            width: auto !important;
+            overflow: visible !important;
+        }
+    }
+    
     </style>
   
 </head>
@@ -812,11 +820,11 @@ try {
                 baseConfig = {
                     spaceBetween: 20,
                     coverflowEffect: {
-                        rotate: 30,
+                        rotate: 12,
                         stretch: 0,
-                        depth: 80,
+                        depth: 40,
                         modifier: 1,
-                        slideShadows: true,
+                        slideShadows: false,
                     },
                     speed: 400,
                 };
@@ -824,11 +832,11 @@ try {
                 baseConfig = {
                     spaceBetween: 25,
                     coverflowEffect: {
-                        rotate: 35,
+                        rotate: 18,
                         stretch: 0,
-                        depth: 90,
+                        depth: 60,
                         modifier: 1,
-                        slideShadows: true,
+                        slideShadows: false,
                     },
                     speed: 500,
                 };
@@ -891,7 +899,8 @@ try {
                 effect: 'coverflow',
                 grabCursor: true,
                 centeredSlides: true,
-                slidesPerView: 'auto',
+                centeredSlidesBounds: true,
+                slidesPerView: 1.2,
                 spaceBetween: config.spaceBetween,
                 speed: config.speed,
                 coverflowEffect: config.coverflowEffect,
@@ -929,9 +938,9 @@ try {
                 },
                 mousewheel: {
                     enabled: true,
-                    sensitivity: slideCount <= 4 ? 3 : 1,
-                    releaseOnEdges: slideCount <= 4 ? false : true,
-                    thresholdDelta: slideCount <= 4 ? 10 : 70,
+                    sensitivity: slideCount <= 4 ? 1 : 0.7,
+                    releaseOnEdges: true,
+                    thresholdDelta: slideCount <= 4 ? 30 : 70,
                 },
                 freeMode: slideCount <= 3 ? {
                     enabled: true,
@@ -986,6 +995,23 @@ try {
                     reachEnd: function() {
                         // Auto-home behavior removed - no longer jumps back to first slide
                     }
+                },
+                breakpoints: {
+                    0: {
+                        effect: 'slide',
+                        centeredSlides: false,
+                        slidesPerView: 1.1,
+                        coverflowEffect: { rotate: 0, stretch: 0, depth: 0, modifier: 0, slideShadows: false }
+                    },
+                    576: {
+                        effect: 'slide',
+                        centeredSlides: false,
+                        slidesPerView: 1.25,
+                        coverflowEffect: { rotate: 0, stretch: 0, depth: 0, modifier: 0, slideShadows: false }
+                    },
+                    768: { effect: 'coverflow', centeredSlides: true, slidesPerView: 2 },
+                    992: { effect: 'coverflow', centeredSlides: true, slidesPerView: 2.5 },
+                    1200: { effect: 'coverflow', centeredSlides: true, slidesPerView: 3 }
                 }
             });
         }
