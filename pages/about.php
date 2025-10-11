@@ -4,21 +4,19 @@ include 'header.php';
 ?>
 
 <style>
-    body {
-    zoom: 90%;
+  body {
+    background-image: url(../includes/images/backbg.jpg); 
+    background-size: cover; /* scales image to cover the whole area */
+    background-position: center; /* centers the image */
+    background-repeat: no-repeat;
+    zoom: 80%;
   }
   .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 32px;
   }
-  .page-title {
-    color: #000000e0;
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin-bottom: 24px;
-    text-align: center;
-  }
+
   .about-section {
     background: #e60013d0;
     margin: 32px 0;
@@ -63,6 +61,7 @@ include 'header.php';
     font-size: 0.95rem;
   }
   .contact-grid {
+    background: #8b8b8bcb;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 24px;
@@ -88,7 +87,7 @@ include 'header.php';
   /* Modern UI Enhancements */
   .hero-section {
     position: relative;
-    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('../../includes/images/about/showroom.jpg') center/cover no-repeat;
+    background: linear-gradient(rgba(0, 0, 0, 0.66));
     height: 350px;
     display: flex;
     align-items: center;
@@ -399,9 +398,8 @@ include 'header.php';
   }
   
   .contact-card {
-    color: #000000;
     position: relative;
-    background: #9c9797ea;
+    background: #9c9797b7;
     padding: 30px;
     text-align: center;
     border: 1px solid rgba(255, 215, 0, 0.2);
@@ -463,7 +461,7 @@ include 'header.php';
   }
   
   .contact-info {
-    color: #000000d8;
+    color: #ffffffff;
     line-height: 1.8;
     text: center;
     position: relative;
@@ -550,7 +548,7 @@ include 'header.php';
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <div class="container">
-  <h1 class="page-title">About Us</h1>
+  
 
   <div class="hero-section">
     <h1 class="hero-title">About Mitsubishi Motors San Pablo</h1>

@@ -4,7 +4,11 @@ include 'header.php';
 ?>
 
 <style>
-    body {
+  body {
+    background-image: url(../includes/images/backbg.jpg); 
+    background-size: cover; /* scales image to cover the whole area */
+    background-position: center; /* centers the image */
+    background-repeat: no-repeat;
     zoom: 90%;
   }
   .container {
@@ -13,7 +17,7 @@ include 'header.php';
     padding: 32px;
   }
   .page-title {
-    color: #000000ef;
+    color: #ffffff;
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 24px;
@@ -139,7 +143,7 @@ include 'header.php';
   }
 
   .page-intro p {
-    color: #000000bb;
+    color: #ffffffff;
     max-width: 800px;
     margin: 15px auto 0;
     font-size: 1.1rem;

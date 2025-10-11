@@ -163,11 +163,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $show_form) {
 		}
 
 		body {
-			background: #dbdbdbff;
-			background-attachment: fixed;
-			color: white;
-			zoom: 90%;
-			padding: 40px 20px;
+            background-image: url(../includes/images/logbg.jpg); 
+            background-size: cover; /* scales image to cover the whole area */
+            background-position: center; /* centers the image */
+            background-repeat: no-repeat;
+            zoom: 90%;
 		}
 
 		.container {
@@ -188,6 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $show_form) {
 		}
 
 		h2 {
+			color: #ffffff;
 			font-size: 1.5rem;
 			margin-bottom: 10px;
 		}
@@ -211,6 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $show_form) {
 		}
 
 		label {
+			color: #ffffff;
 			font-size: 0.9rem;
 		}
 

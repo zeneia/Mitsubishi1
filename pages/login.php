@@ -134,11 +134,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     body {
-      background: #dbdbdbff;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background-image: url(../includes/images/logbg.jpg); 
+      background-size: cover; /* scales image to cover the whole area */
+      background-position: center; /* centers the image */
+      background-repeat: no-repeat;
+      zoom: 90%;
     }
 
     .container {
@@ -150,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     .login-box {
-      background-color: #5f5c5cb0;
+      background-color: #5f5c5cd8;
       margin: 0 auto;
       padding: 28px 24px;
       border-radius: 15px;
@@ -189,6 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     label {
+      color: #ffffff;
       text-align: left;
       font-size: 0.9rem;
       margin-bottom: 5px;

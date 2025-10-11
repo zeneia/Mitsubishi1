@@ -4,8 +4,12 @@ include 'header.php';
 ?>
 
 <style>
-    body {
-    zoom: 90%;
+  body {
+    background-image: url(../includes/images/backbg.jpg); 
+    background-size: cover; /* scales image to cover the whole area */
+    background-position: center; /* centers the image */
+    background-repeat: no-repeat;
+    zoom: 80%;
   }
   .container {
     max-width: 1200px;
@@ -13,7 +17,7 @@ include 'header.php';
     padding: 32px;
   }
   .page-title {
-    color: #000000;
+    color: #ffffffff;
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 24px;
@@ -516,7 +520,7 @@ include 'header.php';
   <h1 class="page-title">Service Offer</h1>
   
   <div class="page-intro;">
-    <p style = "color: #000000; text-align: center;">Trust your Mitsubishi to the experts. Our certified technicians use genuine parts and specialized equipment to keep your vehicle performing at its best.</p>
+    <p style = "color: #ffffff; text-align: center;">Trust your Mitsubishi to the experts. Our certified technicians use genuine parts and specialized equipment to keep your vehicle performing at its best.</p>
   </div>
   
   <div class="services-grid">

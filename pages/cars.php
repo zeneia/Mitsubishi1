@@ -16,16 +16,29 @@ $stmt = $connect->prepare("SELECT * FROM vehicles WHERE availability_status = 'a
 ?>
 
 <style>
-    body {
-    zoom: 90%;
+  body {
+		width: 100%;
+		margin: 0;
+		padding: 0;
   }
+
+  body {
+    background-image: url(../includes/images/logbg.jpg); 
+    background-size: cover; /* scales image to cover the whole area */
+    background-position: center; /* centers the image */
+    background-repeat: no-repeat;
+    zoom: 90%;
+	}
+
+
+
   .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 32px;
   }
   .page-title {
-    color: #000000;
+    color: #ffffff;;
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 24px;
@@ -205,10 +218,10 @@ $stmt = $connect->prepare("SELECT * FROM vehicles WHERE availability_status = 'a
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(0, 0, 0, 0.73);
+    border: 1px solid rgba(255, 255, 255, 1);
     border-radius: 8px;
-    background: rgba(0, 0, 0, 0.2);
-    color: #000000;
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffffff;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -221,7 +234,7 @@ $stmt = $connect->prepare("SELECT * FROM vehicles WHERE availability_status = 'a
 
   /* Modern UI Enhancements */
   .filter-section {
-    color: #000000be;
+    color: #ffffffff;
     margin-bottom: 30px;
     display: flex;
     flex-wrap: wrap;
@@ -236,7 +249,7 @@ $stmt = $connect->prepare("SELECT * FROM vehicles WHERE availability_status = 'a
   .filter-label {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #000000e1;
+    color: #fffafaff;
     margin-right: 10px;
   }
 
@@ -249,7 +262,7 @@ $stmt = $connect->prepare("SELECT * FROM vehicles WHERE availability_status = 'a
   .filter-btn {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid #313131ff;
-    color: #000000e8;
+    color: #ffffffff;
     padding: 8px 16px;
     border-radius: 20px;
     cursor: pointer;

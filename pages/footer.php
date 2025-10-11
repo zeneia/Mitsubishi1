@@ -6,6 +6,7 @@
     padding: 30px 32px 15px;
     border-top: 1px solid #333;
   }
+  
 
   .footer-content {
     max-width: 1200px;
@@ -32,14 +33,11 @@
   }
 
   .contact-info {
-    color: #ffffff;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
     gap: 8px;
     margin-bottom: 8px;
     font-size: 0.85rem;
-    text-align: left;
   }
 
   .social-links {
