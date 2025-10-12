@@ -1596,28 +1596,87 @@ document.head.appendChild(modalInspiredStyle);
     };
 
     window.rescheduleTestDrive = function(requestId) {
+      // Get tomorrow's date as minimum
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const minDate = tomorrow.toISOString().split('T')[0];
+
       Swal.fire({
         title: 'Reschedule Test Drive',
         html: `
-          <div style="text-align: left;">
-            <p style="margin-bottom: 1rem;">This will reset the test drive to "Pending" status so it can be rescheduled.</p>
-            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Reschedule Notes:</label>
-            <textarea id="rescheduleNotes" class="swal2-textarea" placeholder="Add any notes about the rescheduling"></textarea>
+          <div style="text-align: left; padding: 0.5rem;">
+            <p style="margin-bottom: 1rem; color: #666;">Set a new date and time for this test drive appointment.</p>
+            
+            <div style="margin-bottom: 1rem;">
+              <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #d60000;">
+                <i class="fas fa-calendar-alt"></i> New Date:
+              </label>
+              <input type="date" id="newDate" class="swal2-input" 
+                     min="${minDate}"
+                     style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem; font-size: 1rem; box-sizing: border-box;" 
+                     required />
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+              <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #d60000;">
+                <i class="fas fa-clock"></i> Time Slot:
+              </label>
+              <select id="newTime" class="swal2-select" 
+                      style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem; font-size: 1rem; box-sizing: border-box;">
+                <option value="">Select a time slot</option>
+                <option value="9:00 AM - 10:00 AM">9:00 AM - 10:00 AM</option>
+                <option value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
+                <option value="11:00 AM - 12:00 PM">11:00 AM - 12:00 PM</option>
+                <option value="1:00 PM - 2:00 PM">1:00 PM - 2:00 PM</option>
+                <option value="2:00 PM - 3:00 PM">2:00 PM - 3:00 PM</option>
+                <option value="3:00 PM - 4:00 PM">3:00 PM - 4:00 PM</option>
+                <option value="4:00 PM - 5:00 PM">4:00 PM - 5:00 PM</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom: 0.5rem;">
+              <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #d60000;">
+                <i class="fas fa-sticky-note"></i> Reschedule Notes (Optional):
+              </label>
+              <textarea id="rescheduleNotes" class="swal2-textarea" 
+                        placeholder="Add any notes about the rescheduling (e.g., reason for rescheduling, special instructions)"
+                        style="width: 100%; min-height: 4rem; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem; font-size: 1rem; resize: vertical; box-sizing: border-box;"></textarea>
+            </div>
           </div>
         `,
         showCancelButton: true,
-        confirmButtonText: 'Reset to Pending',
+        confirmButtonText: '<i class="fas fa-calendar-check"></i> Confirm Reschedule',
         cancelButtonText: 'Cancel',
+        width: '40rem',
         icon: 'info',
+        customClass: {
+          confirmButton: 'swal2-confirm',
+          cancelButton: 'swal2-cancel'
+        },
         preConfirm: () => {
-          return document.getElementById('rescheduleNotes').value;
+          const newDate = document.getElementById('newDate').value;
+          const newTime = document.getElementById('newTime').value;
+          const notes = document.getElementById('rescheduleNotes').value;
+
+          if (!newDate) {
+            Swal.showValidationMessage('Please select a new date');
+            return false;
+          }
+          if (!newTime) {
+            Swal.showValidationMessage('Please select a time slot');
+            return false;
+          }
+
+          return { newDate, newTime, notes };
         }
       }).then((result) => {
         if (result.isConfirmed) {
           const formData = new FormData();
           formData.append('action', 'reschedule_request');
           formData.append('request_id', requestId);
-          formData.append('reschedule_notes', result.value);
+          formData.append('new_date', result.value.newDate);
+          formData.append('new_time', result.value.newTime);
+          formData.append('reschedule_notes', result.value.notes);
 
           fetch('', {
               method: 'POST',

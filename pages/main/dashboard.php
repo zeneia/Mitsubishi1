@@ -235,28 +235,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
       if ($action === 'reschedule_request') {
         $request_id = intval($_POST['request_id'] ?? 0);
         $reschedule_notes = $_POST['reschedule_notes'] ?? '';
+        $new_date = $_POST['new_date'] ?? '';
+        $new_time = $_POST['new_time'] ?? '';
+
+        // Validate new date and time
+        if (empty($new_date) || empty($new_time)) {
+          echo json_encode(['success' => false, 'message' => 'Please provide a new date and time for the test drive.']);
+          exit();
+        }
 
         // Only reschedule if notes start with [NO_SHOW]
         $sql = "UPDATE test_drive_requests 
-                        SET status = 'Pending', 
+                        SET status = 'Approved', 
+                            selected_date = ?,
+                            selected_time_slot = ?,
+                            approved_at = NOW(),
                             notes = CONCAT('[RESCHEDULED] ', ?, '\n---\n', COALESCE(notes, '')) 
                         WHERE id = ? AND status = 'Rejected' AND notes LIKE '[NO_SHOW]%'";
 
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$reschedule_notes, $request_id]);
+        $stmt->execute([$new_date, $new_time, $reschedule_notes, $request_id]);
 
         if ($stmt->rowCount() > 0) {
           // Send notifications
           require_once dirname(dirname(__DIR__)) . '/includes/api/notification_api.php';
-          $stmt2 = $pdo->prepare("SELECT account_id, selected_date FROM test_drive_requests WHERE id = ?");
+          $stmt2 = $pdo->prepare("SELECT account_id FROM test_drive_requests WHERE id = ?");
           $stmt2->execute([$request_id]);
           $row = $stmt2->fetch(PDO::FETCH_ASSOC);
           if ($row && $row['account_id']) {
-            createNotification($row['account_id'], null, 'Test Drive Rescheduled', 'Your test drive (ID: ' . $request_id . ') has been reset to pending for rescheduling.', 'test_drive', $request_id);
+            createNotification($row['account_id'], null, 'Test Drive Rescheduled', 'Your test drive (ID: ' . $request_id . ') has been rescheduled to ' . date('M d, Y', strtotime($new_date)) . ' at ' . $new_time . '.', 'test_drive', $request_id);
           }
-          createNotification(null, 'Admin', 'Test Drive Rescheduled', 'Test drive request (ID: ' . $request_id . ') has been rescheduled from no show status.', 'test_drive', $request_id);
+          createNotification(null, 'Admin', 'Test Drive Rescheduled', 'Test drive request (ID: ' . $request_id . ') has been rescheduled to ' . date('M d, Y', strtotime($new_date)) . ' at ' . $new_time . '.', 'test_drive', $request_id);
 
-          echo json_encode(['success' => true, 'message' => 'Test drive rescheduled successfully']);
+          echo json_encode(['success' => true, 'message' => 'Test drive rescheduled successfully to ' . date('M d, Y', strtotime($new_date)) . ' at ' . $new_time]);
         } else {
           echo json_encode(['success' => false, 'message' => 'Unable to reschedule. Request not found or not in No Show status.']);
         }
