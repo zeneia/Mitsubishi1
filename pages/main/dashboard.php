@@ -164,7 +164,99 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$completion_notes, $request_id]);
 
+        // Send notifications
+        require_once dirname(dirname(__DIR__)) . '/includes/api/notification_api.php';
+        $stmt2 = $pdo->prepare("SELECT account_id, selected_date FROM test_drive_requests WHERE id = ?");
+        $stmt2->execute([$request_id]);
+        $row = $stmt2->fetch(PDO::FETCH_ASSOC);
+        if ($row && $row['account_id']) {
+          createNotification($row['account_id'], null, 'Test Drive Completed', 'Your test drive (ID: ' . $request_id . ') has been marked as completed.', 'test_drive', $request_id);
+        }
+        createNotification(null, 'Admin', 'Test Drive Completed', 'Test drive request (ID: ' . $request_id . ') has been completed.', 'test_drive', $request_id);
+
         echo json_encode(['success' => true, 'message' => 'Test drive marked as completed']);
+        exit();
+      }
+
+      if ($action === 'no_show_request') {
+        $request_id = intval($_POST['request_id'] ?? 0);
+        $no_show_notes = $_POST['no_show_notes'] ?? '';
+
+        $sql = "UPDATE test_drive_requests 
+                        SET status = 'No Show', 
+                            notes = CONCAT(COALESCE(notes, ''), '\nNo Show: ', ?) 
+                        WHERE id = ?";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$no_show_notes, $request_id]);
+
+        // Send notifications
+        require_once dirname(dirname(__DIR__)) . '/includes/api/notification_api.php';
+        $stmt2 = $pdo->prepare("SELECT account_id, selected_date FROM test_drive_requests WHERE id = ?");
+        $stmt2->execute([$request_id]);
+        $row = $stmt2->fetch(PDO::FETCH_ASSOC);
+        if ($row && $row['account_id']) {
+          createNotification($row['account_id'], null, 'Test Drive - No Show', 'Your test drive (ID: ' . $request_id . ') was marked as no show. Please contact us to reschedule.', 'test_drive', $request_id);
+        }
+        createNotification(null, 'Admin', 'Test Drive - No Show', 'Test drive request (ID: ' . $request_id . ') marked as no show.', 'test_drive', $request_id);
+
+        echo json_encode(['success' => true, 'message' => 'Test drive marked as no show']);
+        exit();
+      }
+
+      if ($action === 'cancel_request') {
+        $request_id = intval($_POST['request_id'] ?? 0);
+        $cancel_reason = $_POST['cancel_reason'] ?? '';
+
+        $sql = "UPDATE test_drive_requests 
+                        SET status = 'Cancelled', 
+                            notes = CONCAT(COALESCE(notes, ''), '\nCancelled: ', ?) 
+                        WHERE id = ?";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$cancel_reason, $request_id]);
+
+        // Send notifications
+        require_once dirname(dirname(__DIR__)) . '/includes/api/notification_api.php';
+        $stmt2 = $pdo->prepare("SELECT account_id, selected_date FROM test_drive_requests WHERE id = ?");
+        $stmt2->execute([$request_id]);
+        $row = $stmt2->fetch(PDO::FETCH_ASSOC);
+        if ($row && $row['account_id']) {
+          createNotification($row['account_id'], null, 'Test Drive Cancelled', 'Your test drive (ID: ' . $request_id . ') has been cancelled.', 'test_drive', $request_id);
+        }
+        createNotification(null, 'Admin', 'Test Drive Cancelled', 'Test drive request (ID: ' . $request_id . ') has been cancelled.', 'test_drive', $request_id);
+
+        echo json_encode(['success' => true, 'message' => 'Test drive cancelled successfully']);
+        exit();
+      }
+
+      if ($action === 'reschedule_request') {
+        $request_id = intval($_POST['request_id'] ?? 0);
+        $reschedule_notes = $_POST['reschedule_notes'] ?? '';
+
+        $sql = "UPDATE test_drive_requests 
+                        SET status = 'Pending', 
+                            notes = CONCAT(COALESCE(notes, ''), '\nRescheduled: ', ?) 
+                        WHERE id = ? AND status = 'No Show'";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$reschedule_notes, $request_id]);
+
+        if ($stmt->rowCount() > 0) {
+          // Send notifications
+          require_once dirname(dirname(__DIR__)) . '/includes/api/notification_api.php';
+          $stmt2 = $pdo->prepare("SELECT account_id, selected_date FROM test_drive_requests WHERE id = ?");
+          $stmt2->execute([$request_id]);
+          $row = $stmt2->fetch(PDO::FETCH_ASSOC);
+          if ($row && $row['account_id']) {
+            createNotification($row['account_id'], null, 'Test Drive Rescheduled', 'Your test drive (ID: ' . $request_id . ') has been reset to pending for rescheduling.', 'test_drive', $request_id);
+          }
+          createNotification(null, 'Admin', 'Test Drive Rescheduled', 'Test drive request (ID: ' . $request_id . ') has been rescheduled from no show status.', 'test_drive', $request_id);
+
+          echo json_encode(['success' => true, 'message' => 'Test drive rescheduled successfully']);
+        } else {
+          echo json_encode(['success' => false, 'message' => 'Unable to reschedule. Request not found or not in No Show status.']);
+        }
         exit();
       }
 

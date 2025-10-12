@@ -64,6 +64,8 @@ $pending_requests = [];
 $approved_requests = [];
 $completed_requests = [];
 $rejected_requests = [];
+$no_show_requests = [];
+$cancelled_requests = [];
 
 if (isset($pdo) && $pdo) {
   try {
@@ -123,6 +125,32 @@ if (isset($pdo) && $pdo) {
         ");
     $stmt->execute([$agentId]);
     $rejected_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Fetch no show requests
+    $stmt = $pdo->prepare("
+            SELECT tdr.*, a.FirstName, a.LastName, a.Email 
+            FROM test_drive_requests tdr 
+            LEFT JOIN accounts a ON tdr.account_id = a.Id 
+            LEFT JOIN customer_information ci ON tdr.account_id = ci.account_id
+            WHERE tdr.status = 'No Show' 
+              AND ci.agent_id = ?
+            ORDER BY tdr.selected_date DESC
+        ");
+    $stmt->execute([$agentId]);
+    $no_show_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Fetch cancelled requests
+    $stmt = $pdo->prepare("
+            SELECT tdr.*, a.FirstName, a.LastName, a.Email 
+            FROM test_drive_requests tdr 
+            LEFT JOIN accounts a ON tdr.account_id = a.Id 
+            LEFT JOIN customer_information ci ON tdr.account_id = ci.account_id
+            WHERE tdr.status = 'Cancelled' 
+              AND ci.agent_id = ?
+            ORDER BY tdr.requested_at DESC
+        ");
+    $stmt->execute([$agentId]);
+    $cancelled_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
   } catch (Exception $e) {
     error_log("Error fetching test drive data: " . $e->getMessage());
   }
@@ -303,6 +331,7 @@ foreach ($new_inquiries as $inquiry) {
     <button class="tab-button active" data-tab="testDrive-pending">Pending Requests</button>
     <button class="tab-button" data-tab="testDrive-approved">Approved Bookings</button>
     <button class="tab-button" data-tab="testDrive-completed">Completed Drives</button>
+    <button class="tab-button" data-tab="testDrive-noshow">No Show</button>
     <button class="tab-button" data-tab="testDrive-rejected">Rejected Bookings</button>
   </div>
 
@@ -403,11 +432,11 @@ foreach ($new_inquiries as $inquiry) {
                 <td><?php echo htmlspecialchars($request['instructor_agent'] ?? 'Not assigned'); ?></td>
                 <td><?php echo $request['approved_at'] ? date('M d, Y', strtotime($request['approved_at'])) : 'N/A'; ?></td>
                 <td class="table-actions">
-                  <button class="btn btn-small btn-info" onclick="viewTestDriveDetails(<?php echo $request['id']; ?>)" style="margin-right: 5px;">
+                  <button class="btn btn-small btn-info" onclick="viewTestDriveDetails(<?php echo $request['id']; ?>)">
                     <i class="fas fa-info-circle"></i> View
                   </button>
-                  <button class="btn btn-small btn-success" onclick="markTestDriveComplete(<?php echo $request['id']; ?>)">
-                    <i class="fas fa-check"></i> Mark Complete
+                  <button class="btn btn-small btn-success" onclick="handleTestDriveStatus(<?php echo $request['id']; ?>)">
+                    <i class="fas fa-tasks"></i> Update Status
                   </button>
                 </td>
               </tr>
@@ -456,6 +485,69 @@ foreach ($new_inquiries as $inquiry) {
                   <button class="btn btn-small btn-info" onclick="viewTestDriveDetails(<?php echo $request['id']; ?>)">
                     <i class="fas fa-info-circle"></i> View Details
                   </button>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="tab-content" id="testDrive-noshow">
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Request ID</th>
+            <th>Customer</th>
+            <th>Contact</th>
+            <th>Scheduled Date</th>
+            <th>Location</th>
+            <th>Instructor</th>
+            <th>Notes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($no_show_requests) && empty($cancelled_requests)): ?>
+            <tr>
+              <td colspan="8" class="text-center">No no-show or cancelled requests found</td>
+            </tr>
+          <?php else: ?>
+            <?php 
+            $combined_requests = array_merge($no_show_requests, $cancelled_requests);
+            usort($combined_requests, function($a, $b) {
+              return strtotime($b['selected_date']) - strtotime($a['selected_date']);
+            });
+            foreach ($combined_requests as $request):
+              $customerName = ($request['FirstName'] && $request['LastName'])
+                ? $request['FirstName'] . ' ' . $request['LastName']
+                : $request['customer_name'];
+              $notes = $request['notes'] ?? 'No notes provided';
+              $displayNotes = strlen($notes) > 50 ? substr($notes, 0, 50) . '...' : $notes;
+              $statusClass = $request['status'] == 'No Show' ? 'status-badge no-show' : 'status-badge cancelled';
+            ?>
+              <tr>
+                <td>
+                  TD-<?php echo str_pad($request['id'], 4, '0', STR_PAD_LEFT); ?>
+                  <br><span class="<?php echo $statusClass; ?>"><?php echo $request['status']; ?></span>
+                </td>
+                <td><?php echo htmlspecialchars($customerName); ?><br><small><?php echo htmlspecialchars($request['Email'] ?? 'N/A'); ?></small></td>
+                <td><?php echo htmlspecialchars($request['mobile_number']); ?></td>
+                <td><?php echo date('M d, Y', strtotime($request['selected_date'])); ?><br><?php echo htmlspecialchars($request['selected_time_slot']); ?></td>
+                <td><?php echo htmlspecialchars($request['test_drive_location']); ?></td>
+                <td><?php echo htmlspecialchars($request['instructor_agent'] ?? 'N/A'); ?></td>
+                <td><?php echo htmlspecialchars($displayNotes); ?></td>
+                <td class="table-actions">
+                  <button class="btn btn-small btn-info" onclick="viewTestDriveDetails(<?php echo $request['id']; ?>)">
+                    <i class="fas fa-info-circle"></i> View
+                  </button>
+                  <?php if ($request['status'] == 'No Show'): ?>
+                    <button class="btn btn-small btn-primary" onclick="rescheduleTestDrive(<?php echo $request['id']; ?>)">
+                      <i class="fas fa-redo"></i> Reschedule
+                    </button>
+                  <?php endif; ?>
                 </td>
               </tr>
             <?php endforeach; ?>
@@ -1316,12 +1408,51 @@ modalInspiredStyle.innerHTML = `
 document.head.appendChild(modalInspiredStyle);
 
 
+    window.handleTestDriveStatus = function(requestId) {
+      Swal.fire({
+        title: 'Update Test Drive Status',
+        html: `
+          <div style="text-align: center; padding: 1rem 0;">
+            <p style="margin-bottom: 1.5rem; color: #666;">Choose the appropriate status for this test drive:</p>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <button id="btnComplete" class="swal2-styled" style="background: #28a745; width: 100%; margin: 0;">
+                <i class="fas fa-check-circle"></i> Mark as Completed
+              </button>
+              <button id="btnNoShow" class="swal2-styled" style="background: #ffc107; color: #000; width: 100%; margin: 0;">
+                <i class="fas fa-user-times"></i> Mark as No Show
+              </button>
+              <button id="btnCancel" class="swal2-styled" style="background: #dc3545; width: 100%; margin: 0;">
+                <i class="fas fa-ban"></i> Mark as Cancelled
+              </button>
+            </div>
+          </div>
+        `,
+        showConfirmButton: false,
+        showCancelButton: true,
+        cancelButtonText: 'Close',
+        didOpen: () => {
+          document.getElementById('btnComplete').addEventListener('click', () => {
+            Swal.close();
+            markTestDriveComplete(requestId);
+          });
+          document.getElementById('btnNoShow').addEventListener('click', () => {
+            Swal.close();
+            markTestDriveNoShow(requestId);
+          });
+          document.getElementById('btnCancel').addEventListener('click', () => {
+            Swal.close();
+            cancelTestDrive(requestId);
+          });
+        }
+      });
+    };
+
     window.markTestDriveComplete = function(requestId) {
       Swal.fire({
         title: 'Mark Test Drive as Completed',
         html: `
           <div style="text-align: left;">
-            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Completion Notes:</label>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Completion Notes:</label>
             <textarea id="completionNotes" class="swal2-textarea" placeholder="Add completion notes, feedback, or observations"></textarea>
           </div>
         `,
@@ -1346,6 +1477,146 @@ document.head.appendChild(modalInspiredStyle);
             .then(data => {
               if (data.success) {
                 Swal.fire('Success!', data.message, 'success').then(() => {
+                  location.reload();
+                });
+              } else {
+                Swal.fire('Error!', data.message || 'An error occurred', 'error');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              Swal.fire('Error!', 'An error occurred while processing the request', 'error');
+            });
+        }
+      });
+    };
+
+    window.markTestDriveNoShow = function(requestId) {
+      Swal.fire({
+        title: 'Mark as No Show',
+        html: `
+          <div style="text-align: left;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">No Show Notes:</label>
+            <textarea id="noShowNotes" class="swal2-textarea" placeholder="Add details about the no-show (e.g., time waited, contact attempts made)"></textarea>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Mark as No Show',
+        cancelButtonText: 'Cancel',
+        icon: 'warning',
+        preConfirm: () => {
+          return document.getElementById('noShowNotes').value;
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const formData = new FormData();
+          formData.append('action', 'no_show_request');
+          formData.append('request_id', requestId);
+          formData.append('no_show_notes', result.value);
+
+          fetch('', {
+              method: 'POST',
+              body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire('Updated!', data.message, 'success').then(() => {
+                  location.reload();
+                });
+              } else {
+                Swal.fire('Error!', data.message || 'An error occurred', 'error');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              Swal.fire('Error!', 'An error occurred while processing the request', 'error');
+            });
+        }
+      });
+    };
+
+    window.cancelTestDrive = function(requestId) {
+      Swal.fire({
+        title: 'Cancel Test Drive',
+        html: `
+          <div style="text-align: left;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Cancellation Reason:</label>
+            <textarea id="cancelReason" class="swal2-textarea" placeholder="Please provide the reason for cancellation"></textarea>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Confirm Cancellation',
+        cancelButtonText: 'Back',
+        icon: 'warning',
+        preConfirm: () => {
+          const reason = document.getElementById('cancelReason').value;
+          if (!reason.trim()) {
+            Swal.showValidationMessage('Please provide a cancellation reason');
+          }
+          return reason;
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const formData = new FormData();
+          formData.append('action', 'cancel_request');
+          formData.append('request_id', requestId);
+          formData.append('cancel_reason', result.value);
+
+          fetch('', {
+              method: 'POST',
+              body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire('Cancelled!', data.message, 'success').then(() => {
+                  location.reload();
+                });
+              } else {
+                Swal.fire('Error!', data.message || 'An error occurred', 'error');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              Swal.fire('Error!', 'An error occurred while processing the request', 'error');
+            });
+        }
+      });
+    };
+
+    window.rescheduleTestDrive = function(requestId) {
+      Swal.fire({
+        title: 'Reschedule Test Drive',
+        html: `
+          <div style="text-align: left;">
+            <p style="margin-bottom: 1rem;">This will reset the test drive to "Pending" status so it can be rescheduled.</p>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Reschedule Notes:</label>
+            <textarea id="rescheduleNotes" class="swal2-textarea" placeholder="Add any notes about the rescheduling"></textarea>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Reset to Pending',
+        cancelButtonText: 'Cancel',
+        icon: 'info',
+        preConfirm: () => {
+          return document.getElementById('rescheduleNotes').value;
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const formData = new FormData();
+          formData.append('action', 'reschedule_request');
+          formData.append('request_id', requestId);
+          formData.append('reschedule_notes', result.value);
+
+          fetch('', {
+              method: 'POST',
+              body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire('Rescheduled!', data.message, 'success').then(() => {
                   location.reload();
                 });
               } else {
@@ -2441,6 +2712,26 @@ document.head.appendChild(modalInspiredStyle);
 
   .status.overdue {
     background-color: #d32f2f;
+    color: white;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+  }
+
+  .status-badge.no-show {
+    background-color: #ffc107;
+    color: #000;
+  }
+
+  .status-badge.cancelled {
+    background-color: #dc3545;
     color: white;
   }
 
