@@ -195,8 +195,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
-        body { background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 25%, #2d1b1b 50%, #8b0000 75%, #b80000 100%); min-height: 100vh; color: white; }
-        .header { background: rgba(0, 0, 0, 0.4); padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 215, 0, 0.2); position: relative; z-index: 10; }
+        
+        body { background: #ffffff; min-height: 100vh; color: white; }
+        .header { background: #000000; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 215, 0, 0.2); position: relative; z-index: 10; }
         .logo-section { display: flex; align-items: center; gap: 20px; }
         .logo { width: 60px; height: auto; filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3)); }
         .brand-text { font-size: 1.4rem; font-weight: 700; background: linear-gradient(45deg, #ffd700, #ffed4e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
@@ -205,21 +206,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .welcome-text { font-size: 1rem; font-weight: 500; }
         .logout-btn { background: linear-gradient(45deg, #d60000, #b30000); color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(214, 0, 0, 0.3); }
         .logout-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(214, 0, 0, 0.5); }
-        .container { max-width: 800px; margin: 0 auto; padding: 30px 20px; position: relative; z-index: 5; }
-        .back-btn { display: inline-block; margin-bottom: 20px; background: rgba(255, 255, 255, 0.1); color: #ffd700; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; font-size: 0.9rem; }
+        
+        .container { max-width: 800px;
+            background: #ffffff; 
+            margin: 0 auto; 
+            padding: 30px 20px; 
+            position: relative; 
+            z-index: 5; }
+
+
+        .back-btn { display: inline-block; margin-bottom: 20px; background: #E60012; color: #ffffff; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; font-size: 0.9rem; }
         .back-btn:hover { background: #ffd700; color: #1a1a1a; }
 
         .quote-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: #ffffff;
             border-radius: 16px;
             overflow: hidden;
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.32);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
         .card-header {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+            background:rgba(99, 99, 99, 0.87);
             padding: 30px;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -260,7 +269,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .section-title {
-            color: #ffd700;
+            color: #E60012;
             font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 15px;
@@ -286,7 +295,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         label {
-            color: rgba(255, 255, 255, 0.9);
+            color: #000000;
             font-size: 0.9rem;
             font-weight: 500;
             margin-bottom: 8px;
@@ -296,8 +305,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         input, select, textarea {
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
+            border: 1px solid rgba(0, 0, 0, 0.67);
+            color: #000000;
             padding: 12px 15px;
             border-radius: 8px;
             font-size: 1rem;
@@ -311,7 +320,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         input::placeholder, textarea::placeholder {
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(0, 0, 0, 0.5);
         }
 
         select option {
