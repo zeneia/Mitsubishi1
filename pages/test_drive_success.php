@@ -55,9 +55,9 @@ $instructor_agent = 'Reo Remos';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
-        body { background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 25%, #2d1b1b 50%, #8b0000 75%, #b80000 100%); min-height: 100vh; color: white; }
+        body { background: #ffffff; min-height: 100vh; color: white; }
         
-        .header { background: rgba(0, 0, 0, 0.4); padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 215, 0, 0.2); position: relative; z-index: 10; }
+        .header { background: #000000; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 215, 0, 0.2); position: relative; z-index: 10; }
         .logo-section { display: flex; align-items: center; gap: 20px; }
         .logo { width: 60px; height: auto; filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3)); }
         .brand-text { font-size: 1.4rem; font-weight: 700; background: linear-gradient(45deg, #ffd700, #ffed4e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
@@ -70,7 +70,7 @@ $instructor_agent = 'Reo Remos';
         .container { max-width: 980px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 5; }
 
         .success-message {
-            background: rgba(76, 175, 80, 0.1);
+            background: rgba(76, 175, 79, 0.45);
             border: 1px solid rgba(76, 175, 80, 0.3);
             border-radius: 10px;
             padding: 30px;
@@ -85,6 +85,7 @@ $instructor_agent = 'Reo Remos';
         }
 
         .success-message p {
+            color: #000000;
             font-size: 1.1rem;
             line-height: 1.6;
             opacity: 0.9;
@@ -406,8 +407,8 @@ $instructor_agent = 'Reo Remos';
             </div>
         <?php else: ?>
             <div class="info-box">
-                <h3><i class="fas fa-info-circle"></i> Next Steps</h3>
-                <ul>
+                <h3 style = "color: #B80000;"><i class="fas fa-info-circle"></i> Next Steps</h3>
+                <ul style = "color: #000000;">
                     <li>Your test drive request is currently under review by our team.</li>
                     <li>You will receive a notification once your request is approved.</li>
                     <li>Please ensure your contact information is up to date.</li>

@@ -49,13 +49,13 @@ if (!$customerProfile) {
         }
 
         body {
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 25%, #2d1b1b 50%, #8b0000 75%, #b80000 100%);
+            background: #ffffff;
             min-height: 100vh;
             color: white;
         }
 
         .header {
-            background: rgba(0, 0, 0, 0.4);
+            background: #000000;
             padding: 20px 30px;
             display: flex;
             justify-content: space-between;
@@ -136,8 +136,8 @@ if (!$customerProfile) {
         .back-btn {
             display: inline-block;
             margin-bottom: 30px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffd700;
+            background: #E60012;
+            color: #ffffff;
             padding: 10px 20px;
             border-radius: 10px;
             text-decoration: none;
@@ -153,7 +153,7 @@ if (!$customerProfile) {
         .page-title {
             font-size: 2.5rem;
             margin-bottom: 30px;
-            background: linear-gradient(45deg, #ffd700, #ffed4e, #fff);
+            background: #E60012;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -162,7 +162,7 @@ if (!$customerProfile) {
         }
 
         .orders-container {
-            background: rgba(255, 255, 255, 0.1);
+            background: #808080;
             border-radius: 20px;
             padding: 30px;
             backdrop-filter: blur(20px);
@@ -183,7 +183,7 @@ if (!$customerProfile) {
         }
 
         .order-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.52);
             border-radius: 15px;
             padding: 25px;
             margin-bottom: 20px;
@@ -212,7 +212,7 @@ if (!$customerProfile) {
         }
 
         .order-info p {
-            color: #ccc;
+            color: #000000ff;
             font-size: 0.9rem;
         }
 
@@ -267,13 +267,13 @@ if (!$customerProfile) {
         }
 
         .detail-item {
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.50);
             padding: 15px;
             border-radius: 10px;
         }
 
         .detail-label {
-            color: #ffd700;
+            color: #E60012;
             font-weight: 600;
             font-size: 0.85rem;
             margin-bottom: 5px;
@@ -586,7 +586,7 @@ if (!$customerProfile) {
         .tab-btn {
             background: transparent;
             border: none;
-            color: #ccc;
+            color: #000000;
             padding: 10px 20px;
             cursor: pointer;
             font-weight: 600;
@@ -595,8 +595,8 @@ if (!$customerProfile) {
         }
 
         .tab-btn.active {
-            color: #ffd700;
-            border-bottom-color: #ffd700;
+            color: #E60012;
+            border-bottom-color: #E60012;
         }
 
         .tab-btn:hover {
@@ -614,7 +614,7 @@ if (!$customerProfile) {
         }
 
         .overview-item {
-            background: rgba(0, 0, 0, 0.2);
+            background: hsla(0, 0%, 0%, 0.50);
             padding: 20px;
             border-radius: 10px;
             border: 1px solid rgba(255, 215, 0, 0.1);
@@ -641,7 +641,7 @@ if (!$customerProfile) {
         .payment-schedule-table {
             overflow-x: auto;
             border-radius: 10px;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.50);
         }
 
         .payment-history-table table,
@@ -669,7 +669,7 @@ if (!$customerProfile) {
 
         .payment-history-table td,
         .payment-schedule-table td {
-            color: #ccc;
+            color: #ffff;
         }
 
         .amortization-summary {

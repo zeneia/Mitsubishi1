@@ -342,9 +342,9 @@ function getInquiryResponses($connect, $inquiryId) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
-        body { background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 25%, #2d1b1b 50%, #8b0000 75%, #b80000 100%); min-height: 100vh; color: white; }
+        body { background: #ffffff; min-height: 100vh; color: white; }
         
-        .header { background: rgba(0, 0, 0, 0.4); padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 215, 0, 0.2); position: relative; z-index: 10; }
+        .header { background: #000000; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 215, 0, 0.2); position: relative; z-index: 10; }
         .logo-section { display: flex; align-items: center; gap: 20px; }
         .logo { width: 60px; height: auto; filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3)); }
         .brand-text { font-size: 1.4rem; font-weight: 700; background: linear-gradient(45deg, #ffd700, #ffed4e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
@@ -355,21 +355,21 @@ function getInquiryResponses($connect, $inquiryId) {
         .logout-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(214, 0, 0, 0.5); }
 
         .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; position: relative; z-index: 5; }
-        .back-btn { display: inline-block; margin-bottom: 20px; background: rgba(255, 255, 255, 0.1); color: #ffd700; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; font-size: 0.9rem; }
+        .back-btn { display: inline-block; margin-bottom: 20px; background: #E60012; color: #ffffff; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; font-size: 0.9rem; }
         .back-btn:hover { background: #ffd700; color: #1a1a1a; }
 
         .page-header { text-align: center; margin-bottom: 40px; }
-        .page-title { font-size: 2.5rem; font-weight: 800; color: #ffd700; margin-bottom: 10px; }
-        .page-subtitle { color: rgba(255, 255, 255, 0.7); font-size: 1.1rem; }
+        .page-title { font-size: 2.5rem; font-weight: 800; color: #E60012; margin-bottom: 10px; }
+        .page-subtitle { color: #000000; font-size: 1.1rem; }
 
         .inquiries-container { display: grid; gap: 25px; }
-        .inquiry-card { background: rgba(255, 255, 255, 0.05); border-radius: 16px; backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); overflow: hidden; transition: all 0.3s ease; }
+        .inquiry-card { background: #808080; border-radius: 16px; backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); overflow: hidden; transition: all 0.3s ease; }
         .inquiry-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); }
 
-        .inquiry-header { padding: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .inquiry-id { color: #ffd700; font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; }
-        .inquiry-vehicle { font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; }
-        .inquiry-date { color: rgba(255, 255, 255, 0.6); font-size: 0.9rem; }
+        .inquiry-header { padding: 20px; border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
+        .inquiry-id { color: #E60012; font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; }
+        .inquiry-vehicle { color: #000000; font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; }
+        .inquiry-date { color: rgba(0, 0, 0, 0.6); font-size: 0.9rem; }
 
         .inquiry-status { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; margin-top: 8px; }
         .status-new { background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3); }
@@ -377,27 +377,27 @@ function getInquiryResponses($connect, $inquiryId) {
 
         .inquiry-body { padding: 20px; }
         .inquiry-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .detail-label { color: rgba(255, 255, 255, 0.6); font-size: 0.8rem; display: block; margin-bottom: 3px; }
-        .detail-value { color: white; font-weight: 500; }
+        .detail-label { color: rgba(0, 0, 0, 0.6); font-size: 0.8rem; display: block; margin-bottom: 3px; }
+        .detail-value { color: #000000; font-weight: 500; }
 
         .inquiry-comments { margin-top: 15px; }
-        .comments-label { color: rgba(255, 255, 255, 0.6); font-size: 0.8rem; margin-bottom: 5px; }
-        .comments-text { background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border-left: 3px solid #ffd700; font-style: italic; }
+        .comments-label { color: rgba(0, 0, 0, 0.6); font-size: 0.8rem; margin-bottom: 5px; }
+        .comments-text { color: #000000; background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border-left: 3px solid #ffd700; font-style: italic; }
 
         .responses-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
         .responses-header { color: #ffd700; font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
         .response-item { background: rgba(40, 167, 69, 0.1); border: 1px solid rgba(40, 167, 69, 0.2); border-radius: 8px; padding: 15px; margin-bottom: 10px; }
         .response-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .response-type { background: rgba(40, 167, 69, 0.3); color: #28a745; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
-        .response-date { color: rgba(255, 255, 255, 0.6); font-size: 0.8rem; }
-        .response-agent { color: rgba(255, 255, 255, 0.7); font-size: 0.8rem; margin-bottom: 8px; }
-        .response-message { line-height: 1.6; }
+        .response-date { color: rgba(0, 0, 0, 0.6); font-size: 0.8rem; }
+        .response-agent { color: rgba(0, 0, 0, 0.7); font-size: 0.8rem; margin-bottom: 8px; }
+        .response-message { line-height: 1.6; color: #000000;}
         .follow-up { margin-top: 10px; padding: 8px; background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.2); border-radius: 4px; }
         .follow-up-label { color: #ffc107; font-size: 0.8rem; font-weight: 600; }
 
         .no-inquiries { text-align: center; padding: 60px 20px; color: rgba(255, 255, 255, 0.6); }
-        .no-inquiries i { font-size: 4rem; color: rgba(255, 215, 0, 0.3); margin-bottom: 20px; }
-        .no-inquiries h3 { color: #ffd700; margin-bottom: 10px; }
+        .no-inquiries i { font-size: 4rem; color: #E60012; margin-bottom: 20px; }
+        .no-inquiries h3 { color: #E60012; margin-bottom: 10px; }
 
         /* Amortization schedule */
         .amortization-panel { display: none; margin-top: 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 15px; }
@@ -406,7 +406,22 @@ function getInquiryResponses($connect, $inquiryId) {
         .amortization-table th, .amortization-table td { border: 1px solid rgba(255,255,255,0.08); padding: 8px 10px; font-size: 0.92rem; }
         .amortization-table th { background: rgba(255,215,0,0.08); color: #ffd700; font-weight: 600; text-align: left; }
         .amortization-table tr:nth-child(even) { background: rgba(255,255,255,0.02); }
-        .new-inquiry-btn { display: inline-block; margin-top: 20px; background: linear-gradient(45deg, #ffd700, #ffed4e); color: #1a1a1a; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; }
+
+        .new-inquiry-btn { display: inline-block; 
+            justify-content: center;
+            align-items: center;
+ 
+            background: #E60012; 
+            color: #ffffff;
+            width:400px;
+            height: 50px;
+ 
+            padding: 12px 24px; 
+            border-radius: 25px; 
+            text-decoration: none;
+            font-weight: 600; 
+            transition: all 0.3s ease; }
+
         .new-inquiry-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5); }
 
         .action-buttons { 
@@ -435,6 +450,7 @@ function getInquiryResponses($connect, $inquiryId) {
             line-height: 1.2;
         }
         .btn i { 
+            color: #E60012;
             font-size: 0.9em; 
             width: 16px;
             text-align: center;
@@ -448,7 +464,7 @@ function getInquiryResponses($connect, $inquiryId) {
             box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3); 
         }
         .btn-secondary { 
-            background: rgba(255, 255, 255, 0.1); 
+            background: #E60012; 
             color: white; 
             border: 1px solid rgba(255, 255, 255, 0.2); 
         }
@@ -490,11 +506,11 @@ function getInquiryResponses($connect, $inquiryId) {
         }
         
         /* Tabs */
-        .tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .tab { padding: 12px 20px; cursor: pointer; font-weight: 500; color: rgba(255, 255, 255, 0.6); 
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid rgba(5, 5, 5, 0.32); }
+        .tab { padding: 12px 20px; cursor: pointer; font-weight: 500; color: #000000; 
                border-bottom: 2px solid transparent; transition: all 0.3s ease; }
-        .tab.active { color: #ffd700; border-bottom-color: #ffd700; }
-        .tab:hover:not(.active) { color: rgba(255, 255, 255, 0.9); }
+        .tab.active { color: #E60012; border-bottom-color: #ff0000ff; }
+        .tab:hover:not(.active) { color: #E60012; }
         .tab-badge { background: rgba(255, 215, 0, 0.2); color: #ffd700; border-radius: 10px; 
                     padding: 2px 8px; font-size: 0.7rem; margin-left: 5px; }
         
@@ -699,7 +715,7 @@ function getInquiryResponses($connect, $inquiryId) {
                     <h3>No Inquiries Yet</h3>
                     <p>You haven't submitted any vehicle inquiries yet.</p>
                     <a href="inquiry.php" class="new-inquiry-btn">
-                        <i class="fas fa-plus"></i> Submit New Inquiry
+                        Submit New Inquiry
                     </a>
                 </div>
             <?php else: ?>

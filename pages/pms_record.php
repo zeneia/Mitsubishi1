@@ -131,8 +131,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
-        body { background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 25%, #2d1b1b 50%, #8b0000 75%, #b80000 100%); min-height: 100vh; color: white; }
-        .header { background: rgba(0, 0, 0, 0.4); padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 215, 0, 0.2); position: relative; z-index: 10; }
+        body { background: #ffffff; min-height: 100vh; color: white; }
+        .header { background: #000000; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 215, 0, 0.2); position: relative; z-index: 10; }
         .logo-section { display: flex; align-items: center; gap: 20px; }
         .logo { width: 60px; height: auto; filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3)); }
         .brand-text { font-size: 1.4rem; font-weight: 700; background: linear-gradient(45deg, #ffd700, #ffed4e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .logout-btn { background: linear-gradient(45deg, #d60000, #b30000); color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(214, 0, 0, 0.3); }
         .logout-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(214, 0, 0, 0.5); }
         .container { max-width: 800px; margin: 0 auto; padding: 30px 20px; position: relative; z-index: 5; }
-        .back-btn { display: inline-block; margin-bottom: 20px; background: rgba(255, 255, 255, 0.1); color: #ffd700; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; font-size: 0.9rem; }
+        .back-btn { display: inline-block; margin-bottom: 20px; background: #E60012; color: #ffffff; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; font-size: 0.9rem; }
         .back-btn:hover { background: #ffd700; color: #1a1a1a; }
 
         .pms-card {
@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .card-header {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+            background: #808080;
             padding: 25px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
@@ -164,12 +164,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .page-title {
             font-size: 2rem;
             font-weight: 800;
-            color: #ffd700;
+            color: #ffffff;
             margin-bottom: 8px;
         }
 
         .page-subtitle {
-            color: rgba(255, 255, 255, 0.7);
+            color: #000000;
             font-size: 0.9rem;
         }
 
@@ -182,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .section-title {
-            color: #ffd700;
+            color: #E60012;
             font-size: 1.1rem;
             font-weight: 600;
             margin-bottom: 15px;
@@ -207,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .form-label {
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(0, 0, 0, 0.9);
             font-size: 0.9rem;
             font-weight: 500;
             margin-bottom: 5px;
@@ -220,10 +220,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .form-input, .form-select, .form-textarea {
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(2, 2, 2, 0.2);
             border-radius: 8px;
             padding: 12px;
-            color: white;
+            color: #000000;
             font-size: 0.9rem;
             transition: all 0.3s ease;
         }
@@ -255,7 +255,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: flex;
             align-items: center;
             gap: 5px;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(0, 0, 0, 0.9);
             font-size: 0.9rem;
             cursor: pointer;
         }
@@ -280,11 +280,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .checkbox-group input[type="checkbox"] {
             width: 18px;
             height: 18px;
-            accent-color: #ffd700;
+            accent-color: #E60012;
         }
 
         .checkbox-group label {
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(0, 0, 0, 0.9);
             font-size: 0.9rem;
             cursor: pointer;
         }
