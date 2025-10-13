@@ -401,8 +401,6 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
       <div class="tab-navigation">
         <button class="tab-button active" data-tab="transaction-completed">Completed Transactions</button>
         <button class="tab-button" data-tab="transaction-pending">Pending Transactions</button>
-        <button class="tab-button" data-tab="transaction-analytics">Transaction Analytics</button>
-        <button class="tab-button" data-tab="transaction-reports">Reports</button>
       </div>
 
       <!-- Completed Transactions Tab -->
@@ -457,17 +455,14 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
           <thead>
             <tr>
               <th>Transaction ID</th>
-              <th>Client Name</th>
-              <th>Vehicle Model</th>
-              <th>Sale Price</th>
-              <th>Sales Agent</th>
-              <th>Date Completed</th>
-              <th>Payment Method</th>
-              <th>Actions</th>
+              <th>Customer Name</th>
+              <th>Vehicle Name</th>
+              <th>Total Amount</th>
+              <th>Agent Name</th>
             </tr>
           </thead>
           <tbody id="completed-tbody">
-            <tr><td colspan="8" style="text-align:center;color:var(--text-light);">Loading...</td></tr>
+            <tr><td colspan="5" style="text-align:center;color:var(--text-light);">Loading...</td></tr>
           </tbody>
         </table>
         <div class="pagination" style="display:flex;align-items:center;gap:12px;justify-content:flex-end;margin-top:10px;">
@@ -562,17 +557,18 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
           <thead>
             <tr>
               <th>Transaction ID</th>
-              <th>Client Name</th>
-              <th>Vehicle Model</th>
-              <th>Sale Price</th>
-              <th>Sales Agent</th>
-              <th>Status</th>
-              <th>Days Pending</th>
-              <th>Actions</th>
+              <th>Date</th>
+              <th>Customer Name</th>
+              <th>Vehicle Name</th>
+              <th>Amount</th>
+              <th>Type of Payment</th>
+              <th>Reference Number</th>
+              <th>Agent Name</th>
+              <th>View Receipt</th>
             </tr>
           </thead>
           <tbody id="pending-tbody">
-            <tr><td colspan="8" style="text-align:center;color:var(--text-light);">Loading...</td></tr>
+            <tr><td colspan="9" style="text-align:center;color:var(--text-light);">Loading...</td></tr>
           </tbody>
         </table>
         
@@ -588,178 +584,6 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
         </div>
       </div>
 
-      <!-- Transaction Analytics Tab -->
-      <div class="tab-content" id="transaction-analytics">
-        <div class="info-cards">
-          <div class="info-card">
-            <div class="info-card-title">Monthly Growth</div>
-            <div class="info-card-value">+12.5%</div>
-          </div>
-          <div class="info-card">
-            <div class="info-card-title">Best Selling Model</div>
-            <div class="info-card-value">Xpander</div>
-          </div>
-          <div class="info-card">
-            <div class="info-card-title">Top Agent Performance</div>
-            <div class="info-card-value">Carlos M.</div>
-          </div>
-          <div class="info-card">
-            <div class="info-card-title">Average Deal Time</div>
-            <div class="info-card-value">14 days</div>
-          </div>
-        </div>
-        
-        <div class="chart-container">
-          <h3>Sales Performance (Last 12 Months)</h3>
-          <div id="salesChart" style="height: 350px; width: 100%;">
-            <!-- Chart placeholder -->
-            <div style="height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-light);">
-              Chart visualization would be displayed here
-            </div>
-          </div>
-        </div>
-        
-        <div class="filter-bar">
-          <select class="filter-select">
-            <option value="monthly">Monthly View</option>
-            <option value="quarterly">Quarterly View</option>
-            <option value="yearly">Yearly View</option>
-          </select>
-          <select class="filter-select">
-            <option value="">All Vehicle Models</option>
-            <option value="montero">Montero Sport</option>
-            <option value="xpander">Xpander</option>
-            <option value="mirage">Mirage G4</option>
-          </select>
-          <button class="btn btn-primary">Update Chart</button>
-        </div>
-        
-        <h3>Model Performance Analysis</h3>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Vehicle Model</th>
-              <th>Units Sold (Month)</th>
-              <th>Sales Value</th>
-              <th>Market Share</th>
-              <th>YoY Growth</th>
-              <th>Avg. Sale Time</th>
-              <th>Trend</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Montero Sport</td>
-              <td>34</td>
-              <td>₱81.5M</td>
-              <td>38%</td>
-              <td>+15.2%</td>
-              <td>12 days</td>
-              <td><span class="status approved">↗ Rising</span></td>
-            </tr>
-            <tr>
-              <td>Xpander</td>
-              <td>48</td>
-              <td>₱60.2M</td>
-              <td>28%</td>
-              <td>+23.5%</td>
-              <td>8 days</td>
-              <td><span class="status approved">↗ Rising</span></td>
-            </tr>
-            <tr>
-              <td>Mirage G4</td>
-              <td>32</td>
-              <td>₱30.2M</td>
-              <td>14%</td>
-              <td>-3.2%</td>
-              <td>15 days</td>
-              <td><span class="status overdue">↘ Declining</span></td>
-            </tr>
-            <tr>
-              <td>Strada</td>
-              <td>25</td>
-              <td>₱38.5M</td>
-              <td>18%</td>
-              <td>+5.7%</td>
-              <td>10 days</td>
-              <td><span class="status approved">→ Stable</span></td>
-            </tr>
-            <tr>
-              <td>Outlander PHEV</td>
-              <td>4</td>
-              <td>₱11.6M</td>
-              <td>2%</td>
-              <td>+100%</td>
-              <td>20 days</td>
-              <td><span class="status approved">↗ Rising</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Reports Tab -->
-      <div class="tab-content" id="transaction-reports">
-        <h3>Available Transaction Reports</h3>
-        
-        <div class="reports-grid">
-          <div class="report-card">
-            <h3><i class="fas fa-chart-bar"></i> Monthly Sales Report</h3>
-            <p>Comprehensive analysis of sales performance for the current month with comparisons to previous periods.</p>
-            <button class="btn btn-primary">Generate Report</button>
-          </div>
-          
-          <div class="report-card">
-            <h3><i class="fas fa-user-tie"></i> Agent Performance Report</h3>
-            <p>Detailed breakdown of sales performance by individual sales agents with rankings and metrics.</p>
-            <button class="btn btn-primary">Generate Report</button>
-          </div>
-          
-          <div class="report-card">
-            <h3><i class="fas fa-car"></i> Vehicle Model Analysis</h3>
-            <p>In-depth analysis of sales trends by vehicle model, variants, and popular specifications.</p>
-            <button class="btn btn-primary">Generate Report</button>
-          </div>
-          
-          <div class="report-card">
-            <h3><i class="fas fa-coins"></i> Financial Summary</h3>
-            <p>Complete financial overview of transactions, revenue, commissions, and profitability.</p>
-            <button class="btn btn-primary">Generate Report</button>
-          </div>
-          
-          <div class="report-card">
-            <h3><i class="fas fa-clock"></i> Processing Time Analysis</h3>
-            <p>Analysis of transaction processing times from inquiry to completion with improvement recommendations.</p>
-            <button class="btn btn-primary">Generate Report</button>
-          </div>
-          
-          <div class="report-card">
-            <h3><i class="fas fa-map-marker-alt"></i> Regional Sales Analysis</h3>
-            <p>Geographic breakdown of sales performance across different regions and dealerships.</p>
-            <button class="btn btn-primary">Generate Report</button>
-          </div>
-        </div>
-        
-        <div class="filter-bar">
-          <select class="filter-select">
-            <option value="current">Current Month</option>
-            <option value="previous">Previous Month</option>
-            <option value="quarter">Current Quarter</option>
-            <option value="year">Year to Date</option>
-            <option value="custom">Custom Date Range</option>
-          </select>
-          <select class="filter-select">
-            <option value="pdf">PDF Format</option>
-            <option value="excel">Excel Format</option>
-            <option value="csv">CSV Format</option>
-          </select>
-          <button class="btn btn-primary">Export Selected Report</button>
-        </div>
-        
-        <div class="action-area">
-          <button class="btn btn-secondary">Schedule Regular Reports</button>
-          <button class="btn btn-outline">Report Settings</button>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -823,27 +647,20 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
       function renderCompletedRows(list) {
         const tbody = document.getElementById('completed-tbody');
         if (!list || list.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-light);">No transactions found</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light);">No transactions found</td></tr>';
           return;
         }
         tbody.innerHTML = list.map(item => {
           const price = `₱${Number(item.sale_price||0).toLocaleString(undefined,{maximumFractionDigits:0})}`;
-          const vm = `${item.vehicle_model||''} ${item.variant?('('+item.variant+')'):''}`;
-          const date = item.date_completed ? new Date(item.date_completed).toLocaleDateString() : '';
+          const vm = `${item.vehicle_model||''} ${item.variant?(' '+item.variant):''}`;
           const txn = item.transaction_id || '';
           return `
             <tr>
               <td>${txn}</td>
-              <td>${item.client_name||'N/A'}<br><small>${item.email||''}</small></td>
+              <td>${item.client_name||'N/A'}</td>
               <td>${vm}</td>
               <td>${price}</td>
               <td>${item.agent_name||''}</td>
-              <td>${date}</td>
-              <td>${item.payment_method||''}</td>
-              <td class="table-actions">
-                <button class="btn btn-small btn-outline" data-order-id="${item.order_id}" data-txn="${txn}" onclick="viewTransaction(this)">View Details</button>
-                <button class="btn btn-small btn-primary">Print Invoice</button>
-              </td>
             </tr>`;
         }).join('');
       }
@@ -851,24 +668,36 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
       function renderPendingRows(list) {
         const tbody = document.getElementById('pending-tbody');
         if (!list || list.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-light);">No pending transactions</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-light);">No pending transactions</td></tr>';
           return;
         }
         tbody.innerHTML = list.map(item => {
           const price = `₱${Number(item.sale_price||0).toLocaleString(undefined,{maximumFractionDigits:0})}`;
-          const vm = `${item.vehicle_model||''} ${item.variant?('('+item.variant+')'):''}`;
-          const status = item.order_status || 'Pending';
+          const vm = `${item.vehicle_model||''} ${item.variant?(' '+item.variant):''}`;
+          const date = item.latest_payment_date ? new Date(item.latest_payment_date).toLocaleDateString() : (item.date_completed ? new Date(item.date_completed).toLocaleDateString() : '-');
+          const paymentType = item.latest_payment_type || '-';
+          const refNumber = item.latest_payment_reference || '-';
+          const hasReceipt = item.receipt_filename && item.latest_payment_id;
+          
           return `
             <tr>
               <td>${item.transaction_id||''}</td>
-              <td>${item.client_name||'N/A'}<br><small>${item.email||''}</small></td>
+              <td>${date}</td>
+              <td>${item.client_name||'N/A'}</td>
               <td>${vm}</td>
               <td>${price}</td>
+              <td>${paymentType}</td>
+              <td>${refNumber}</td>
               <td>${item.agent_name||''}</td>
-              <td><span class="status pending">${status}</span></td>
-              <td>-</td>
               <td class="table-actions">
-                <button class="btn btn-small btn-outline" data-order-id="${item.order_id}" data-txn="${item.transaction_id||''}" onclick="viewTransaction(this)">View Details</button>
+                ${hasReceipt ? `
+                  <button class="btn btn-small btn-outline" onclick="viewReceipt(${item.latest_payment_id})">
+                    <i class="fas fa-receipt"></i> View
+                  </button>
+                  <button class="btn btn-small btn-primary" onclick="viewAllReceipts(${item.order_id})">
+                    <i class="fas fa-list"></i> All
+                  </button>
+                ` : `<span style="color: var(--text-light);">No receipt</span>`}
               </td>
             </tr>`;
         }).join('');
@@ -1077,6 +906,115 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
       
       window.closeTransactionDetails = function() {
         document.getElementById('transactionDetails').style.display = 'none';
+      };
+
+      // Receipt viewing functions
+      window.viewReceipt = function(paymentId) {
+        if (!paymentId) {
+          alert('No receipt available');
+          return;
+        }
+        // Open receipt in new window
+        window.open(`${TXN_API}?action=get_receipt&payment_id=${paymentId}`, '_blank');
+      };
+
+      window.viewAllReceipts = async function(orderId) {
+        if (!orderId) {
+          alert('Invalid order');
+          return;
+        }
+
+        try {
+          const res = await fetch(`${TXN_API}?action=get_all_receipts&order_id=${orderId}`);
+          const json = await res.json();
+          
+          if (!json.success || !json.data || json.data.length === 0) {
+            alert('No receipts found for this order');
+            return;
+          }
+
+          const receipts = json.data;
+          let tableRows = receipts.map(r => {
+            const date = r.payment_date ? new Date(r.payment_date).toLocaleDateString() : '-';
+            const amount = `₱${Number(r.amount_paid||0).toLocaleString(undefined,{maximumFractionDigits:0})}`;
+            const hasReceipt = r.receipt_filename;
+            return `
+              <tr>
+                <td>${r.payment_number||''}</td>
+                <td>${date}</td>
+                <td>${r.payment_type||''}</td>
+                <td>${amount}</td>
+                <td>${r.reference_number||'-'}</td>
+                <td>
+                  ${hasReceipt ? 
+                    `<button class="btn btn-small btn-outline" onclick="viewReceipt(${r.id})">
+                      <i class="fas fa-eye"></i> View
+                    </button>` : 
+                    '<span style="color: #999;">No receipt</span>'}
+                </td>
+              </tr>
+            `;
+          }).join('');
+
+          // Show receipts in a modal-style overlay
+          const overlay = document.createElement('div');
+          overlay.id = 'receiptsOverlay';
+          overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+          `;
+          
+          overlay.innerHTML = `
+            <div style="background: white; border-radius: 0.625rem; padding: 1.875rem; max-width: 60rem; width: 100%; max-height: 90%; overflow-y: auto;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 0.0625rem solid #e5e7eb; padding-bottom: 0.625rem;">
+                <h3 style="margin: 0; font-size: 1.25rem; color: #1f2937;">All Payment Receipts</h3>
+                <button onclick="closeReceiptsOverlay()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280;">&times;</button>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Payment #</th>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Reference</th>
+                    <th>Receipt</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${tableRows}
+                </tbody>
+              </table>
+            </div>
+          `;
+          
+          document.body.appendChild(overlay);
+          
+          overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) {
+              closeReceiptsOverlay();
+            }
+          });
+        } catch (error) {
+          console.error('Error loading receipts:', error);
+          alert('Failed to load receipts');
+        }
+      };
+
+      window.closeReceiptsOverlay = function() {
+        const overlay = document.getElementById('receiptsOverlay');
+        if (overlay) {
+          overlay.remove();
+        }
       };
     });
   </script>

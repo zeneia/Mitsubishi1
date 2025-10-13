@@ -13,8 +13,8 @@ if (!isset($_SESSION['user_id']) || !in_array(($_SESSION['user_role'] ?? ''), ['
     exit;
 }
 
-$pdo = $GLOBALS['pdo'] ?? null;
-if (!$pdo) {
+// Database connection is available via $GLOBALS['pdo'] from init.php
+if (!isset($GLOBALS['pdo']) || !$GLOBALS['pdo']) {
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => 'Database connection failed']);
     exit;
@@ -39,6 +39,12 @@ try {
         case 'export_transactions':
             exportTransactions();
             break;
+        case 'get_all_receipts':
+            getAllReceipts();
+            break;
+        case 'get_receipt':
+            getReceipt();
+            break;
         default:
             http_response_code(400);
             echo json_encode(['success' => false, 'error' => 'Invalid action']);
@@ -50,7 +56,7 @@ try {
 
 function getTransactions()
 {
-    global $pdo;
+    $pdo = $GLOBALS['pdo'];
 
     // Inputs
     $status = trim(strtolower($_POST['status'] ?? $_GET['status'] ?? ''));
@@ -66,16 +72,14 @@ function getTransactions()
     $where = [];
     $params = [];
 
-    // Map UI status to order_status
+    // Map UI status based on payment completion
     if ($status !== '') {
         if ($status === 'completed') {
-            // Consider commonly used completion states
-            $where[] = "o.order_status IN ('completed','delivered','paid','Complete','Completed')";
+            // Fully paid orders (remaining balance = 0)
+            $where[] = "(o.total_price - COALESCE(payments.total_paid, 0)) = 0";
         } elseif ($status === 'pending') {
-            $where[] = "o.order_status IN ('pending','Processing','processing','Pending')";
-        } else {
-            $where[] = 'o.order_status = ?';
-            $params[] = $status;
+            // Not fully paid orders (remaining balance > 0)
+            $where[] = "(o.total_price - COALESCE(payments.total_paid, 0)) > 0";
         }
     }
 
@@ -111,17 +115,23 @@ function getTransactions()
 
     $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
-    // Total count
+    // Total count with payment calculation
     $countSql = "SELECT COUNT(*) AS total FROM orders o
                  LEFT JOIN customer_information ci ON o.customer_id = ci.cusID
                  LEFT JOIN accounts acc ON ci.account_id = acc.Id
                  LEFT JOIN vehicles v ON o.vehicle_id = v.id
+                 LEFT JOIN (
+                     SELECT order_id, COALESCE(SUM(amount_paid), 0) as total_paid
+                     FROM payment_history
+                     WHERE status = 'Confirmed'
+                     GROUP BY order_id
+                 ) payments ON o.order_id = payments.order_id
                  $whereSql";
     $stmt = $pdo->prepare($countSql);
     $stmt->execute($params);
     $total = (int)($stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
 
-    // Data query
+    // Data query with payment info
     $sql = "SELECT 
                 o.order_id,
                 o.order_number,
@@ -138,12 +148,35 @@ function getTransactions()
                 o.actual_delivery_date,
                 ci.firstname, ci.lastname, acc.Email AS email,
                 CONCAT(agent.FirstName,' ',agent.LastName) AS agent_name,
-                v.model_name AS v_model_name, v.variant AS v_variant
+                v.model_name AS v_model_name, v.variant AS v_variant,
+                COALESCE(payments.total_paid, 0) as total_paid,
+                (o.total_price - COALESCE(payments.total_paid, 0)) as remaining_balance,
+                latest_payment.payment_type,
+                latest_payment.reference_number,
+                latest_payment.payment_date as latest_payment_date,
+                latest_payment.receipt_filename,
+                latest_payment.id as latest_payment_id
             FROM orders o
             LEFT JOIN customer_information ci ON o.customer_id = ci.cusID
             LEFT JOIN accounts acc ON ci.account_id = acc.Id
             LEFT JOIN accounts agent ON o.sales_agent_id = agent.Id
             LEFT JOIN vehicles v ON o.vehicle_id = v.id
+            LEFT JOIN (
+                SELECT order_id, COALESCE(SUM(amount_paid), 0) as total_paid
+                FROM payment_history
+                WHERE status = 'Confirmed'
+                GROUP BY order_id
+            ) payments ON o.order_id = payments.order_id
+            LEFT JOIN (
+                SELECT ph.*
+                FROM payment_history ph
+                INNER JOIN (
+                    SELECT order_id, MAX(id) as max_id
+                    FROM payment_history
+                    WHERE status = 'Confirmed'
+                    GROUP BY order_id
+                ) latest ON ph.order_id = latest.order_id AND ph.id = latest.max_id
+            ) latest_payment ON o.order_id = latest_payment.order_id
             $whereSql
             ORDER BY o.created_at DESC
             LIMIT ? OFFSET ?";
@@ -170,7 +203,14 @@ function getTransactions()
             'agent_name' => $r['agent_name'] ?? '',
             'date_completed' => $r['actual_delivery_date'] ?: $r['created_at'],
             'payment_method' => $r['payment_method'] ?? '',
-            'order_status' => $r['order_status'] ?? ''
+            'order_status' => $r['order_status'] ?? '',
+            'total_paid' => (float)($r['total_paid'] ?? 0),
+            'remaining_balance' => (float)($r['remaining_balance'] ?? 0),
+            'latest_payment_type' => $r['payment_type'] ?? '',
+            'latest_payment_reference' => $r['reference_number'] ?? '',
+            'latest_payment_date' => $r['latest_payment_date'] ?? '',
+            'receipt_filename' => $r['receipt_filename'] ?? '',
+            'latest_payment_id' => (int)($r['latest_payment_id'] ?? 0)
         ];
     }, $rows ?: []);
 
@@ -187,40 +227,53 @@ function getTransactions()
 
 function getStats()
 {
-    global $pdo;
+    $pdo = $GLOBALS['pdo'];
 
     $status = trim(strtolower($_POST['status'] ?? $_GET['status'] ?? 'completed'));
 
-    $where = '';
+    $where = [];
+    $params = [];
+    
+    // Build base join for payment calculation
+    $paymentJoin = "LEFT JOIN (
+        SELECT order_id, COALESCE(SUM(amount_paid), 0) as total_paid
+        FROM payment_history
+        WHERE status = 'Confirmed'
+        GROUP BY order_id
+    ) payments ON o.order_id = payments.order_id";
+
     if ($status === 'completed') {
-        $where = "WHERE o.order_status IN ('completed','delivered','paid','Complete','Completed')";
+        $where[] = "(o.total_price - COALESCE(payments.total_paid, 0)) = 0";
     } elseif ($status === 'pending') {
-        $where = "WHERE o.order_status IN ('pending','Processing','processing','Pending')";
+        $where[] = "(o.total_price - COALESCE(payments.total_paid, 0)) > 0";
     }
 
     // Sales Agent restriction
     $role = $_SESSION['user_role'] ?? '';
-    $params = [];
     if ($role === 'Sales Agent') {
-        $where = $where ? ($where . ' AND o.sales_agent_id = ?') : 'WHERE o.sales_agent_id = ?';
+        $where[] = 'o.sales_agent_id = ?';
         $params[] = $_SESSION['user_id'];
     }
 
+    $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+
     // Total transactions
-    $totalSql = "SELECT COUNT(*) AS cnt FROM orders o $where";
+    $totalSql = "SELECT COUNT(*) AS cnt FROM orders o $paymentJoin $whereSql";
     $stmt = $pdo->prepare($totalSql);
     $stmt->execute($params);
     $total = (int)($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
 
     // This month count
-    $monthFilter = "DATE_FORMAT(o.created_at,'%Y-%m') = DATE_FORMAT(CURRENT_DATE(),'%Y-%m')";
-    $monthSql = "SELECT COUNT(*) AS cnt FROM orders o " . ($where ? ($where . ' AND ' . $monthFilter) : ('WHERE ' . $monthFilter));
+    $whereMonth = $where;
+    $whereMonth[] = "DATE_FORMAT(o.created_at,'%Y-%m') = DATE_FORMAT(CURRENT_DATE(),'%Y-%m')";
+    $whereSqlMonth = 'WHERE ' . implode(' AND ', $whereMonth);
+    $monthSql = "SELECT COUNT(*) AS cnt FROM orders o $paymentJoin $whereSqlMonth";
     $stmt = $pdo->prepare($monthSql);
     $stmt->execute($params);
     $month = (int)($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0);
 
     // Total sales and avg
-    $sumSql = "SELECT COALESCE(SUM(o.total_price),0) AS total_sales, COALESCE(AVG(o.total_price),0) AS avg_sale FROM orders o $where";
+    $sumSql = "SELECT COALESCE(SUM(o.total_price),0) AS total_sales, COALESCE(AVG(o.total_price),0) AS avg_sale FROM orders o $paymentJoin $whereSql";
     $stmt = $pdo->prepare($sumSql);
     $stmt->execute($params);
     $sum = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -238,7 +291,7 @@ function getStats()
 
 function getTransactionDetails()
 {
-    global $pdo;
+    $pdo = $GLOBALS['pdo'];
 
     $order_id = (int)($_POST['order_id'] ?? $_GET['order_id'] ?? 0);
     if ($order_id <= 0) {
@@ -281,7 +334,7 @@ function getTransactionDetails()
 
 function getFilters()
 {
-    global $pdo;
+    $pdo = $GLOBALS['pdo'];
     // Agents (restrict for Sales Agent role)
     $agents = [];
     if (($_SESSION['user_role'] ?? '') === 'Sales Agent') {
@@ -315,7 +368,7 @@ function getFilters()
 
 function exportTransactions()
 {
-    global $pdo;
+    $pdo = $GLOBALS['pdo'];
 
     // Collect same filters as getTransactions
     $status = trim(strtolower($_POST['status'] ?? $_GET['status'] ?? ''));
@@ -392,5 +445,105 @@ function exportTransactions()
         fputcsv($out, ['No data']);
     }
     fclose($out);
+    exit;
+}
+
+function getAllReceipts()
+{
+    $pdo = $GLOBALS['pdo'];
+
+    $order_id = (int)($_POST['order_id'] ?? $_GET['order_id'] ?? 0);
+    if ($order_id <= 0) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'order_id is required']);
+        return;
+    }
+
+    $sql = "SELECT 
+                ph.id,
+                ph.payment_number,
+                ph.payment_date,
+                ph.amount_paid,
+                ph.payment_type,
+                ph.reference_number,
+                ph.receipt_filename,
+                ph.status
+            FROM payment_history ph
+            WHERE ph.order_id = ? AND ph.status = 'Confirmed'
+            ORDER BY ph.payment_date DESC";
+
+    $params = [$order_id];
+    
+    // If Sales Agent, ensure the order belongs to them
+    if (($_SESSION['user_role'] ?? '') === 'Sales Agent') {
+        $checkSql = "SELECT sales_agent_id FROM orders WHERE order_id = ?";
+        $checkStmt = $pdo->prepare($checkSql);
+        $checkStmt->execute([$order_id]);
+        $agentId = $checkStmt->fetchColumn();
+        if ($agentId != $_SESSION['user_id']) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+            return;
+        }
+    }
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $receipts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode(['success' => true, 'data' => $receipts ?: []]);
+}
+
+function getReceipt()
+{
+    $pdo = $GLOBALS['pdo'];
+
+    $payment_id = (int)($_GET['payment_id'] ?? 0);
+    if ($payment_id <= 0) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'payment_id is required']);
+        return;
+    }
+
+    $sql = "SELECT 
+                ph.receipt_image,
+                ph.receipt_filename
+            FROM payment_history ph
+            WHERE ph.id = ?";
+
+    $params = [$payment_id];
+    
+    // If Sales Agent, ensure the payment belongs to their order
+    if (($_SESSION['user_role'] ?? '') === 'Sales Agent') {
+        $sql .= " AND EXISTS (SELECT 1 FROM orders o WHERE o.order_id = ph.order_id AND o.sales_agent_id = ?)";
+        $params[] = $_SESSION['user_id'];
+    }
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $receipt = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$receipt || !$receipt['receipt_image']) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'error' => 'Receipt not found']);
+        return;
+    }
+
+    // Output image directly
+    header_remove('Content-Type');
+    $filename = $receipt['receipt_filename'] ?: 'receipt.jpg';
+    $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    $mimeTypes = [
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
+        'gif' => 'image/gif',
+        'pdf' => 'application/pdf'
+    ];
+    $mime = $mimeTypes[$ext] ?? 'application/octet-stream';
+    
+    header('Content-Type: ' . $mime);
+    header('Content-Disposition: inline; filename="' . $filename . '"');
+    echo $receipt['receipt_image'];
     exit;
 }
