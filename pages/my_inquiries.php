@@ -257,7 +257,7 @@ try {
     error_log("Database error fetching loan applications: " . $e->getMessage());
 }
 
-// Fetch ALL test drive requests (no account filter) with explicit fields and aliases
+// Fetch customer's test drive requests with explicit fields and aliases
 try {
     // Prefer $pdo from includes/init.php; fallback to $connect
     $dbh = isset($GLOBALS['pdo']) && $GLOBALS['pdo'] instanceof PDO ? $GLOBALS['pdo'] : (isset($connect) ? $connect : null);
@@ -281,27 +281,28 @@ try {
             tdr.notes,
             v.model_name AS vehicle_model,
             v.variant AS vehicle_variant,
-            v.image_url AS vehicle_image
+            v.main_image AS vehicle_image
         FROM test_drive_requests tdr
         LEFT JOIN vehicles v ON tdr.vehicle_id = v.id
+        WHERE tdr.account_id = ?
         ORDER BY tdr.requested_at DESC
     ";
     $stmt_test_drives = $dbh->prepare($sql_tdr);
-    $stmt_test_drives->execute();
+    $stmt_test_drives->execute([$_SESSION['user_id']]);
     $test_drives = $stmt_test_drives->fetchAll(PDO::FETCH_ASSOC);
 
     // Log the number of test drives found
-    error_log("Found " . count($test_drives) . " total test drives in the system");
+    error_log("Found " . count($test_drives) . " test drives for user " . $_SESSION['user_id']);
     error_log("Test drives data (trimmed): " . print_r(array_map(function($td){ 
         unset($td['notes']); 
         return $td; 
     }, $test_drives), true));
     // Additional diagnostic: total count directly from table using the same handle
     try {
-        $stmt_cnt = $dbh->prepare("SELECT COUNT(*) FROM test_drive_requests");
-        $stmt_cnt->execute();
+        $stmt_cnt = $dbh->prepare("SELECT COUNT(*) FROM test_drive_requests WHERE account_id = ?");
+        $stmt_cnt->execute([$_SESSION['user_id']]);
         $td_total_count = (int)$stmt_cnt->fetchColumn();
-        error_log("Diagnostic: test_drive_requests table COUNT(*) = " . $td_total_count);
+        error_log("Diagnostic: test_drive_requests COUNT for user " . $_SESSION['user_id'] . " = " . $td_total_count);
     } catch (Exception $ie) {
         error_log("Diagnostic COUNT failed: " . $ie->getMessage());
         $td_total_count = null;
