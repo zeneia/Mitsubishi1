@@ -283,41 +283,6 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
             font-weight: 500;
         }
 
-        /* View Toggle */
-        .view-toggle {
-            display: flex;
-            background: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            padding: 0.25rem;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-color);
-        }
-
-        .toggle-btn {
-            background: transparent;
-            color: var(--text-secondary);
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .toggle-btn:hover {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-
-        .toggle-btn.active {
-            background: var(--primary-color);
-            color: white;
-            box-shadow: var(--shadow-md);
-        }
 
         /* Viewer Container */
         .viewer-container {
@@ -400,73 +365,115 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
         /* Modern Control Panel */
         .controls-panel {
             position: absolute;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--bg-primary);
-            backdrop-filter: blur(20px);
-            border-radius: var(--radius-xl);
-            padding: 1.5rem;
+            bottom: 1.5rem;
+            left: 1.5rem;
+            right: 1.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 1.25rem;
+            padding: 1rem 1.5rem;
             display: flex;
-            gap: 2rem;
+            gap: 0.5rem;
             align-items: center;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-xl);
+            justify-content: space-between;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 
+                        0 2px 8px rgba(0, 0, 0, 0.04),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.9);
             z-index: 20;
+            overflow: visible;
         }
 
         .control-group {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.375rem;
+            padding: 0 0.5rem;
+            position: relative;
+            overflow: visible;
+        }
+        
+        .control-group:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: -0.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 60%;
+            background: linear-gradient(to bottom, 
+                transparent, 
+                rgba(0, 0, 0, 0.1) 20%, 
+                rgba(0, 0, 0, 0.1) 80%, 
+                transparent);
+        }
+        
+        .control-group:first-child {
+            padding-left: 0;
+        }
+        
+        .control-group:last-child {
+            padding: 0;
         }
 
         .control-label {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            white-space: nowrap;
+            display: none;
         }
 
         .control-btn,
         .rotation-btn {
-            background: var(--bg-secondary);
+            background: rgba(248, 249, 250, 0.8);
             color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            padding: 0.75rem 1rem;
-            border-radius: var(--radius-md);
+            border: none;
+            padding: 0.625rem 1rem;
+            border-radius: 0.625rem;
             cursor: pointer;
-            font-size: 0.875rem;
+            font-size: 0.8125rem;
             font-weight: 500;
-            transition: var(--transition);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04),
+                        0 1px 2px rgba(0, 0, 0, 0.06);
+            position: relative;
+        }
+        
+        .control-btn i,
+        .rotation-btn i {
+            font-size: 0.875rem;
         }
 
         .control-btn:hover,
         .rotation-btn:hover {
             background: var(--primary-color);
             color: white;
-            border-color: var(--primary-color);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(230, 0, 18, 0.2),
+                        0 2px 4px rgba(230, 0, 18, 0.15);
+        }
+        
+        .control-btn:active,
+        .rotation-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 4px rgba(230, 0, 18, 0.15);
         }
 
         .rotation-btn {
-            padding: 0.75rem;
+            padding: 0.625rem;
             border-radius: 50%;
-            width: 44px;
-            height: 44px;
+            width: 2.25rem;
+            height: 2.25rem;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 0;
         }
 
         .rotation-controls {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.375rem;
         }
 
         /* Color picker */
@@ -474,35 +481,52 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
             display: flex;
             gap: 0.5rem;
             align-items: center;
-            flex-wrap: wrap;
-            max-width: 420px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: visible;
+            flex: 1;
+            max-width: none;
+            padding: 0.5rem 0.25rem;
+            margin: 0 -0.25rem;
+            scrollbar-width: none;
+        }
+        
+        .color-picker::-webkit-scrollbar {
+            display: none;
         }
 
         .color-swatch {
-            width: 44px;
-            height: 44px;
+            width: 2.25rem;
+            height: 2.25rem;
             border-radius: 50%;
-            border: 3px solid var(--border-color);
+            border: 2px solid rgba(255, 255, 255, 0.9);
             cursor: pointer;
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08),
+                        0 1px 3px rgba(0, 0, 0, 0.1),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.3);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             background: #f5f5f5;
             position: relative;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .color-swatch:hover { 
-            transform: translateY(-2px) scale(1.05); 
-            box-shadow: var(--shadow-md); 
-            border-color: var(--text-secondary);
+            transform: translateY(-2px) scale(1.08); 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12),
+                        0 2px 4px rgba(0, 0, 0, 0.08); 
+            border-color: rgba(255, 255, 255, 1);
         }
         
         .color-swatch.active { 
-            border-color: var(--primary-color); 
-            box-shadow: 0 0 0 3px rgba(230,0,18,0.2);
+            border-color: var(--primary-color);
+            border-width: 3px;
+            box-shadow: 0 0 0 3px rgba(230, 0, 18, 0.15),
+                        0 4px 12px rgba(0, 0, 0, 0.12),
+                        0 2px 4px rgba(0, 0, 0, 0.08);
             transform: scale(1.1);
         }
         
@@ -513,68 +537,13 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
             left: 50%;
             transform: translate(-50%, -50%);
             color: var(--primary-color);
-            font-size: 1.25rem;
+            font-size: 1rem;
             font-weight: bold;
-            text-shadow: 0 0 2px white, 0 0 4px white;
+            text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9),
+                        0 0 8px rgba(255, 255, 255, 0.8);
+            filter: drop-shadow(0 0 2px white);
         }
 
-        /* Info Panel */
-        .info-panel {
-            position: absolute;
-            top: 2rem;
-            right: 2rem;
-            background: var(--bg-primary);
-            backdrop-filter: blur(20px);
-            border-radius: var(--radius-lg);
-            padding: 1.5rem;
-            max-width: 320px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .info-panel h3 {
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .info-panel p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-        }
-
-        .feature-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .feature-list li {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            transition: var(--transition);
-        }
-
-        .feature-list li:last-child {
-            border-bottom: none;
-        }
-
-        .feature-list li:hover {
-            color: var(--primary-color);
-            padding-left: 0.5rem;
-        }
-
-        .feature-list li i {
-            color: var(--primary-color);
-            width: 16px;
-        }
 
         /* Loading Screen */
         .loading-screen {
@@ -672,30 +641,52 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
             }
 
             .controls-panel {
-                flex-direction: column;
-                gap: 1rem;
-                padding: 1rem;
-                border-radius: var(--radius-lg);
+                flex-wrap: wrap;
+                gap: 0.75rem;
+                padding: 0.875rem 1rem;
                 bottom: 1rem;
                 left: 1rem;
                 right: 1rem;
-                transform: none;
+                border-radius: 1rem;
             }
 
             .control-group {
+                flex-wrap: wrap;
                 justify-content: center;
-                width: 100%;
+                padding: 0 0.5rem;
             }
-
-            .info-panel {
-                position: static;
-                margin-top: 1rem;
-                max-width: none;
+            
+            .control-group::after {
+                display: none;
+            }
+            
+            .color-picker {
+                order: -1;
+                width: 100%;
+                justify-content: center;
+                padding-bottom: 0.75rem;
+                margin-bottom: 0.5rem;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            }
+            
+            .control-btn {
+                padding: 0.5rem 0.875rem;
+                font-size: 0.75rem;
+            }
+            
+            .rotation-btn {
+                width: 2.5rem;
+                height: 2.5rem;
+            }
+            
+            .color-swatch {
+                width: 2.5rem;
+                height: 2.5rem;
             }
 
             .carousel-controls {
-                width: 48px;
-                height: 48px;
+                width: 3rem;
+                height: 3rem;
             }
 
             .carousel-prev {
@@ -712,13 +703,24 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
                 height: 60vh;
             }
 
-            .info-panel {
-                max-width: 280px;
-            }
-
             .controls-panel {
-                gap: 1.5rem;
-                padding: 1.25rem;
+                gap: 0.875rem;
+                padding: 0.875rem 1.25rem;
+            }
+            
+            .control-btn {
+                font-size: 0.75rem;
+                padding: 0.5625rem 0.875rem;
+            }
+            
+            .rotation-btn {
+                width: 2rem;
+                height: 2rem;
+            }
+            
+            .color-swatch {
+                width: 2rem;
+                height: 2rem;
             }
         }
 
@@ -795,12 +797,6 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
                         <div class="vehicle-info">
                             <h1 class="vehicle-title"><?php echo htmlspecialchars($vehicle['model_name']); ?> 3D View</h1>
                             <p class="vehicle-subtitle">Interactive 360° Vehicle Viewing Experience</p>
-                        </div>
-                        <div class="view-toggle">
-                            <button class="toggle-btn active" data-view="exterior">
-                                <i class="fas fa-car"></i>
-                                <span>Exterior</span>
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -885,16 +881,6 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
                         </div>
                     </div>
 
-                    <div class="info-panel">
-                        <h3 id="viewTitle">Exterior View</h3>
-                        <p id="viewDescription">Explore the exterior design and features of the <?php echo htmlspecialchars($vehicle['model_name']); ?>.</p>
-                        <ul class="feature-list" id="featureList">
-                            <li><i class="fas fa-car"></i> Aerodynamic Design</li>
-                            <li><i class="fas fa-lightbulb"></i> LED Headlights</li>
-                            <li><i class="fas fa-shield-alt"></i> Safety Features</li>
-                            <li><i class="fas fa-cog"></i> Alloy Wheels</li>
-                        </ul>
-                    </div>
                 </div>
             </div>
         </div>
@@ -1552,37 +1538,6 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
             }
         }
 
-        // View toggle functionality
-        const viewBtns = document.querySelectorAll('.toggle-btn');
-        viewBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const view = this.dataset.view;
-                viewBtns.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-
-                // Update info panel
-                const viewTitle = document.getElementById('viewTitle');
-                const viewDescription = document.getElementById('viewDescription');
-                const featureList = document.getElementById('featureList');
-
-                if (view === 'exterior') {
-                    viewTitle.textContent = 'Exterior View';
-                    viewDescription.textContent = 'Explore the exterior design and features of the vehicle.';
-                    featureList.innerHTML = `
-                        <li><i class="fas fa-car"></i> Aerodynamic Design</li>
-                        <li><i class="fas fa-lightbulb"></i> LED Headlights</li>
-                        <li><i class="fas fa-shield-alt"></i> Safety Features</li>
-                        <li><i class="fas fa-cog"></i> Alloy Wheels</li>
-                    `;
-                    
-                    // Set exterior camera view for model viewer
-                    const modelViewer = document.getElementById('model-viewer');
-                    if (modelViewer && modelViewer.style.display !== 'none') {
-                        modelViewer.cameraOrbit = '0deg 75deg 3.75m';
-                    }
-                }
-            });
-        });
 
     </script>
 </body>
