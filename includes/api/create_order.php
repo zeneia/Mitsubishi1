@@ -28,18 +28,6 @@ try {
         throw new Exception('Invalid JSON input');
     }
     
-    // Validate required fields
-    $requiredFields = [
-        'client_type', 'vehicle_model', 'vehicle_variant', 'vehicle_color',
-        'model_year', 'base_price', 'total_price', 'payment_method', 'order_status'
-    ];
-    
-    foreach ($requiredFields as $field) {
-        if (!isset($input[$field]) || empty($input[$field])) {
-            throw new Exception("Missing required field: $field");
-        }
-    }
-    
     // Get sales agent ID from session
     if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'SalesAgent') {
         throw new Exception('Unauthorized: Invalid sales agent session');
@@ -51,30 +39,113 @@ try {
     $order_id = null;
     $order_number = null;
     
-    // Handle different client types
+    // Start transaction for ALL order types to ensure atomicity
+    $connect->beginTransaction();
+    
+    // Perform all validation BEFORE any database operations
+    
+    // Validate client type
+    if (empty($input['client_type'])) {
+        throw new Exception('Client type is required');
+    }
+    
+    // Client-specific validation
     if ($input['client_type'] === 'handled') {
-        // For handled clients, no transaction needed - just verify customer exists
-        if (!isset($input['customer_id']) || empty($input['customer_id'])) {
+        // Validate handled client data
+        if (empty($input['customer_id'])) {
             throw new Exception('Customer ID is required for handled clients');
         }
         
         $customer_id = $input['customer_id'];
         
-        // Verify customer exists
-        $stmt = $connect->prepare("SELECT cusID, account_id FROM customer_information WHERE cusID = ?");
+        // Verify customer exists and is approved
+        $stmt = $connect->prepare("SELECT ci.cusID, ci.Status, a.Email, ci.mobile_number, ci.account_id 
+                                 FROM customer_information ci 
+                                 LEFT JOIN accounts a ON ci.account_id = a.Id 
+                                 WHERE ci.cusID = ? AND ci.Status = 'Approved'");
         $stmt->execute([$customer_id]);
         $customer = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if (!$customer) {
-            throw new Exception('Customer not found');
+            throw new Exception('Customer not found or not approved');
         }
         
         $account_id = $customer['account_id'];
         
+    } else if ($input['client_type'] === 'walkin') {
+        // Validate walk-in client data
+        $walkinRequired = ['manual_firstname', 'manual_lastname', 'manual_mobile', 'manual_birthday'];
+        foreach ($walkinRequired as $field) {
+            if (empty($input[$field])) {
+                $field_name = ucwords(str_replace('_', ' ', str_replace('manual_', '', $field)));
+                throw new Exception("$field_name is required for walk-in clients");
+            }
+        }
+        
+        // Check for duplicate email in accounts table
+        $email = trim($input['manual_email'] ?? '');
+        if (!empty($email)) {
+            $stmt = $connect->prepare("SELECT Id FROM accounts WHERE Email = ?");
+            $stmt->execute([$email]);
+            if ($stmt->fetch(PDO::FETCH_ASSOC)) {
+                throw new Exception('Email address is already registered');
+            }
+        }
+        
+        // Check for duplicate mobile number in customer_information table
+        $mobile = trim($input['manual_mobile'] ?? '');
+        if (!empty($mobile)) {
+            $stmt = $connect->prepare("SELECT cusID FROM customer_information WHERE mobile_number = ?");
+            $stmt->execute([$mobile]);
+            if ($stmt->fetch(PDO::FETCH_ASSOC)) {
+                throw new Exception('Mobile number is already registered');
+            }
+        }
+    } else {
+        throw new Exception('Invalid client type');
+    }
+    
+    // Validate required vehicle and order fields
+    $requiredFields = [
+        'vehicle_model', 'vehicle_variant', 'vehicle_color',
+        'model_year', 'base_price', 'total_price', 'payment_method', 'order_status'
+    ];
+    
+    foreach ($requiredFields as $field) {
+        if (!isset($input[$field]) || empty($input[$field])) {
+            throw new Exception("Missing required field: $field");
+        }
+    }
+    
+    // Check for duplicate orders (same customer, same vehicle within short timeframe)
+    $customer_id_for_check = $customer_id ?? 0;
+    $vehicle_model = $input['vehicle_model'];
+    $vehicle_variant = $input['vehicle_variant'];
+    
+    $stmt = $connect->prepare("
+        SELECT order_id, order_number, created_at 
+        FROM orders 
+        WHERE customer_id = ? 
+        AND vehicle_model = ? 
+        AND vehicle_variant = ? 
+        AND created_at > DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+        AND order_status != 'cancelled'
+    ");
+    $stmt->execute([$customer_id_for_check, $vehicle_model, $vehicle_variant]);
+    $recent_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    if (!empty($recent_orders)) {
+        $order = $recent_orders[0];
+        throw new Exception('A recent order for the same customer and vehicle was already created. Order #' . $order['order_number'] . ' was placed recently. Please wait a few minutes or check the existing order.');
+    }
+    
+    // Handle different client types - validation already done above
+    if ($input['client_type'] === 'handled') {
+        // For handled clients, customer_id and account_id already validated above
         // Generate order number if not provided
         $order_number = $input['order_number'] ?? generateOrderNumber();
         
-        // Create the order directly (no transaction needed for handled clients)
+        // Create the order (transaction is already active)
         $stmt = $connect->prepare("
             INSERT INTO orders (
                 order_number, customer_id, sales_agent_id, vehicle_id, client_type,
@@ -129,18 +200,7 @@ try {
         }
         
     } else if ($input['client_type'] === 'walkin') {
-        // For walk-in clients, use transaction for multiple table inserts
-        
-        // Validate walk-in required fields
-        $walkinRequired = ['manual_firstname', 'manual_lastname', 'manual_mobile', 'manual_birthday'];
-        foreach ($walkinRequired as $field) {
-            if (!isset($input[$field]) || empty($input[$field])) {
-                throw new Exception("Missing required field for walk-in: $field");
-            }
-        }
-        
-        // Start transaction for walk-in clients only
-        $connect->beginTransaction();
+        // For walk-in clients, transaction is already active from above
         
         // Generate unique username and email for walk-in customer
         $timestamp = time();
@@ -261,12 +321,12 @@ try {
             );
         }
         
-        // Commit transaction for walk-in clients
-        $connect->commit();
-        
-    } else {
+        } else {
         throw new Exception('Invalid client type');
     }
+
+    // Commit transaction for all order types
+    $connect->commit();
 
     // --- Notification Logic ---
     // Notify the customer (if account_id is available)
@@ -291,7 +351,7 @@ try {
     ]);
     
 } catch (Exception $e) {
-    // Rollback transaction on error (only for walk-in clients)
+    // Rollback transaction on error for all order types
     if ($connect->inTransaction()) {
         $connect->rollback();
     }

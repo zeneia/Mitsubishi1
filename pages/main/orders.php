@@ -1005,7 +1005,7 @@ try {
     }
 
     // Handle form submission - now submits to backend
-    function handleOrderSubmit() {
+    async function handleOrderSubmit() {
       const form = document.getElementById('orderForm');
       const formData = new FormData(form);
 
@@ -1013,6 +1013,62 @@ try {
       const orderData = {};
       for (let [key, value] of formData.entries()) {
         orderData[key] = value;
+      }
+
+      // Pre-validate before any data processing
+      Swal.fire({
+        title: 'Validating...',
+        text: 'Please wait while we validate your order information',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      try {
+        // Call validation API first
+        const validationResponse = await fetch('../../includes/api/validate_order.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            validation_type: 'pre_submit',
+            client_type: orderData.client_type,
+            customer_id: orderData.customer_id,
+            manual_email: orderData.manual_email,
+            manual_mobile: orderData.manual_mobile,
+            manual_firstname: orderData.manual_firstname,
+            manual_lastname: orderData.manual_lastname,
+            manual_birthday: orderData.manual_birthday,
+            vehicle_model: orderData.vehicle_model,
+            vehicle_variant: orderData.vehicle_variant
+          })
+        });
+
+        const validationResult = await validationResponse.json();
+
+        if (!validationResult.success) {
+          Swal.fire({
+            title: 'Validation Error',
+            html: validationResult.data.errors.join('<br>'),
+            icon: 'error',
+            confirmButtonColor: '#d60000'
+          });
+          return;
+        }
+
+      } catch (error) {
+        console.error('Validation error:', error);
+        Swal.fire({
+          title: 'Validation Error',
+          text: 'Unable to validate order. Please try again.',
+          icon: 'error',
+          confirmButtonColor: '#d60000'
+        });
+        return;
       }
 
       // Validate client type
