@@ -374,9 +374,9 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
             border-radius: 1.25rem;
             padding: 1rem 1.5rem;
             display: flex;
-            gap: 0.5rem;
+            gap: 0.625rem;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             border: 1px solid rgba(255, 255, 255, 0.8);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 
                         0 2px 8px rgba(0, 0, 0, 0.04),
@@ -415,6 +415,7 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
         
         .control-group:last-child {
             padding: 0;
+            margin-left: auto;
         }
 
         .control-label {
