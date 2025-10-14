@@ -1659,7 +1659,7 @@ if ($user_role === 'Sales Agent') {
     async function viewDetails(id) {
       showLoading(true);
       try {
-        const response = await fetch(`../../api/vehicles.php?id=${id}`);
+        const response = await fetch(`../../api/vehicles.php?id=${id}&include_images=1`);
         const data = await response.json();
 
         if (data.success && data.data) {
@@ -1688,22 +1688,40 @@ if ($user_role === 'Sales Agent') {
 mainImageContainer.innerHTML = '';
 if (vehicle.main_image) {
   const img = document.createElement('img');
-  // Detect if main_image is base64 or a file path
+  // Handle different image data formats
   if ((/^[A-Za-z0-9+/=]+$/.test(vehicle.main_image) && vehicle.main_image.length > 100) || vehicle.main_image.startsWith('data:image')) {
-    // Base64 or already a data URL
+    // Base64 or data URL
     img.src = vehicle.main_image.startsWith('data:image') ? vehicle.main_image : 'data:image/jpeg;base64,' + vehicle.main_image;
   } else {
-    // Assume it's a file path
-    const webPath = vehicle.main_image.replace(/\\/g, '/').replace(/^.*\/htdocs\//, '/');
-    img.src = webPath;
+    // File path - convert to web-accessible URL
+    let imagePath = vehicle.main_image.replace(/\\/g, '/');
+    
+    // Convert various absolute path formats to relative web paths
+    if (imagePath.includes('/htdocs/')) {
+      imagePath = imagePath.replace(/^.*\/htdocs\//, '/');
+    } else if (imagePath.startsWith('/xampp/htdocs/')) {
+      imagePath = imagePath.replace(/^\/xampp\/htdocs\//, '/');
+    } else if (imagePath.startsWith('/var/www/html/')) {
+      imagePath = imagePath.replace(/^\/var\/www\/html\//, '/');
+    } else if (imagePath.includes('/var/www/html/')) {
+      imagePath = imagePath.replace(/^.*\/var\/www\/html\//, '/');
+    }
+    
+    // Ensure path starts with forward slash if it doesn't already
+    if (!imagePath.startsWith('/')) {
+      imagePath = '/' + imagePath;
+    }
+    
+    img.src = imagePath;
   }
-  img.alt = `${vehicle.model_name} Main Image`;
+  img.alt = `${vehicle.model_name || 'Vehicle'} Main Image`;
   img.onerror = function() {
-    this.parentNode.innerHTML = 'Image not found';
+    console.error('Main image failed to load:', img.src);
+    this.parentNode.innerHTML = '<p style="color: #666; padding: 20px; text-align: center;">Main image not available</p>';
   };
   mainImageContainer.appendChild(img);
 } else {
-  mainImageContainer.textContent = 'No main image available.';
+  mainImageContainer.innerHTML = '<p style="color: #666; padding: 20px; text-align: center;">No main image available.</p>';
 }
 
           const additionalImagesContainer = document.getElementById('viewDetailAdditionalImages');
@@ -1712,14 +1730,33 @@ const additionalImagesSection = document.getElementById('viewDetailAdditionalIma
 if (vehicle.additional_images && Array.isArray(vehicle.additional_images) && vehicle.additional_images.length > 0) {
   vehicle.additional_images.forEach(imageData => {
     const img = document.createElement('img');
-    // Detect if imageData is base64 or a file path
+    // Handle different image data formats
     if ((/^[A-Za-z0-9+/=]+$/.test(imageData) && imageData.length > 100) || imageData.startsWith('data:image')) {
       img.src = imageData.startsWith('data:image') ? imageData : 'data:image/jpeg;base64,' + imageData;
     } else {
-      const webPath = imageData.replace(/\\/g, '/').replace(/^.*\/htdocs/, '');
-      img.src = webPath;
+      // File path - convert to web-accessible URL
+      let imagePath = imageData.replace(/\\/g, '/');
+      
+      // Convert various absolute path formats to relative web paths
+      if (imagePath.includes('/htdocs/')) {
+        imagePath = imagePath.replace(/^.*\/htdocs\//, '/');
+      } else if (imagePath.startsWith('/xampp/htdocs/')) {
+        imagePath = imagePath.replace(/^\/xampp\/htdocs\//, '/');
+      } else if (imagePath.startsWith('/var/www/html/')) {
+        imagePath = imagePath.replace(/^\/var\/www\/html\//, '/');
+      } else if (imagePath.includes('/var/www/html/')) {
+        imagePath = imagePath.replace(/^.*\/var\/www\/html\//, '/');
+      }
+      
+      // Ensure path starts with forward slash if it doesn't already
+      if (!imagePath.startsWith('/')) {
+        imagePath = '/' + imagePath;
+      }
+      
+      img.src = imagePath;
     }
     img.onerror = function() {
+      console.error('Additional image failed to load:', this.src);
       this.style.display = 'none';
     };
     additionalImagesContainer.appendChild(img);

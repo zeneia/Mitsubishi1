@@ -402,13 +402,26 @@ function handleFileUpload($file, $uploadDir, $filePrefix) {
 
 function getVehicleById($pdo, $id) {
     try {
-        // Exclude LONGBLOB fields to prevent JSON encoding issues
-        $sql = "SELECT id, model_name, variant, year_model, category, engine_type, transmission, 
-                       fuel_type, seating_capacity, key_features, base_price, promotional_price,
-                       min_downpayment_percentage, financing_terms, color_options, popular_color,
-                       stock_quantity, min_stock_alert, availability_status, expected_delivery_time,
-                       created_at, updated_at
-                FROM vehicles WHERE id = ?";
+        // Check if images should be included
+        $includeImages = isset($_GET['include_images']) && $_GET['include_images'] === '1';
+        
+        if ($includeImages) {
+            // Include image fields when requested
+            $sql = "SELECT id, model_name, variant, year_model, category, engine_type, transmission, 
+                           fuel_type, seating_capacity, key_features, base_price, promotional_price,
+                           min_downpayment_percentage, financing_terms, color_options, popular_color,
+                           stock_quantity, min_stock_alert, availability_status, expected_delivery_time,
+                           main_image, additional_images, view_360_images, created_at, updated_at
+                    FROM vehicles WHERE id = ?";
+        } else {
+            // Exclude LONGBLOB fields to prevent JSON encoding issues (default behavior)
+            $sql = "SELECT id, model_name, variant, year_model, category, engine_type, transmission, 
+                           fuel_type, seating_capacity, key_features, base_price, promotional_price,
+                           min_downpayment_percentage, financing_terms, color_options, popular_color,
+                           stock_quantity, min_stock_alert, availability_status, expected_delivery_time,
+                           created_at, updated_at
+                    FROM vehicles WHERE id = ?";
+        }
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$id]);
         $vehicle = $stmt->fetch(PDO::FETCH_ASSOC);
