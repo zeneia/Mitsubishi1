@@ -469,6 +469,32 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
             gap: 0.5rem;
         }
 
+        /* Color picker */
+        .color-picker {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+            max-width: 420px;
+        }
+
+        .color-swatch {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f5f5;
+        }
+
+        .color-swatch:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .color-swatch.active { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(230,0,18,0.15); }
+
         /* Info Panel */
         .info-panel {
             position: absolute;
@@ -829,6 +855,11 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
                                 <span>Reset</span>
                             </button>
                         </div>
+
+                        <div class="control-group">
+                            <span class="control-label">Color:</span>
+                            <div id="colorPicker" class="color-picker" aria-label="Color options"></div>
+                        </div>
                     </div>
 
                     <div class="info-panel">
@@ -856,6 +887,12 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
         // Project base (e.g., /Mitsubishi) and origin for robust, cross-env URLs
         const PROJECT_BASE = "<?php echo rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/'); ?>";
         const ORIGIN = window.location.origin;
+        let modelControlsBound = false;
+
+        // Color-related state
+        let colorOptions = [];
+        let colorModels = {}; // map: normalizedColor -> modelPath
+        let selectedColor = null;
 
         // Normalize any filesystem or partial web path to a full web URL under the project base
         function toProjectWebUrl(pathInput) {
@@ -886,7 +923,15 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
             try {
                 // Use vehicle data from PHP instead of making API call
                 const view360Data = <?php echo json_encode($vehicle['view_360_images'] ?? ''); ?>;
-                
+                const colorOptionsRaw = <?php echo json_encode($vehicle['color_options'] ?? ''); ?>;
+                colorOptions = Array.isArray(colorOptionsRaw)
+                    ? colorOptionsRaw
+                    : String(colorOptionsRaw || '')
+                        .split(',')
+                        .map(s => s.trim())
+                        .filter(Boolean);
+                const normalizedColors = colorOptions.map(c => normalizeColorKey(c));
+
                 if (view360Data) {
                     // Parse the view_360_images data (it might be JSON string or array)
                     let view360Files = [];
@@ -902,20 +947,33 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
                     } else {
                         view360Files = [view360Data];
                     }
-                    
-                    // Check if we have any 3D model files (GLB/GLTF)
-                    const modelFiles = view360Files.filter(filePath => 
-                        filePath && (filePath.toLowerCase().endsWith('.glb') || filePath.toLowerCase().endsWith('.gltf'))
+
+                    // Build color->model map if objects provided or infer by filename
+                    colorModels = buildColorModelMap(view360Files, normalizedColors);
+
+                    // Collect plain model files for non-mapped case
+                    const modelFiles = flattenToArray(view360Files).filter(filePath => 
+                        filePath && (String(filePath).toLowerCase().endsWith('.glb') || String(filePath).toLowerCase().endsWith('.gltf'))
                     );
-                    
+
+                    // Render color picker UI
+                    renderColorPicker();
+
+                    // Prefer a color with explicit model mapping
+                    const firstColorWithModel = normalizedColors.find(nc => colorModels[nc]);
+                    if (firstColorWithModel) {
+                        selectedColor = firstColorWithModel;
+                        setActiveColorUI(selectedColor);
+                        await loadModelFromPath(colorModels[selectedColor]);
+                        return;
+                    }
+
                     if (modelFiles.length > 0) {
-                        // Load the first 3D model file
-                        console.log('Loading 3D model:', modelFiles[0]);
                         await loadModelFromPath(modelFiles[0]);
                     } else {
                         // Check for image files
-                        const imageFiles = view360Files.filter(filePath => 
-                            filePath && filePath.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/)
+                        const imageFiles = flattenToArray(view360Files).filter(filePath => 
+                            filePath && String(filePath).toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/)
                         );
                         
                         if (imageFiles.length > 0) {
@@ -933,6 +991,105 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
                 console.error('Error initializing viewer:', error);
                 showFallbackMessage();
             }
+        }
+
+        function flattenToArray(val) {
+            if (Array.isArray(val)) return val;
+            if (val && typeof val === 'object') return Object.values(val);
+            return [val];
+        }
+
+        function normalizeColorKey(c) {
+            return String(c || '').trim().toLowerCase();
+        }
+
+        function buildColorModelMap(raw, normalizedColors) {
+            const map = {};
+            if (!raw) return map;
+            // Case 1: array of objects [{color, model}] or [{color, file}]
+            if (Array.isArray(raw)) {
+                raw.forEach(item => {
+                    if (item && typeof item === 'object') {
+                        const color = normalizeColorKey(item.color || item.colour || '');
+                        const model = item.model || item.file || item.src || item.path;
+                        if (color && model && /\.(glb|gltf)$/i.test(String(model))) {
+                            map[color] = model;
+                        }
+                    }
+                });
+                // If still empty, try infer by filename
+                if (Object.keys(map).length === 0) {
+                    const paths = raw.filter(x => typeof x === 'string');
+                    inferFromFilenames(paths, normalizedColors, map);
+                }
+                return map;
+            }
+            // Case 2: object keyed by color
+            if (raw && typeof raw === 'object') {
+                Object.keys(raw).forEach(k => {
+                    const color = normalizeColorKey(k);
+                    const model = raw[k];
+                    if (color && model && /\.(glb|gltf)$/i.test(String(model))) {
+                        map[color] = model;
+                    }
+                });
+                return map;
+            }
+            // Case 3: string or unknown -> no map
+            return map;
+        }
+
+        function inferFromFilenames(paths, normalizedColors, map) {
+            (paths || []).forEach(p => {
+                const lower = String(p).toLowerCase();
+                if (!/\.(glb|gltf)$/.test(lower)) return;
+                for (const c of normalizedColors) {
+                    if (c && lower.includes(c)) { map[c] = p; break; }
+                }
+            });
+        }
+
+        function renderColorPicker() {
+            const container = document.getElementById('colorPicker');
+            if (!container) return;
+            container.innerHTML = '';
+            if (!colorOptions || colorOptions.length === 0) return;
+            colorOptions.forEach(color => {
+                const key = normalizeColorKey(color);
+                const swatch = document.createElement('button');
+                swatch.type = 'button';
+                swatch.className = 'color-swatch';
+                swatch.title = color;
+                // Try to set CSS color safely; fall back to label if invalid
+                swatch.style.background = color;
+                swatch.dataset.colorKey = key;
+                swatch.addEventListener('click', () => selectColor(key));
+                container.appendChild(swatch);
+            });
+        }
+
+        async function selectColor(colorKey) {
+            selectedColor = colorKey;
+            setActiveColorUI(colorKey);
+            const model = colorModels[colorKey];
+            if (model) {
+                await loadModelFromPath(model);
+            } else {
+                // No model for this color, show images or fallback
+                if (images360 && images360.length > 0) {
+                    showImageCarouselFromPaths(images360);
+                } else {
+                    await setup360ImageCarousel();
+                }
+            }
+        }
+
+        function setActiveColorUI(colorKey) {
+            const container = document.getElementById('colorPicker');
+            if (!container) return;
+            Array.from(container.children).forEach(el => {
+                el.classList.toggle('active', el.dataset.colorKey === colorKey);
+            });
         }
 
         async function loadModelFromPath(modelPath) {
@@ -1102,6 +1259,8 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
         }
 
         function setupModelViewerControls(modelViewer) {
+            if (modelControlsBound) return; // prevent duplicate listeners
+            modelControlsBound = true;
             // Auto-rotate control
             document.getElementById('autoRotateBtn').addEventListener('click', function() {
                 isAutoRotating = !isAutoRotating;

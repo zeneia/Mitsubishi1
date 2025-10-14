@@ -1206,6 +1206,11 @@ if ($user_role === 'Sales Agent') {
             <label class="image-upload-label">360° View Images / 3D Models</label>
             <input type="file" class="file-input" id="view360Images" name="view_360_images[]" accept="image/*,.glb,.gltf" multiple>
             <div class="file-info">Max size: 50MB per file (supports images and 3D models)</div>
+
+            <label class="image-upload-label" style="margin-top:12px;">3D Models by Color</label>
+            <div id="colorModelList"></div>
+            <button type="button" class="btn btn-secondary" id="addColorModelBtn" style="margin-top:8px;">Add Color & Model</button>
+            <div class="file-info">Pair each color with its .glb/.gltf file.</div>
           </div>
         </div>
         <div class="modal-footer">
@@ -1356,7 +1361,32 @@ if ($user_role === 'Sales Agent') {
       statusFilter.addEventListener('change', filterVehicles);
       vehicleForm.addEventListener('submit', handleVehicleSubmit);
       updateStockForm.addEventListener('submit', handleUpdateStockSubmit); // Listener for new form
+
+      // Color-model add button
+      const addBtn = document.getElementById('addColorModelBtn');
+      if (addBtn) addBtn.addEventListener('click', addColorModelRow);
     });
+
+    function addColorModelRow(colorVal = '', fileRequired = false) {
+      const list = document.getElementById('colorModelList');
+      if (!list) return;
+      const row = document.createElement('div');
+      row.className = 'form-row';
+      row.style.alignItems = 'center';
+      row.style.gap = '10px';
+      row.innerHTML = `
+        <div class="form-group" style="flex:1 1 40%">
+          <input type="text" class="form-control" name="color_model_colors[]" placeholder="Color name (e.g., White)" value="${colorVal || ''}">
+        </div>
+        <div class="form-group" style="flex:1 1 50%">
+          <input type="file" class="file-input" name="color_model_files[]" accept=".glb,.gltf" ${fileRequired ? 'required' : ''}>
+        </div>
+        <div class="form-group" style="flex:0 0 auto">
+          <button type="button" class="btn btn-secondary" onclick="this.closest('div.form-row').remove()">Remove</button>
+        </div>
+      `;
+      list.appendChild(row);
+    }
     
     // Load vehicles from API
     async function loadVehicles() {
@@ -1772,6 +1802,16 @@ if (vehicle.additional_images && Array.isArray(vehicle.additional_images) && veh
       for (let i = 0; i < view360Images.length; i++) {
         if (view360Images[i].size > 50 * 1024 * 1024) {
           showToast(`360°/3D file ${i + 1} is too large. Maximum size is 50MB per file.`, 'error');
+          return;
+        }
+      }
+
+      // Check color-model files size (50MB each)
+      const colorModelFiles = vehicleForm.querySelectorAll('input[name="color_model_files[]"]');
+      for (let i = 0; i < colorModelFiles.length; i++) {
+        const f = colorModelFiles[i].files && colorModelFiles[i].files[0];
+        if (f && f.size > 50 * 1024 * 1024) {
+          showToast(`Color model file ${i + 1} is too large. Maximum size is 50MB per file.`, 'error');
           return;
         }
       }

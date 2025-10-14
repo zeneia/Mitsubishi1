@@ -461,6 +461,30 @@ function createVehicle($pdo) {
                 $additionalImages = json_encode(array_map('base64_encode', $images));
             }
         }
+        // Handle color-specific 3D models (optional)
+        $colorModelMap = [];
+        if (isset($_FILES['color_model_files']) && is_array($_FILES['color_model_files']['tmp_name'])) {
+            $colors = isset($_POST['color_model_colors']) && is_array($_POST['color_model_colors']) ? $_POST['color_model_colors'] : [];
+            foreach ($_FILES['color_model_files']['tmp_name'] as $key => $tmpName) {
+                if ($_FILES['color_model_files']['error'][$key] === UPLOAD_ERR_OK) {
+                    $file = [
+                        'tmp_name' => $tmpName,
+                        'name' => $_FILES['color_model_files']['name'][$key],
+                        'type' => $_FILES['color_model_files']['type'][$key],
+                        'size' => $_FILES['color_model_files']['size'][$key]
+                    ];
+                    $color = isset($colors[$key]) ? trim($colors[$key]) : '';
+                    $prefix = 'vehicle_new_color_' . preg_replace('/\s+/', '_', strtolower($color ?: 'unknown')) . '_' . $key;
+                    $path = handleFileUpload($file, '../uploads/3d_models/', $prefix);
+                    if ($path) {
+                        $colorModelMap[] = ['color' => $color, 'model' => $path];
+                    }
+                }
+            }
+        }
+
+        $view360Json = !empty($colorModelMap) ? json_encode($colorModelMap) : null;
+
         $sql = "INSERT INTO vehicles (
             model_name, variant, year_model, category, engine_type, transmission, 
             fuel_type, seating_capacity, key_features, base_price, promotional_price,
@@ -490,7 +514,7 @@ function createVehicle($pdo) {
             $_POST['min_stock_alert'] ?? 5,
             $mainImage,
             $additionalImages,
-            null
+            $view360Json
         ]);
         if ($success) {
             echo json_encode(['success' => true, 'message' => 'Vehicle created successfully']);
@@ -595,6 +619,33 @@ function updateVehicle($pdo) {
                         }
                     }
                     if (!empty($view360ImagesPaths)) {
+                        $updateImages = true;
+                    }
+                }
+
+                // Handle color-specific 3D models mapping
+                if (isset($_FILES['color_model_files']) && is_array($_FILES['color_model_files']['tmp_name'])) {
+                    $colors = isset($_POST['color_model_colors']) && is_array($_POST['color_model_colors']) ? $_POST['color_model_colors'] : [];
+                    $colorModelMap = [];
+                    foreach ($_FILES['color_model_files']['tmp_name'] as $key => $tmpName) {
+                        if ($_FILES['color_model_files']['error'][$key] === UPLOAD_ERR_OK) {
+                            $file = [
+                                'tmp_name' => $tmpName,
+                                'name' => $_FILES['color_model_files']['name'][$key],
+                                'type' => $_FILES['color_model_files']['type'][$key],
+                                'size' => $_FILES['color_model_files']['size'][$key]
+                            ];
+                            $color = isset($colors[$key]) ? trim($colors[$key]) : '';
+                            $prefix = $vehicleId . '_color_update_' . preg_replace('/\s+/', '_', strtolower($color ?: 'unknown')) . '_' . $key;
+                            $path = handleFileUpload($file, '../uploads/3d_models/', $prefix);
+                            if ($path) {
+                                $colorModelMap[] = ['color' => $color, 'model' => $path];
+                            }
+                        }
+                    }
+                    if (!empty($colorModelMap)) {
+                        // Replace generic list with explicit color mapping
+                        $view360ImagesPaths = $colorModelMap;
                         $updateImages = true;
                     }
                 }
