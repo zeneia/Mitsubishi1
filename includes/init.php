@@ -55,3 +55,71 @@ function redirectWithMessage($location, $message, $type = 'success') {
     header("Location: $location");
     exit();
 }
+
+// Global function to include phone validation script
+function includePhoneValidation() {
+    ?>
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        
+        const restrictToNumbers = (input) => {
+            // Skip if input already has phone formatting (like test_drive.php)
+            const form = input.closest('form');
+            if (form && (form.id?.includes('testdrive') || form.action?.includes('test_drive'))) {
+                return;
+            }
+            
+            // Skip if placeholder suggests formatting
+            if (input.placeholder && input.placeholder.includes('(') && input.placeholder.includes(')')) {
+                return;
+            }
+            
+            // Remove non-digits
+            const original = input.value;
+            input.value = input.value.replace(/\D/g, '');
+            
+            // Restore cursor if changed
+            if (original !== input.value) {
+                const pos = input.selectionStart;
+                const removed = original.length - input.value.length;
+                input.setSelectionRange(Math.max(0, pos - removed), Math.max(0, pos - removed));
+            }
+        };
+
+        const applyPhoneValidation = () => {
+            const inputs = document.querySelectorAll('input[type="tel"], input[name*="phone"], input[name*="mobile"]');
+            inputs.forEach(input => {
+                if (!input.hasAttribute('data-phone-validated')) {
+                    input.setAttribute('data-phone-validated', 'true');
+                    restrictToNumbers(input);
+                    input.addEventListener('input', () => restrictToNumbers(input));
+                    input.addEventListener('paste', () => setTimeout(() => restrictToNumbers(input), 0));
+                    if (input.value) restrictToNumbers(input);
+                }
+            });
+        };
+
+        // Apply on load
+        applyPhoneValidation();
+        
+        // Watch for new inputs
+        const observer = new MutationObserver((mutations) => {
+            let needsUpdate = false;
+            mutations.forEach(mutation => {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === 1) { // Element node
+                        if (node.matches?.('input[type="tel"], input[name*="phone"], input[name*="mobile"]') ||
+                            node.querySelector?.('input[type="tel"], input[name*="phone"], input[name*="mobile"]')) {
+                            needsUpdate = true;
+                        }
+                    }
+                });
+            });
+            if (needsUpdate) setTimeout(applyPhoneValidation, 0);
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+    });
+    </script>
+    <?php
+}

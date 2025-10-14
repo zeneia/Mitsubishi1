@@ -1,3 +1,6 @@
+<?php
+require_once '../includes/init.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -198,6 +201,10 @@
   
   <!-- Load Mobile Fix JavaScript -->
   <script src="../js/mobile-fix.js" defer></script>
+  
+  <!-- Load Phone Validation JavaScript -->
+  <script src="../js/phone-validation.js" defer></script>
+  <?php includePhoneValidation(); ?>
 </head>
 <body>
   <header>
