@@ -299,6 +299,8 @@ try {
         }
 
         /* Responsive design */
+
+        
         @media (max-width: 768px) {
             .header {
                 padding: 0 15px;

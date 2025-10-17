@@ -414,7 +414,7 @@ function getInquiryResponses($connect, $inquiryId) {
  
             background: #E60012; 
             color: #ffffff;
-            width:400px;
+            width:250px;
             height: 50px;
  
             padding: 12px 24px; 
@@ -621,6 +621,23 @@ function getInquiryResponses($connect, $inquiryId) {
             border-bottom: none;
             margin-bottom: 0;
             padding-bottom: 0;
+        }
+
+        @media (max-width: 575px) {
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                padding: 15px 20px;
+            }
+            .user-section {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+                width: 100%;
+            }
+            .page-title {
+                font-size: 2rem;
+            }
         }
 
         @media (max-width: 768px) {

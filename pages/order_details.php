@@ -365,6 +365,25 @@ if (!$customerProfile) {
         }
 
         /* Responsive Modal Styles */
+
+        @media (max-width: 575px) {
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                padding: 15px 20px;
+            }
+            .user-section {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+                width: 100%;
+            }
+            .page-title {
+                font-size: 2rem;
+            
+            }
+        }
+
         @media (max-width: 768px) {
             .modal {
                 padding: 0.5rem;
