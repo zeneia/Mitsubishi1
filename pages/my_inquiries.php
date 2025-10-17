@@ -386,7 +386,7 @@ function getInquiryResponses($connect, $inquiryId) {
         .comments-text { color: #000000; background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border-left: 3px solid #ffd700; font-style: italic; }
 
         .responses-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
-        .responses-header { color: #ffd700; font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .responses-header { color: #000000ff; font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
         .response-item { background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(40, 167, 69, 0.2); border-radius: 8px; padding: 15px; margin-bottom: 10px; }
         .response-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .response-type { background: rgba(40, 167, 70, 1); color: #000000; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }

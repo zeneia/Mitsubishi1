@@ -86,57 +86,63 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
            RESET & BASE STYLES
            ========================================== */
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
         }
         
         body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: var(--font-size-sm);
-            line-height: 1.6;
-            background-color: var(--color-background);
-            color: var(--color-text-primary);
+            background: #ffffff;
+            min-height: 100vh;
+            color: white;
         }
 
         /* ==========================================
            HEADER
            ========================================== */
         header {
+            background: #000000;
+            padding: 20px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--color-white);
-            border-bottom: 0.125rem solid var(--color-primary);
-            padding: var(--space-3) var(--space-4);
-            min-height: var(--header-height);
-            gap: var(--space-4);
-            flex-wrap: wrap;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
         }
 
         header .logo-section {
             display: flex;
             align-items: center;
-            font-weight: 700;
-            font-size: var(--font-size-md);
-            color: var(--color-primary);
-            gap: var(--space-2);
+            gap: 20px;
         }
 
         header .logo-section img {
-            height: 1.875rem;
-            width: auto;
+            width: 60px;
+            height: auto;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
         }
 
         header .user-section {
             display: flex;
             align-items: center;
-            gap: var(--space-3);
-            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .brand-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         header .user-section .welcome-text {
-            font-weight: 500;
-            font-size: var(--font-size-sm);
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 500
+            
         }
 
         header .user-section .user-avatar {
@@ -417,6 +423,25 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
         /* Small devices (360px and up) - Base styles above */
         
         /* Medium devices (768px and up) */
+
+        @media (max-width: 575px) {
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                padding: 15px 20px;
+            }
+            .user-section {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+                width: 100%;
+            }
+            .page-title {
+                font-size: 2rem;
+            
+            }
+        }
+
         @media (min-width: 48rem) {
             :root {
                 --header-height: 4.5rem;

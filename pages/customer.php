@@ -75,6 +75,7 @@ try {
     <link href="../css/customer-admin-styles.css" rel="stylesheet">
     <style>
         /* Override specific styles for dashboard cards while maintaining admin consistency */
+        
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -157,14 +158,13 @@ try {
 
         /* Header styling to match admin */
         .header {
-            background: white;
-            padding: 0 30px;
-            height: 80px;
+            background: #000000;
+            padding: 20px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: var(--shadow-light);
-            border-bottom: 3px solid var(--primary-red);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
         }
 
         .logo-section {
@@ -181,32 +181,35 @@ try {
         .brand-text {
             font-size: 1.4rem;
             font-weight: 700;
-            color: var(--primary-red);
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .user-section {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
         }
 
         .user-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: var(--primary-red);
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
             font-weight: bold;
+            color: #b80000;
             font-size: 1.2rem;
         }
 
         .welcome-text {
+            color: #ffffff;
             font-size: 1rem;
             font-weight: 500;
-            color: var(--text-dark);
         }
 
         .logout-btn {
@@ -301,12 +304,24 @@ try {
         /* Responsive design */
 
         
-        @media (max-width: 768px) {
+        @media (max-width: 575px) {
             .header {
-                padding: 0 15px;
-                height: 60px;
+                flex-direction: column;
+                gap: 12px;
+                padding: 15px 20px;
             }
+
+            .user-section {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+                width: 100%;
+            }
+
+            .page-title{
+                font-size: 2rem;
             
+            }
             .container {
                 padding: 20px 15px;
             }

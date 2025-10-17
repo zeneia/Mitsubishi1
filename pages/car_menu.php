@@ -64,14 +64,13 @@ try {
         }
 
         .header {
-            background: #ffffff;
+            background: #000000;
             padding: 20px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 3px solid #CC0000;
-            position: relative;
-            z-index: 10;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
         }
 
         .logo-section {
@@ -81,14 +80,18 @@ try {
         }
 
         .logo {
-           width: 60px;
-           height: auto;
+            width: 60px;
+            height: auto;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
         }
 
         .brand-text {
-           font-size: 1.4rem;
-           font-weight: 700;
-           color: #E60012;
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .user-section {
@@ -101,19 +104,18 @@ try {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: #E60012;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            color: #ffffff;
+            color: #b80000;
             font-size: 1.2rem;
         }
         
         .welcome-text {
             font-size: 1rem;
             font-weight: 500;
-            color: #000000
         }
 
         .logout-btn {
