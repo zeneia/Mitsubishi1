@@ -383,7 +383,7 @@ function getInquiryResponses($connect, $inquiryId) {
 
         .inquiry-comments { margin-top: 15px; }
         .comments-label { color: rgba(0, 0, 0, 0.6); font-size: 0.8rem; margin-bottom: 5px; }
-        .comments-text { color: #000000; background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border-left: 3px solid #ffd700; font-style: italic; }
+        .comments-text { color: #000000; background: rgba(44, 44, 44, 0.14); padding: 12px; border-radius: 8px; border-left: 3px solid #3d3d3dff; font-style: italic; }
 
         .responses-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
         .responses-header { color: #000000ff; font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
@@ -841,7 +841,7 @@ function getInquiryResponses($connect, $inquiryId) {
                                     </form>
                                 <?php else: ?>
                                     <span class="btn btn-secondary" aria-disabled="true">
-                                        <i class="fas fa-check"></i> Read
+                                        <i class="fas fa-check" style="color: #ffffff;"></i> Read
                                     </span>
                                 <?php endif; ?>
                             </div>
