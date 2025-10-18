@@ -161,22 +161,63 @@ function createEmailLogsTable($pdo) {
 }
 
 /**
- * Send email function using Mailgun HTTP API
+ * Send email function using Gmail SMTP
+ * Updated to use PHPMailer with Gmail SMTP instead of Mailgun
+ * No Composer required - PHPMailer is included directly
  */
 function sendEmail($email_content) {
     try {
-        // Load Mailgun configuration
-        $config_file = dirname(__DIR__) . '/config/email_config.php';
-        
-        if (file_exists($config_file)) {
-            include_once $config_file;
-        }
-        
-        // Use Mailgun HTTP API to send email
-        return sendEmailWithMailgun($email_content);
-        
+        // Load GmailMailer (includes PHPMailer automatically)
+        require_once dirname(__DIR__) . '/includes/backend/GmailMailer.php';
+
+        // Use Gmail SMTP to send email
+        return sendEmailWithGmail($email_content);
+
     } catch (Exception $e) {
+        error_log("Email sending error: " . $e->getMessage());
         return ['success' => false, 'error' => $e->getMessage()];
+    }
+}
+
+/**
+ * Send email using Gmail SMTP via PHPMailer
+ */
+function sendEmailWithGmail($email_content) {
+    try {
+        $mailer = new \Mitsubishi\Backend\GmailMailer();
+
+        // Prepare options
+        $options = [
+            'priority' => $email_content['priority'] ?? 'normal',
+            'is_html' => true
+        ];
+
+        // Add CC if specified
+        if (isset($email_content['cc'])) {
+            $options['cc'] = $email_content['cc'];
+        }
+
+        // Add BCC if specified
+        if (isset($email_content['bcc'])) {
+            $options['bcc'] = $email_content['bcc'];
+        }
+
+        // Send email
+        $result = $mailer->sendEmail(
+            $email_content['to'],
+            $email_content['subject'],
+            $email_content['message'],
+            $options
+        );
+
+        return $result;
+
+    } catch (Exception $e) {
+        error_log("Gmail SMTP Error: " . $e->getMessage());
+        return [
+            'success' => false,
+            'error' => 'Failed to send email via Gmail SMTP: ' . $e->getMessage()
+        ];
     }
 }
 

@@ -1,3 +1,29 @@
-
 # YoYo AI version control directory
 .yoyo/
+
+# Environment variables - IMPORTANT: Contains sensitive credentials!
+.env
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Log files
+*.log
+error_log
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+
+# Node modules
+node_modules/
+package-lock.json
