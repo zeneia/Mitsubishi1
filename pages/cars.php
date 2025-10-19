@@ -371,9 +371,9 @@ $stmt = $connect->prepare("SELECT * FROM vehicles WHERE availability_status = 'a
                     if (strpos($webPath, 'uploads/') === 0) {
                         // Just add ../ to go up from pages/ directory to project root
                         $webPath = '../' . $webPath;
-                    } else if (strpos($webPath, 'htdocs/Mitsubishi/') !== false) {
-                        // Handle full system paths
-                        $webPath = preg_replace('/^.*\/htdocs\/Mitsubishi\//', '../', $webPath);
+                    } else if (strpos($webPath, 'htdocs/') !== false) {
+                        // Handle full system paths - extract everything after htdocs/
+                        $webPath = preg_replace('/^.*\/htdocs\/[^\/]+\//', '../', $webPath);
                     } else {
                         // If it's just a filename, assume it's in uploads/vehicle_images/main/
                         $webPath = '../uploads/vehicle_images/main/' . basename($webPath);

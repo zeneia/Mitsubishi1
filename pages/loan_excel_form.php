@@ -1003,7 +1003,7 @@ $interest_rates = [
 
 			try {
 				// Use centralized payment calculator API
-				const response = await fetch('/Mitsubishi/includes/payment_calculator.php', {
+				const response = await fetch('../includes/payment_calculator.php', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'
@@ -1134,7 +1134,7 @@ $interest_rates = [
 			
 			try {
 				// Use centralized payment calculator API
-				const response = await fetch('/Mitsubishi/includes/payment_calculator.php', {
+				const response = await fetch('../includes/payment_calculator.php', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'
@@ -1163,7 +1163,7 @@ $interest_rates = [
 				console.error('Payment calculation error during form submission:', error);
 				// Try centralized payment calculator API as fallback
 				try {
-					const response = await fetch('/Mitsubishi/includes/payment_calculator.php', {
+					const response = await fetch('../includes/payment_calculator.php', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json'

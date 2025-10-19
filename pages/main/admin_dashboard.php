@@ -1474,7 +1474,7 @@ $accountStats = getAccountStats($connect);
       const queryParam = cusID ? `cusID=${cusID}` : `accountId=${accountId}`;
 
       // Fetch customer details via AJAX
-      fetch(`/Mitsubishi/pages/main/admin_actions.php?action=get_customer_details&${queryParam}`)
+      fetch(`admin_actions.php?action=get_customer_details&${queryParam}`)
         .then(response => {
           if (!response.ok) {
             throw new Error(`Server error: ${response.status}`);
@@ -1675,7 +1675,7 @@ $accountStats = getAccountStats($connect);
       submitBtn.disabled = true;
 
       // Submit rejection
-      fetch('/Mitsubishi/pages/main/admin_actions.php?action=reject_customer', {
+      fetch('admin_actions.php?action=reject_customer', {
         method: 'POST',
         body: formData
       })
@@ -1761,7 +1761,7 @@ $accountStats = getAccountStats($connect);
       approveBtn.disabled = true;
 
       // Submit approval
-      fetch('/Mitsubishi/pages/main/admin_actions.php?action=approve_customer', {
+      fetch('admin_actions.php?action=approve_customer', {
         method: 'POST',
         body: formData
       })
@@ -1828,7 +1828,7 @@ $accountStats = getAccountStats($connect);
       document.getElementById('customerReviewModal').style.display = 'flex';
 
       // Fetch customer details
-      fetch(`/Mitsubishi/pages/main/admin_actions.php?action=get_customer_details&cusID=${cusID}`)
+      fetch(`admin_actions.php?action=get_customer_details&cusID=${cusID}`)
         .then(response => {
           if (!response.ok) {
             throw new Error(`Server error: ${response.status}`);
@@ -1903,7 +1903,7 @@ $accountStats = getAccountStats($connect);
       document.getElementById('customerReviewModal').style.display = 'flex';
 
       // Fetch account details
-      fetch(`/Mitsubishi/pages/main/admin_actions.php?action=get_customer_details&accountId=${accountId}`)
+      fetch(`admin_actions.php?action=get_customer_details&accountId=${accountId}`)
         .then(response => {
           if (!response.ok) {
             throw new Error(`Server error: ${response.status}`);
@@ -1989,7 +1989,7 @@ $accountStats = getAccountStats($connect);
       reapproveBtn.disabled = true;
 
       // Submit re-approval
-      fetch('/Mitsubishi/pages/main/admin_actions.php?action=approve_customer', {
+      fetch('admin_actions.php?action=approve_customer', {
         method: 'POST',
         body: formData
       })
@@ -2068,7 +2068,7 @@ $accountStats = getAccountStats($connect);
       reapproveBtn.disabled = true;
 
       // Submit re-approval
-      fetch('/Mitsubishi/pages/main/admin_actions.php?action=approve_customer', {
+      fetch('admin_actions.php?action=approve_customer', {
         method: 'POST',
         body: formData
       })
