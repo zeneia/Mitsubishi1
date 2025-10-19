@@ -402,31 +402,47 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Company Name</label>
-                <input type="text" class="form-input" value="Mitsubishi Motors" required>
+                <input type="text" id="company_name" name="company_name" class="form-input" required>
               </div>
               <div class="form-group">
                 <label class="form-label">Address</label>
-                <input type="text" class="form-input" value="1234 Elm Street" required>
+                <input type="text" id="company_address" name="company_address" class="form-input" required>
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">City</label>
-                <input type="text" class="form-input" value="Tokyo" required>
+                <input type="text" id="company_city" name="company_city" class="form-input" required>
               </div>
               <div class="form-group">
                 <label class="form-label">Postal Code</label>
-                <input type="text" class="form-input" value="100-0001" required>
+                <input type="text" id="company_postal_code" name="company_postal_code" class="form-input" required>
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Country</label>
-                <input type="text" class="form-input" value="Japan" required>
+                <label class="form-label">Province</label>
+                <input type="text" id="company_province" name="company_province" class="form-input" required>
               </div>
               <div class="form-group">
+                <label class="form-label">Country</label>
+                <input type="text" id="company_country" name="company_country" class="form-input" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
                 <label class="form-label">Phone</label>
-                <input type="tel" class="form-input" value="+81-3-1234-5678" required>
+                <input type="tel" id="company_phone" name="company_phone" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" id="company_email" name="company_email" class="form-input" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Facebook Page URL</label>
+                <input type="url" id="company_facebook" name="company_facebook" class="form-input">
               </div>
             </div>
             <div class="action-area">
@@ -442,38 +458,12 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
           <form id="businessHoursForm">
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Monday</label>
-                <input type="text" class="form-input" value="9:00 AM - 5:00 PM" required>
+                <label class="form-label">Weekday Hours (Mon-Sat)</label>
+                <input type="text" id="business_hours_weekday" name="business_hours_weekday" class="form-input" placeholder="Mon-Sat: 8:00 AM - 6:00 PM" required>
               </div>
               <div class="form-group">
-                <label class="form-label">Tuesday</label>
-                <input type="text" class="form-input" value="9:00 AM - 5:00 PM" required>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Wednesday</label>
-                <input type="text" class="form-input" value="9:00 AM - 5:00 PM" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Thursday</label>
-                <input type="text" class="form-input" value="9:00 AM - 5:00 PM" required>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Friday</label>
-                <input type="text" class="form-input" value="9:00 AM - 5:00 PM" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Saturday</label>
-                <input type="text" class="form-input" value="Closed" required>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Sunday</label>
-                <input type="text" class="form-input" value="Closed" required>
+                <label class="form-label">Weekend Hours (Sunday)</label>
+                <input type="text" id="business_hours_weekend" name="business_hours_weekend" class="form-input" placeholder="Sunday: 9:00 AM - 5:00 PM" required>
               </div>
             </div>
             <div class="action-area">
@@ -749,50 +739,70 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
           </form>
         </div>
 
-        <div class="settings-card">
-          <div class="settings-header">
-            <h3 class="settings-title">System Maintenance</h3>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Database Optimization</label>
-              <p style="color: var(--text-light); font-size: 14px; margin-bottom: 10px;">
-                Last optimized: Mar 20, 2024
-              </p>
-              <button class="btn btn-primary">Optimize Database</button>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Clear System Cache</label>
-              <p style="color: var(--text-light); font-size: 14px; margin-bottom: 10px;">
-                Cache size: 156 MB
-              </p>
-              <button class="btn btn-secondary">Clear Cache</button>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Log Files Management</label>
-              <p style="color: var(--text-light); font-size: 14px; margin-bottom: 10px;">
-                Total log size: 89 MB
-              </p>
-              <button class="btn btn-outline">Archive Old Logs</button>
-            </div>
-            <div class="form-group">
-              <label class="form-label">System Update</label>
-              <p style="color: var(--text-light); font-size: 14px; margin-bottom: 10px;">
-                Current version: v2.1.4
-              </p>
-              <button class="btn btn-primary">Check for Updates</button>
-            </div>
-          </div>
-        </div>
+
       </div>
     </div>
   </div>
 
   <script src="../../includes/js/common-scripts.js"></script>
   <script>
+    // Include SweetAlert2 from CDN
+    if (!document.querySelector('script[src*="sweetalert2"]')) {
+      const swalScript = document.createElement('script');
+      swalScript.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
+      document.head.appendChild(swalScript);
+
+      // Also include SweetAlert2 CSS
+      const swalCSS = document.createElement('link');
+      swalCSS.rel = 'stylesheet';
+      swalCSS.href = 'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css';
+      document.head.appendChild(swalCSS);
+    }
+
+    // Wait for SweetAlert2 to load before defining custom configurations
+    setTimeout(() => {
+      // Custom SweetAlert2 configurations
+      const SwalSuccess = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        icon: 'success',
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        },
+        customClass: {
+          popup: 'colored-toast'
+        }
+      });
+
+      const SwalError = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        icon: 'error',
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        },
+        customClass: {
+          popup: 'colored-toast'
+        }
+      });
+
+      // Store these in window object for global access
+      window.SwalSuccess = SwalSuccess;
+      window.SwalError = SwalError;
+    }, 1000);
+
     document.addEventListener('DOMContentLoaded', function() {
+      // Load company settings on page load
+      loadCompanySettings();
+
       // Tab navigation functionality
       document.querySelectorAll('.tab-button').forEach(function(button) {
         button.addEventListener('click', function() {
@@ -802,7 +812,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
           });
           // Add active class to clicked button
           this.classList.add('active');
-          
+
           // Get the target tab content id
           const tabId = this.getAttribute('data-tab');
           // Hide all tab contents
@@ -817,32 +827,52 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
       // Form submissions
       document.getElementById('companyForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        alert('Company information updated successfully!');
+        saveCompanySettings();
       });
 
       document.getElementById('businessHoursForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        alert('Business hours updated successfully!');
+        saveBusinessHours();
       });
 
       document.getElementById('systemForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        alert('System preferences updated successfully!');
+        if (window.SwalSuccess) {
+          window.SwalSuccess.fire({
+            title: 'Success!',
+            text: 'System preferences updated successfully!'
+          });
+        }
       });
 
       document.getElementById('securityForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        alert('Security settings updated successfully!');
+        if (window.SwalSuccess) {
+          window.SwalSuccess.fire({
+            title: 'Success!',
+            text: 'Security settings updated successfully!'
+          });
+        }
       });
 
       document.getElementById('accessForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        alert('Access control settings updated successfully!');
+        if (window.SwalSuccess) {
+          window.SwalSuccess.fire({
+            title: 'Success!',
+            text: 'Access control settings updated successfully!'
+          });
+        }
       });
 
       document.getElementById('backupForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        alert('Backup configuration saved successfully!');
+        if (window.SwalSuccess) {
+          window.SwalSuccess.fire({
+            title: 'Success!',
+            text: 'Backup configuration saved successfully!'
+          });
+        }
       });
 
       // Load financing data when financing tab is clicked
@@ -872,12 +902,22 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
           if (data.success) {
             displayFinancingRates(data.data);
           } else {
-            alert('Error loading financing rates: ' + data.error);
+            if (window.SwalError) {
+              window.SwalError.fire({
+                title: 'Error!',
+                text: 'Error loading financing rates: ' + data.error
+              });
+            }
           }
         })
         .catch(error => {
           console.error('Error:', error);
-          alert('Failed to load financing rates');
+          if (window.SwalError) {
+            window.SwalError.fire({
+              title: 'Error!',
+              text: 'Failed to load financing rates'
+            });
+          }
         });
     }
 
@@ -928,14 +968,29 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          alert('Financing rates updated successfully!');
+          if (window.SwalSuccess) {
+            window.SwalSuccess.fire({
+              title: 'Success!',
+              text: 'Financing rates updated successfully!'
+            });
+          }
         } else {
-          alert('Error updating financing rates: ' + data.error);
+          if (window.SwalError) {
+            window.SwalError.fire({
+              title: 'Error!',
+              text: 'Error updating financing rates: ' + data.error
+            });
+          }
         }
       })
       .catch(error => {
         console.error('Error:', error);
-        alert('Failed to update financing rates');
+        if (window.SwalError) {
+          window.SwalError.fire({
+            title: 'Error!',
+            text: 'Failed to update financing rates'
+          });
+        }
       });
     }
 
@@ -949,12 +1004,22 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
             document.getElementById('maxFinancingAmount').value = rule.max_financing_amount;
             document.getElementById('minCreditScore').value = rule.min_credit_score || '';
           } else {
-            alert('Error loading financing rules: ' + (data.error || 'No rules found'));
+            if (window.SwalError) {
+              window.SwalError.fire({
+                title: 'Error!',
+                text: 'Error loading financing rules: ' + (data.error || 'No rules found')
+              });
+            }
           }
         })
         .catch(error => {
           console.error('Error:', error);
-          alert('Failed to load financing rules');
+          if (window.SwalError) {
+            window.SwalError.fire({
+              title: 'Error!',
+              text: 'Failed to load financing rules'
+            });
+          }
         });
     }
 
@@ -965,7 +1030,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
       formData.append('min_down_payment_percent', document.getElementById('minDownPayment').value);
       formData.append('max_financing_amount', document.getElementById('maxFinancingAmount').value);
       formData.append('min_credit_score', document.getElementById('minCreditScore').value);
-      
+
       fetch('../../includes/backend/financing_settings_backend.php', {
         method: 'POST',
         body: formData
@@ -973,16 +1038,231 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          alert('Financing rules updated successfully!');
+          if (window.SwalSuccess) {
+            window.SwalSuccess.fire({
+              title: 'Success!',
+              text: 'Financing rules updated successfully!'
+            });
+          }
         } else {
-          alert('Error updating financing rules: ' + data.error);
+          if (window.SwalError) {
+            window.SwalError.fire({
+              title: 'Error!',
+              text: 'Error updating financing rules: ' + data.error
+            });
+          }
         }
       })
       .catch(error => {
         console.error('Error:', error);
-        alert('Failed to update financing rules');
+        if (window.SwalError) {
+          window.SwalError.fire({
+            title: 'Error!',
+            text: 'Failed to update financing rules'
+          });
+        }
+      });
+    }
+
+    // Company Settings Functions
+    function loadCompanySettings() {
+      fetch('../../includes/backend/company_settings_backend.php?action=get_company_settings')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const settings = data.data;
+            // Populate company form fields
+            document.getElementById('company_name').value = settings.company_name || '';
+            document.getElementById('company_address').value = settings.company_address || '';
+            document.getElementById('company_city').value = settings.company_city || '';
+            document.getElementById('company_postal_code').value = settings.company_postal_code || '';
+            document.getElementById('company_province').value = settings.company_province || '';
+            document.getElementById('company_country').value = settings.company_country || '';
+            document.getElementById('company_phone').value = settings.company_phone || '';
+            document.getElementById('company_email').value = settings.company_email || '';
+            document.getElementById('company_facebook').value = settings.company_facebook || '';
+
+            // Populate business hours
+            document.getElementById('business_hours_weekday').value = settings.business_hours_weekday || '';
+            document.getElementById('business_hours_weekend').value = settings.business_hours_weekend || '';
+          } else {
+            console.error('Error loading company settings:', data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+
+    function saveCompanySettings() {
+      const formData = new FormData(document.getElementById('companyForm'));
+      formData.append('action', 'update_company_settings');
+
+      fetch('../../includes/backend/company_settings_backend.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          if (window.SwalSuccess) {
+            window.SwalSuccess.fire({
+              title: 'Success!',
+              text: 'Company information updated successfully!'
+            });
+          }
+        } else {
+          if (window.SwalError) {
+            window.SwalError.fire({
+              title: 'Error!',
+              text: 'Error updating company information: ' + data.error
+            });
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        if (window.SwalError) {
+          window.SwalError.fire({
+            title: 'Error!',
+            text: 'Failed to update company information'
+          });
+        }
+      });
+    }
+
+    function saveBusinessHours() {
+      const formData = new FormData(document.getElementById('businessHoursForm'));
+      formData.append('action', 'update_company_settings');
+
+      fetch('../../includes/backend/company_settings_backend.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          if (window.SwalSuccess) {
+            window.SwalSuccess.fire({
+              title: 'Success!',
+              text: 'Business hours updated successfully!'
+            });
+          }
+        } else {
+          if (window.SwalError) {
+            window.SwalError.fire({
+              title: 'Error!',
+              text: 'Error updating business hours: ' + data.error
+            });
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        if (window.SwalError) {
+          window.SwalError.fire({
+            title: 'Error!',
+            text: 'Failed to update business hours'
+          });
+        }
       });
     }
   </script>
+
+  <style>
+    /* Custom SweetAlert2 Toast Styles - Mitsubishi Brand Colors */
+    .colored-toast.swal2-icon-success {
+      background: linear-gradient(135deg, #dc143c, #b91c3c) !important;
+      color: white !important;
+    }
+
+    .colored-toast.swal2-icon-error {
+      background: linear-gradient(135deg, #8b0000, #a52a2a) !important;
+      color: white !important;
+    }
+
+    .colored-toast.swal2-icon-warning {
+      background: linear-gradient(135deg, #ffd700, #ffb347) !important;
+      color: #8b0000 !important;
+    }
+
+    .colored-toast.swal2-icon-info {
+      background: linear-gradient(135deg, #2c3e50, #34495e) !important;
+      color: white !important;
+    }
+
+    .colored-toast.swal2-icon-question {
+      background: linear-gradient(135deg, #34495e, #2c3e50) !important;
+      color: white !important;
+    }
+
+    .colored-toast .swal2-title {
+      color: white !important;
+      font-size: 1rem !important;
+      font-weight: 600 !important;
+    }
+
+    .colored-toast .swal2-html-container {
+      color: white !important;
+      font-size: 0.875rem !important;
+    }
+
+    .colored-toast .swal2-success {
+      border-color: white !important;
+      color: white !important;
+    }
+
+    .colored-toast .swal2-success [class^='swal2-success-line'] {
+      background-color: white !important;
+    }
+
+    .colored-toast .swal2-success-ring {
+      border-color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    .colored-toast .swal2-error {
+      border-color: white !important;
+      color: white !important;
+    }
+
+    .colored-toast .swal2-x-mark-line-left,
+    .colored-toast .swal2-x-mark-line-right {
+      background-color: white !important;
+    }
+
+    .colored-toast .swal2-warning {
+      border-color: #8b0000 !important;
+      color: #8b0000 !important;
+    }
+
+    .colored-toast .swal2-info {
+      border-color: white !important;
+      color: white !important;
+    }
+
+    .colored-toast .swal2-question {
+      border-color: white !important;
+      color: white !important;
+    }
+
+    .colored-toast .swal2-timer-progress-bar {
+      background: rgba(255, 255, 255, 0.6) !important;
+    }
+
+    /* Ensure toast container has proper styling */
+    .swal2-container .colored-toast {
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(220, 20, 60, 0.3) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .swal2-container .colored-toast.swal2-icon-error {
+      box-shadow: 0 8px 32px rgba(139, 0, 0, 0.3) !important;
+    }
+
+    .swal2-container .colored-toast.swal2-icon-warning {
+      box-shadow: 0 8px 32px rgba(255, 215, 0, 0.3) !important;
+    }
+  </style>
 </body>
 </html>

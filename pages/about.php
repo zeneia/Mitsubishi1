@@ -1,6 +1,29 @@
-<?php 
+<?php
 $pageTitle = "About Us - Mitsubishi Motors";
-include 'header.php'; 
+include 'header.php';
+
+// Load company settings from database
+require_once '../includes/database/db_conn.php';
+
+// Fetch company settings
+$companySettings = [];
+try {
+    $stmt = $connect->prepare("SELECT setting_key, setting_value FROM company_settings");
+    $stmt->execute();
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($results as $row) {
+        $companySettings[$row['setting_key']] = $row['setting_value'];
+    }
+} catch (PDOException $e) {
+    error_log("Error loading company settings: " . $e->getMessage());
+}
+
+// Helper function to get setting with default value
+function getSetting($key, $default = '') {
+    global $companySettings;
+    return $companySettings[$key] ?? $default;
+}
 ?>
 
 <style>
@@ -580,13 +603,13 @@ include 'header.php';
       <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
       <div class="contact-title">Visit Our Showroom</div>
       <div class="contact-info">
-        📍 Km 85.5 Maharlika Highway, Brgy.San Ignacio, San Pablo City Laguna<br>
-        San Pablo City, Laguna Province<br>
-        🕒 Mon-Sat: 8:00 AM - 6:00 PM<br>
-        🕒 Sunday: 9:00 AM - 5:00 PM
+        📍 <?php echo htmlspecialchars(getSetting('company_address', 'Km 85.5 Maharlika Highway, Brgy.San Ignacio')); ?><br>
+        <?php echo htmlspecialchars(getSetting('company_city', 'San Pablo City')); ?>, <?php echo htmlspecialchars(getSetting('company_province', 'Laguna')); ?><br>
+        🕒 <?php echo htmlspecialchars(getSetting('business_hours_weekday', 'Mon-Sat: 8:00 AM - 6:00 PM')); ?><br>
+        🕒 <?php echo htmlspecialchars(getSetting('business_hours_weekend', 'Sunday: 9:00 AM - 5:00 PM')); ?>
       </div>
     </div>
-    
+
 
   </div>
   

@@ -120,20 +120,50 @@
   }
 </style>
 
+<?php
+// Load company settings if not already loaded
+if (!function_exists('getSetting')) {
+    require_once __DIR__ . '/../includes/database/db_conn.php';
+
+    $companySettings = [];
+    try {
+        $stmt = $connect->prepare("SELECT setting_key, setting_value FROM company_settings");
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($results as $row) {
+            $companySettings[$row['setting_key']] = $row['setting_value'];
+        }
+    } catch (PDOException $e) {
+        error_log("Error loading company settings in footer: " . $e->getMessage());
+    }
+
+    function getSetting($key, $default = '') {
+        global $companySettings;
+        return $companySettings[$key] ?? $default;
+    }
+}
+?>
+
 <!-- Footer -->
 <footer>
   <div class="footer-content">
     <div class="footer-section">
-      <h3>Mitsubishi Motors San Pablo</h3>
-      <p>Your trusted partner for innovative and reliable vehicles in San Pablo City, Laguna.</p>
+      <h3><?php echo htmlspecialchars(getSetting('company_name', 'Mitsubishi Motors San Pablo')); ?></h3>
+      <p>Your trusted partner for innovative and reliable vehicles in <?php echo htmlspecialchars(getSetting('company_city', 'San Pablo City')); ?>, <?php echo htmlspecialchars(getSetting('company_province', 'Laguna')); ?>.</p>
       <div class="social-links">
-        <a href="#" title="Facebook">📘</a>
+        <?php
+        $facebook = getSetting('company_facebook', '#');
+        if ($facebook && $facebook !== '#') {
+            echo '<a href="' . htmlspecialchars($facebook) . '" title="Facebook" target="_blank" rel="noopener">📘</a>';
+        }
+        ?>
         <a href="#" title="Instagram">📷</a>
         <a href="#" title="Twitter">🐦</a>
         <a href="#" title="YouTube">📺</a>
       </div>
     </div>
-    
+
     <div class="footer-section">
       <h3>Quick Links</h3>
       <div class="footer-links">
@@ -143,26 +173,26 @@
         <a href="../main/about.php">About Us</a>
       </div>
     </div>
-    
+
     <div class="footer-section">
       <h3>Contact</h3>
       <div class="contact-info">
         <span>📍</span>
-        <span>Km 85.5 Maharlika Highway, Brgy.San Ignacio, San Pablo City Laguna</span>
+        <span><?php echo htmlspecialchars(getSetting('company_address', 'Km 85.5 Maharlika Highway, Brgy.San Ignacio')); ?>, <?php echo htmlspecialchars(getSetting('company_city', 'San Pablo City')); ?> <?php echo htmlspecialchars(getSetting('company_province', 'Laguna')); ?></span>
       </div>
       <div class="contact-info">
         <span>📞</span>
-        <span>(049) 503-9693</span>
+        <span><?php echo htmlspecialchars(getSetting('company_phone', '(049) 503-9693')); ?></span>
       </div>
       <div class="contact-info">
         <span>✉️</span>
-        <span>smf.hr@yahoo.com</span>
+        <span><?php echo htmlspecialchars(getSetting('company_email', 'smf.hr@yahoo.com')); ?></span>
       </div>
     </div>
   </div>
-  
+
   <div class="footer-bottom">
-    <p>&copy; 2024 Mitsubishi Motors San Pablo City. All rights reserved.</p>
+    <p>&copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars(getSetting('company_name', 'Mitsubishi Motors San Pablo City')); ?>. All rights reserved.</p>
   </div>
 </footer>
 </body>
