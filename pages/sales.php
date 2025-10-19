@@ -487,15 +487,7 @@ include 'header.php';
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
   }
 
-  .contact-info {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 30px;
-    margin: 25px 0;
-    position: relative;
-    z-index: 1;
-  }
+
 
   .contact-item {
     display: flex;
@@ -572,7 +564,7 @@ include 'header.php';
     <p>Discover exclusive Mitsubishi deals and financing options at our San Pablo City dealership. Take advantage of our limited-time offers to drive home your dream car today.</p>
   </div>
   
-  <!-- Countdown Timer Section -->
+  <!-- Countdown Timer Section 
   <div class="countdown-container">
     <div class="countdown-title">Limited Time Offer Ends In:</div>
     <div class="countdown" id="promotion-countdown">
@@ -593,7 +585,7 @@ include 'header.php';
         <div class="countdown-label">Seconds</div>
       </div>
     </div>
-  </div>
+  </div>-->
   
   <div class="sales-section">
     <h2 class="section-title">Current Promotions</h2>

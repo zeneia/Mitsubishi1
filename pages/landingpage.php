@@ -68,6 +68,7 @@ try {
 <style>
   /* Zoom out the entire page to 7% */
   body {
+    background: #000000;
     zoom: 90%;
   }
   
@@ -779,10 +780,6 @@ try {
   </div>
 </section>
 
-
-    </div>
-  </div>
-</section>
 
 <!-- Call to Action with Parallax -->
 <section class="cta-section">

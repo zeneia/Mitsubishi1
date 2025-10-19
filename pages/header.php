@@ -20,6 +20,7 @@ require_once '../includes/init.php';
       padding: 0;
       box-sizing: border-box;
     }
+    
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
       background: #ffffff;

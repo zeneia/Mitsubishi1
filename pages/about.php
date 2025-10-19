@@ -27,6 +27,12 @@ function getSetting($key, $default = '') {
 ?>
 
 <style>
+
+  body {
+		width: 100%;
+		margin: 0;
+		padding: 0;
+  } 
   body {
     background-image: url(../includes/images/backbg.jpg); 
     background-size: cover; /* scales image to cover the whole area */

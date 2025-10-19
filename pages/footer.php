@@ -1,9 +1,10 @@
 <style>
   /* Footer Styles */
   footer {
+    width: 100%;
     background: #1a1a1a;
     color: #ccc;
-    padding: 30px 32px 15px;
+    padding: 50px 30px 20px;
     border-top: 1px solid #333;
   }
   
