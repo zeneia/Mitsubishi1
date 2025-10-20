@@ -17,6 +17,9 @@ if (!$pdo) {
   die("Database connection not available. Please check your database configuration.");
 }
 
+// Include notification API
+require_once(dirname(dirname(__DIR__)) . '/includes/api/notification_api.php');
+
 // Handle AJAX requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     header('Content-Type: application/json');
@@ -25,26 +28,89 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         switch ($_POST['action']) {
             case 'approve':
                 $pms_id = (int)$_POST['pms_id'];
+
+                // Update PMS request status
                 $stmt = $pdo->prepare("
                     UPDATE car_pms_records p
                     INNER JOIN customer_information ci ON p.customer_id = ci.account_id
-                    SET p.request_status = 'Approved', p.approved_by = ?, p.approved_at = NOW() 
+                    SET p.request_status = 'Approved', p.approved_by = ?, p.approved_at = NOW()
                     WHERE p.pms_id = ? AND ci.agent_id = ?
                 ");
                 $stmt->execute([$_SESSION['user_id'], $pms_id, $sales_agent_id]);
+
+                // Get customer_id and request details for notification
+                $stmt = $pdo->prepare("
+                    SELECT p.customer_id, CONCAT('PMS-', YEAR(p.created_at), '-', LPAD(p.pms_id, 3, '0')) as request_id
+                    FROM car_pms_records p
+                    WHERE p.pms_id = ?
+                ");
+                $stmt->execute([$pms_id]);
+                $pms_data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                // Create notification for customer
+                if ($pms_data && $pms_data['customer_id']) {
+                    try {
+                        createNotification(
+                            $pms_data['customer_id'],
+                            null,
+                            'PMS Request Approved',
+                            'Your PMS request ' . $pms_data['request_id'] . ' has been approved.',
+                            'pms',
+                            $pms_id
+                        );
+                    } catch (Exception $e) {
+                        // Log error but don't fail the approval
+                        error_log("Failed to create PMS approval notification: " . $e->getMessage());
+                    }
+                }
+
                 echo json_encode(['success' => true, 'message' => 'PMS request approved successfully']);
                 break;
                 
             case 'reject':
                 $pms_id = (int)$_POST['pms_id'];
                 $reason = $_POST['rejection_reason'] ?? '';
+
+                // Update PMS request status
                 $stmt = $pdo->prepare("
                     UPDATE car_pms_records p
                     INNER JOIN customer_information ci ON p.customer_id = ci.account_id
-                    SET p.request_status = 'Rejected', p.approved_by = ?, p.approved_at = NOW(), p.rejection_reason = ? 
+                    SET p.request_status = 'Rejected', p.approved_by = ?, p.approved_at = NOW(), p.rejection_reason = ?
                     WHERE p.pms_id = ? AND ci.agent_id = ?
                 ");
                 $stmt->execute([$_SESSION['user_id'], $reason, $pms_id, $sales_agent_id]);
+
+                // Get customer_id and request details for notification
+                $stmt = $pdo->prepare("
+                    SELECT p.customer_id, CONCAT('PMS-', YEAR(p.created_at), '-', LPAD(p.pms_id, 3, '0')) as request_id
+                    FROM car_pms_records p
+                    WHERE p.pms_id = ?
+                ");
+                $stmt->execute([$pms_id]);
+                $pms_data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                // Create notification for customer
+                if ($pms_data && $pms_data['customer_id']) {
+                    try {
+                        $notification_message = 'Your PMS request ' . $pms_data['request_id'] . ' has been rejected.';
+                        if (!empty($reason)) {
+                            $notification_message .= ' Reason: ' . $reason;
+                        }
+
+                        createNotification(
+                            $pms_data['customer_id'],
+                            null,
+                            'PMS Request Rejected',
+                            $notification_message,
+                            'pms',
+                            $pms_id
+                        );
+                    } catch (Exception $e) {
+                        // Log error but don't fail the rejection
+                        error_log("Failed to create PMS rejection notification: " . $e->getMessage());
+                    }
+                }
+
                 echo json_encode(['success' => true, 'message' => 'PMS request rejected']);
                 break;
                 
@@ -53,16 +119,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $new_date = $_POST['new_date'];
                 $new_time = $_POST['new_time'];
                 $reason = $_POST['reschedule_reason'] ?? '';
-                
+
                 $scheduled_datetime = $new_date . ' ' . $new_time . ':00';
+
+                // Update PMS request status
                 $stmt = $pdo->prepare("
                     UPDATE car_pms_records p
                     INNER JOIN customer_information ci ON p.customer_id = ci.account_id
-                    SET p.request_status = 'Scheduled', p.scheduled_date = ?, p.approved_by = ?, p.approved_at = NOW(), 
-                        p.service_notes_findings = CONCAT(COALESCE(p.service_notes_findings, ''), '\nRescheduled: ', ?) 
+                    SET p.request_status = 'Scheduled', p.scheduled_date = ?, p.approved_by = ?, p.approved_at = NOW(),
+                        p.service_notes_findings = CONCAT(COALESCE(p.service_notes_findings, ''), '\nRescheduled: ', ?)
                     WHERE p.pms_id = ? AND ci.agent_id = ?
                 ");
                 $stmt->execute([$scheduled_datetime, $_SESSION['user_id'], $reason, $pms_id, $sales_agent_id]);
+
+                // Get customer_id and request details for notification
+                $stmt = $pdo->prepare("
+                    SELECT p.customer_id, CONCAT('PMS-', YEAR(p.created_at), '-', LPAD(p.pms_id, 3, '0')) as request_id
+                    FROM car_pms_records p
+                    WHERE p.pms_id = ?
+                ");
+                $stmt->execute([$pms_id]);
+                $pms_data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                // Create notification for customer
+                if ($pms_data && $pms_data['customer_id']) {
+                    try {
+                        // Format the date and time for display
+                        $formatted_date = date('F j, Y', strtotime($new_date));
+                        $formatted_time = date('g:i A', strtotime($new_time));
+
+                        $notification_message = 'Your PMS request ' . $pms_data['request_id'] . ' has been rescheduled to ' . $formatted_date . ' at ' . $formatted_time . '.';
+                        if (!empty($reason)) {
+                            $notification_message .= ' Reason: ' . $reason;
+                        }
+
+                        createNotification(
+                            $pms_data['customer_id'],
+                            null,
+                            'PMS Request Rescheduled',
+                            $notification_message,
+                            'pms',
+                            $pms_id
+                        );
+                    } catch (Exception $e) {
+                        // Log error but don't fail the reschedule
+                        error_log("Failed to create PMS reschedule notification: " . $e->getMessage());
+                    }
+                }
+
                 echo json_encode(['success' => true, 'message' => 'PMS request rescheduled successfully']);
                 break;
                 
