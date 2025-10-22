@@ -61,12 +61,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_otp'])) {
 
 // Handle OTP resend
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resend_otp'])) {
+    error_log("DEBUG PAGE: Resend OTP button clicked for accountId=$accountId, email=$email");
     $result = $otpService->resendOTP($accountId, $email, 'password_reset');
+    error_log("DEBUG PAGE: resendOTP result: " . json_encode($result));
 
     if ($result['success']) {
         $resend_message = $result['message'];
+        error_log("DEBUG PAGE: Success message set: $resend_message");
     } else {
         $error_message = $result['message'];
+        error_log("DEBUG PAGE: Error message set: $error_message");
     }
 }
 
@@ -330,6 +334,16 @@ $maskedEmail = maskEmail($email);
                 <div class="message success"><?php echo htmlspecialchars($resend_message); ?></div>
             <?php endif; ?>
 
+            <!-- DEBUG: Show POST data -->
+            <?php if (isset($_POST['resend_otp'])): ?>
+                <div class="message info" style="background: #ffeb3b; color: #000;">
+                    🔍 DEBUG: Resend button was clicked!
+                    <?php if (isset($result)): ?>
+                        Result: <?php echo htmlspecialchars(json_encode($result)); ?>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+
             <form method="post" autocomplete="off">
                 <div class="otp-input-container">
                     <input 
@@ -401,7 +415,28 @@ $maskedEmail = maskEmail($email);
         <?php endif; ?>
 
         // Handle resend form submission
-        document.getElementById('resendForm').addEventListener('submit', function() {
+        let isSubmitting = false;
+        document.getElementById('resendForm').addEventListener('submit', function(e) {
+            console.log('DEBUG: Resend form submit event triggered');
+            console.log('DEBUG: isSubmitting =', isSubmitting);
+            console.log('DEBUG: Button disabled =', document.getElementById('resendButton').disabled);
+
+            // Prevent multiple submissions
+            if (isSubmitting) {
+                console.log('DEBUG: Preventing submission - already submitting');
+                e.preventDefault();
+                return false;
+            }
+
+            // Mark as submitting and disable button immediately
+            isSubmitting = true;
+            const resendButton = document.getElementById('resendButton');
+            resendButton.disabled = true;
+            resendButton.textContent = 'Sending...';
+
+            console.log('DEBUG: Form will now submit');
+
+            // Start cooldown (will be applied after page reload)
             startCooldown();
         });
     </script>

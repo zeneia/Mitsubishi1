@@ -42,9 +42,9 @@ function searchCustomerAccounts() {
     
     try {
         $stmt = $connect->prepare("
-            SELECT Id, Username, Email, FirstName, LastName, Status 
-            FROM accounts 
-            WHERE Role = 'Customer' 
+            SELECT Id, Username, Email, FirstName, LastName, DateOfBirth, Status
+            FROM accounts
+            WHERE Role = 'Customer'
             AND (Username LIKE :term OR Email LIKE :term OR FirstName LIKE :term OR LastName LIKE :term OR CONCAT(FirstName, ' ', LastName) LIKE :term)
             LIMIT 10
         ");
@@ -63,52 +63,92 @@ function searchCustomerAccounts() {
 }
 
 function addCustomer() {
-    global $connect;
-    
+    global $connect, $sales_agent_id;
+
     try {
         $connect->beginTransaction();
-        
-        // Validate required fields
-        if (empty($_POST['account_id']) || empty($_POST['firstname']) || empty($_POST['lastname']) || empty($_POST['birthday'])) {
+
+        // Validate required fields for walk-in customers
+        if (empty($_POST['firstname']) || empty($_POST['lastname']) || empty($_POST['birthday'])) {
             throw new Exception('Required fields are missing');
         }
-        
-        // Check if account already has customer information
-        $checkStmt = $connect->prepare("SELECT cusID FROM customer_information WHERE account_id = :account_id");
-        $checkStmt->bindParam(':account_id', $_POST['account_id']);
-        $checkStmt->execute();
-        
-        if ($checkStmt->fetch()) {
-            throw new Exception('This account already has customer information');
+
+        // Validate valid ID fields
+        if (empty($_POST['valid_id_type']) || empty($_POST['valid_id_number'])) {
+            throw new Exception('Valid ID information is required');
         }
-        
+
+        // Generate unique username and email for walk-in customer
+        $timestamp = time();
+        $random = mt_rand(1000, 9999);
+        $username = 'walkin_' . $timestamp . '_' . $random;
+        $email = !empty($_POST['email']) ? $_POST['email'] : ('walkin_' . $timestamp . '@temp.mitsubishi.com');
+
+        // Check if email already exists (if provided)
+        if (!empty($_POST['email'])) {
+            $checkEmail = $connect->prepare("SELECT Id FROM accounts WHERE Email = ?");
+            $checkEmail->execute([$_POST['email']]);
+            if ($checkEmail->fetch()) {
+                throw new Exception('Email address is already registered');
+            }
+        }
+
+        // Create account first
+        $stmt = $connect->prepare("
+            INSERT INTO accounts (Username, Email, Role, FirstName, LastName, DateOfBirth, Status, CreatedAt)
+            VALUES (?, ?, 'Customer', ?, ?, ?, 'Approved', NOW())
+        ");
+
+        $stmt->execute([
+            $username,
+            $email,
+            $_POST['firstname'],
+            $_POST['lastname'],
+            $_POST['birthday']
+        ]);
+
+        $account_id = $connect->lastInsertId();
+
         // Calculate age
         $birthday = new DateTime($_POST['birthday']);
         $today = new DateTime();
         $age = $today->diff($birthday)->y;
-        
-        // Insert customer information
+
+        // Handle valid ID image upload
+        $valid_id_image = null;
+        if (isset($_FILES['valid_id_image']) && $_FILES['valid_id_image']['error'] === UPLOAD_ERR_OK) {
+            $valid_id_image = file_get_contents($_FILES['valid_id_image']['tmp_name']);
+        }
+
+        // Note: profile_image is not stored in customer_information table
+        // It would need to be stored in accounts.ProfileImage if needed
+
+        // Create customer information - assign to current sales agent
+        // Walk-in customers are automatically approved since agent verified them in person
         $stmt = $connect->prepare("
             INSERT INTO customer_information (
-                account_id, firstname, lastname, middlename, suffix, nationality,
+                account_id, agent_id, firstname, lastname, middlename, suffix, nationality,
                 birthday, age, gender, civil_status, mobile_number, complete_address,
                 employment_status, company_name, position, monthly_income,
-                valid_id_type, valid_id_number, Status
+                valid_id_type, valid_id_image, valid_id_number,
+                Status, customer_type
             ) VALUES (
-                :account_id, :firstname, :lastname, :middlename, :suffix, :nationality,
+                :account_id, :agent_id, :firstname, :lastname, :middlename, :suffix, :nationality,
                 :birthday, :age, :gender, :civil_status, :mobile_number, :complete_address,
                 :employment_status, :company_name, :position, :monthly_income,
-                :valid_id_type, :valid_id_number, 'Pending'
+                :valid_id_type, :valid_id_image, :valid_id_number,
+                'Approved', 'Walk In'
             )
         ");
-        
+
         $stmt->execute([
-            ':account_id' => $_POST['account_id'],
+            ':account_id' => $account_id,
+            ':agent_id' => $sales_agent_id,
             ':firstname' => $_POST['firstname'],
             ':lastname' => $_POST['lastname'],
             ':middlename' => $_POST['middlename'] ?: null,
             ':suffix' => $_POST['suffix'] ?: null,
-            ':nationality' => $_POST['nationality'] ?: null,
+            ':nationality' => $_POST['nationality'] ?: 'Filipino',
             ':birthday' => $_POST['birthday'],
             ':age' => $age,
             ':gender' => $_POST['gender'] ?: null,
@@ -119,18 +159,23 @@ function addCustomer() {
             ':company_name' => $_POST['company_name'] ?: null,
             ':position' => $_POST['position'] ?: null,
             ':monthly_income' => $_POST['monthly_income'] ?: null,
-            ':valid_id_type' => $_POST['valid_id_type'] ?: null,
-            ':valid_id_number' => $_POST['valid_id_number'] ?: null
+            ':valid_id_type' => $_POST['valid_id_type'],
+            ':valid_id_image' => $valid_id_image,
+            ':valid_id_number' => $_POST['valid_id_number']
         ]);
-        
+
         $connect->commit();
-require_once(dirname(dirname(__DIR__)) . '/includes/api/notification_api.php');
-createNotification($_POST['account_id'], null, 'Customer Info Added', 'Your customer information has been added by Sales Agent.', 'customer');
-createNotification(null, 'SalesAgent', 'Customer Info Added', 'Customer info added for account ID ' . $_POST['account_id'], 'customer');
-echo json_encode(['success' => true, 'message' => 'Customer information added successfully']);
-        
+
+        require_once(dirname(dirname(__DIR__)) . '/includes/api/notification_api.php');
+        createNotification($account_id, null, 'Customer Info Approved', 'Your customer information has been verified and approved by Sales Agent.', 'customer');
+        createNotification(null, 'SalesAgent', 'Walk-in Customer Added', 'Walk-in customer added and approved: ' . $_POST['firstname'] . ' ' . $_POST['lastname'], 'customer');
+
+        echo json_encode(['success' => true, 'message' => 'Walk-in customer added and approved successfully']);
+
     } catch (Exception $e) {
-        $connect->rollBack();
+        if ($connect->inTransaction()) {
+            $connect->rollBack();
+        }
         error_log("Add customer error: " . $e->getMessage());
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }

@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $agentDisplayName = trim($_POST['agent_display_name'] ?? ''); // Example field
 
                 // Check if agent profile exists, then update or insert
-                $checkAgentProfile = $connect->prepare("SELECT id FROM sales_agent_profiles WHERE account_id = ?");
+                $checkAgentProfile = $connect->prepare("SELECT agent_profile_id FROM sales_agent_profiles WHERE account_id = ?");
                 $checkAgentProfile->execute([$_SESSION['user_id']]);
                 if ($checkAgentProfile->fetch()) {
                     $agentUpdateQuery = "UPDATE sales_agent_profiles SET bio = ?, display_name = ? WHERE account_id = ?";

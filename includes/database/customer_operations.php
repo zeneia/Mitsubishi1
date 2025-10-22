@@ -312,10 +312,20 @@ class CustomerOperations {
                 return false;
             }
 
-            // Ensure customer row exists
-            $ins = $this->pdo->prepare("INSERT INTO customer_information (account_id, agent_id, updated_at) VALUES (:aid, :gid, CURRENT_TIMESTAMP)
-                                         ON DUPLICATE KEY UPDATE agent_id = VALUES(agent_id), updated_at = CURRENT_TIMESTAMP");
-            return $ins->execute([':aid' => $accountId, ':gid' => $agentId]);
+            // Check if customer_information row exists for this account_id
+            $checkStmt = $this->pdo->prepare("SELECT cusID FROM customer_information WHERE account_id = :aid");
+            $checkStmt->execute([':aid' => $accountId]);
+            $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($existing) {
+                // Update existing customer record
+                $upd = $this->pdo->prepare("UPDATE customer_information SET agent_id = :gid, updated_at = CURRENT_TIMESTAMP WHERE account_id = :aid");
+                return $upd->execute([':gid' => $agentId, ':aid' => $accountId]);
+            } else {
+                // Insert new customer record
+                $ins = $this->pdo->prepare("INSERT INTO customer_information (account_id, agent_id, updated_at) VALUES (:aid, :gid, CURRENT_TIMESTAMP)");
+                return $ins->execute([':aid' => $accountId, ':gid' => $agentId]);
+            }
         } catch (PDOException $e) {
             error_log('setCustomerAgentByAccountId error: ' . $e->getMessage());
             return false;

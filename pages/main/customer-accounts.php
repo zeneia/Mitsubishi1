@@ -822,7 +822,7 @@ try {
       <div class="modal-overlay" id="customerFormModal">
         <div class="modal">
           <div class="modal-header">
-            <h3 id="modalTitle">Add Customer Information</h3>
+            <h3 id="modalTitle">Add Walk-in Customer</h3>
             <button class="modal-close" onclick="closeCustomerModal()">
               <i class="fas fa-times"></i>
             </button>
@@ -830,107 +830,8 @@ try {
           <form id="customerForm">
             <div class="modal-body">
               <input type="hidden" id="cusID" name="cusID">
-              
+
               <div class="form-section">
-                <h3>Customer Type</h3>
-                <div class="form-group">
-                  <label for="customer_type">Customer Type <span style="color: red;">*</span></label>
-                  <select id="customer_type" name="customer_type" class="form-control" required onchange="toggleCustomerType()">
-                    <option value="">Select Customer Type</option>
-                    <option value="Handled">Handled Client</option>
-                    <option value="Walk In">Walk-in Client</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="form-section" id="handledClientSection" style="display: none;">
-                <h3>Account Selection</h3>
-                <div class="form-group">
-                  <label for="account_search">Search Customer Account <span style="color: red;">*</span></label>
-                  <div class="search-account-wrapper" id="search-account-wrapper">
-                    <input type="text" id="account_search" class="form-control" 
-                           placeholder="Search by username or email...">
-                    <input type="hidden" id="account_id" name="account_id">
-                    <div class="search-results" id="searchResults"></div>
-                  </div>
-                  <div class="account-info-display" id="accountInfoDisplay">
-                    <div class="info-row">
-                      <span class="info-label">Username:</span>
-                      <span class="info-value" id="display_username"></span>
-                    </div>
-                    <div class="info-row">
-                      <span class="info-label">Email:</span>
-                      <span class="info-value" id="display_email"></span>
-                    </div>
-                    <div class="info-row">
-                      <span class="info-label">Account Status:</span>
-                      <span class="info-value" id="display_status"></span>
-                    </div>
-                  </div>
-                  
-                  <!-- New display area for personal information for Handled Clients -->
-                  <div class="account-info-display" id="handledClientPersonalInfoDisplay" style="margin-top: 10px; display: none;">
-                    <h4 style="margin-bottom: 10px; color: var(--primary-red);">Personal Information (from Account)</h4>
-                    <div class="info-row">
-                      <span class="info-label">First Name:</span>
-                      <span class="info-value" id="display_handled_firstname"></span>
-                    </div>
-                    <div class="info-row">
-                      <span class="info-label">Middle Name:</span>
-                      <span class="info-value" id="display_handled_middlename"></span>
-                    </div>
-                    <div class="info-row">
-                      <span class="info-label">Last Name:</span>
-                      <span class="info-value" id="display_handled_lastname"></span>
-                    </div>
-                    <div class="info-row">
-                      <span class="info-label">Suffix:</span>
-                      <span class="info-value" id="display_handled_suffix"></span>
-                    </div>
-                    <div class="info-row">
-                      <span class="info-label">Birthday:</span>
-                      <span class="info-value" id="display_handled_birthday"></span>
-                    </div>
-                    <div class="info-row">
-                      <span class="info-label">Age:</span>
-                      <span class="info-value" id="display_handled_age"></span>
-                    </div>
-                    <div class="info-row">
-                      <span class="info-label">Gender:</span>
-                      <span class="info-value" id="display_handled_gender"></span>
-                    </div>
-                    <div class="info-row">
-                      <span class="info-label">Nationality:</span>
-                      <span class="info-value" id="display_handled_nationality"></span>
-                    </div>
-                    <div class="info-row">
-                      <span class="info-label">Civil Status:</span>
-                      <span class="info-value" id="display_handled_civil_status"></span>
-                    </div>
-                    <div class="info-row">
-                      <span class="info-label">Mobile Number:</span>
-                      <span class="info-value" id="display_handled_mobile_number"></span>
-                    </div>
-                    <div class="info-row">
-                      <span class="info-label">Complete Address:</span>
-                      <span class="info-value" id="display_handled_complete_address"></span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-section" id="walkInClientSection" style="display: none;">
-                <h3>Profile Image</h3>
-                <div class="form-group">
-                  <label for="profile_image">Profile Image</label>
-                  <input type="file" id="profile_image" name="profile_image" class="form-control" accept="image/*" onchange="previewProfileImage(this)">
-                  <div id="profileImagePreview" style="margin-top: 10px; display: none;">
-                    <img id="profilePreviewImg" style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 1px solid var(--border-light);">
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-section" id="personalInfoSection" style="display: none;">
                 <h3>Personal Information</h3>
                 <div class="form-row">
                   <div class="form-group">
@@ -1097,56 +998,19 @@ try {
         function closeCustomerModal() {
           document.getElementById('customerFormModal').classList.remove('active');
           document.getElementById('customerForm').reset();
-          document.getElementById('accountInfoDisplay').style.display = 'none';
-          document.getElementById('handledClientPersonalInfoDisplay').style.display = 'none'; 
-          // Clear text content of handledClientPersonalInfoDisplay spans
-          const handledInfoSpans = document.querySelectorAll('#handledClientPersonalInfoDisplay .info-value');
-          handledInfoSpans.forEach(span => span.textContent = '');
-          
-          document.getElementById('profileImagePreview').style.display = 'none';
           document.getElementById('validIdImagePreview').style.display = 'none';
-          // Ensure sections are reset to default visibility
-          document.getElementById('handledClientSection').style.display = 'none';
-          document.getElementById('walkInClientSection').style.display = 'none';
-          document.getElementById('personalInfoSection').style.display = 'none';
-          // Re-enable customer_type select for next operation
-          document.getElementById('customer_type').disabled = false;
         }
 
         document.addEventListener('DOMContentLoaded', function() {
           // Add customer button
           document.getElementById('addCustomerBtn').addEventListener('click', function() {
-            document.getElementById('modalTitle').textContent = 'Add Customer Information';
+            document.getElementById('modalTitle').textContent = 'Add Walk-in Customer';
             document.getElementById('submitBtnText').textContent = 'Save Customer Information';
-            document.getElementById('customerForm').reset(); 
+            document.getElementById('customerForm').reset();
             document.getElementById('cusID').value = '';
-            
-            // Ensure customer_type select is enabled for adding and reset its value
-            document.getElementById('customer_type').disabled = false;
-            document.getElementById('customer_type').value = ''; // Reset selection
-            
-            // Call toggleCustomerType to ensure sections are correctly hidden/shown based on no selection
-            toggleCustomerType(); 
 
-            document.getElementById('accountInfoDisplay').style.display = 'none';
-            const handledClientPersonalInfoDisplay = document.getElementById('handledClientPersonalInfoDisplay');
-            handledClientPersonalInfoDisplay.style.display = 'none';
-            const handledInfoSpans = handledClientPersonalInfoDisplay.querySelectorAll('.info-value');
-            handledInfoSpans.forEach(span => span.textContent = '');
-
-            document.getElementById('profileImagePreview').style.display = 'none';
-            document.getElementById('profilePreviewImg').src = '';
             document.getElementById('validIdImagePreview').style.display = 'none';
             document.getElementById('validIdPreviewImg').src = '';
-
-            // Reset required attributes for "Add" mode
-            // These might be set by toggleCustomerType, but explicit reset here is safer for "Add"
-            document.getElementById('valid_id_image').required = true; 
-            // Default required for walk-in, will be adjusted by toggleCustomerType if needed
-            document.getElementById('firstname').required = true; 
-            document.getElementById('lastname').required = true;
-            document.getElementById('birthday').required = true;
-            document.getElementById('account_search').required = false; // Default for "Add" until type is selected
 
             openCustomerModal();
           });
@@ -1163,71 +1027,12 @@ try {
             const today = new Date();
             let age = today.getFullYear() - birthday.getFullYear();
             const monthDiff = today.getMonth() - birthday.getMonth();
-            
+
             if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthday.getDate())) {
               age--;
             }
-            
+
             document.getElementById('age').value = age;
-          });
-
-          // Account search functionality
-          let searchTimeout;
-          document.getElementById('account_search').addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            const searchTerm = this.value.trim();
-            
-            if (searchTerm.length < 2) {
-              document.getElementById('searchResults').style.display = 'none';
-              return;
-            }
-
-            searchTimeout = setTimeout(() => {
-              fetch(`customer-accounts-ajax.php?action=search_accounts&term=${encodeURIComponent(searchTerm)}`)
-                .then(response => response.json())
-                .then(data => {
-                  const resultsDiv = document.getElementById('searchResults');
-                  resultsDiv.innerHTML = '';
-                  
-                  if (data.success && data.accounts.length > 0) {
-                    data.accounts.forEach(account => {
-                      const item = document.createElement('div');
-                      item.className = 'search-result-item';
-                      
-                      // Create display name - show full name if available, otherwise username
-                      let displayName = account.Username;
-                      if (account.FirstName && account.LastName) {
-                        displayName = `${account.FirstName} ${account.LastName} (${account.Username})`;
-                      } else if (account.FirstName || account.LastName) {
-                        displayName = `${account.FirstName || account.LastName} (${account.Username})`;
-                      }
-                      
-                      item.innerHTML = `
-                        <strong>${displayName}</strong><br>
-                        <small>${account.Email} - ${account.Status}</small>
-                      `;
-                      item.addEventListener('click', function() {
-                        selectAccount(account);
-                      });
-                      resultsDiv.appendChild(item);
-                    });
-                    resultsDiv.style.display = 'block';
-                  } else {
-                    resultsDiv.innerHTML = '<div class="search-result-item">No accounts found</div>';
-                    resultsDiv.style.display = 'block';
-                  }
-                })
-                .catch(error => {
-                  console.error('Error searching accounts:', error);
-                });
-            }, 300);
-          });
-
-          // Click outside to close search results
-          document.addEventListener('click', function(e) {
-            if (!e.target.closest('.search-account-wrapper')) {
-              document.getElementById('searchResults').style.display = 'none';
-            }
           });
         });
 
@@ -1235,13 +1040,12 @@ try {
         async function handleCustomerSubmit() {
           const form = document.getElementById('customerForm');
           const formData = new FormData(form);
-          
-          // Validate customer type
-          const customerType = formData.get('customer_type');
-          if (!customerType) {
+
+          // Validate required personal information fields
+          if (!formData.get('firstname') || !formData.get('lastname') || !formData.get('birthday')) {
             Swal.fire({
               title: 'Error',
-              text: 'Please select a customer type',
+              text: 'Please fill in all required personal information fields',
               icon: 'error',
               confirmButtonColor: '#d60000',
               confirmButtonText: 'OK',
@@ -1254,24 +1058,7 @@ try {
             return;
           }
 
-          // Validate based on customer type
-          if (customerType === 'Handled' && !formData.get('account_id')) {
-            Swal.fire({
-              title: 'Error',
-              text: 'Please select a customer account for handled clients',
-              icon: 'error',
-              confirmButtonColor: '#d60000',
-              confirmButtonText: 'OK',
-              allowOutsideClick: true,
-              allowEscapeKey: true,
-              backdrop: true,
-              heightAuto: false,
-              width: '400px'
-            });
-            return;
-          }
-
-          // Validate required fields
+          // Validate required ID fields
           if (!formData.get('valid_id_type') || !formData.get('valid_id_number')) {
             Swal.fire({
               title: 'Error',
@@ -1363,381 +1150,63 @@ try {
           }
         }
 
-        // Function to toggle customer type sections
-        function toggleCustomerType() {
-          const customerType = document.getElementById('customer_type').value;
-          const handledSection = document.getElementById('handledClientSection');
-          const walkInSection = document.getElementById('walkInClientSection');
-          const personalInfoSectionInputs = document.getElementById('personalInfoSection'); // This is the section with INPUTS
-          const handledClientPersonalInfoDisplay = document.getElementById('handledClientPersonalInfoDisplay');
-          const accountSearchInput = document.getElementById('account_search');
-          // const accountId = document.getElementById('account_id'); // Not directly used for visibility logic here
-
-          const searchLabel = document.querySelector('label[for="account_search"]');
-          const searchWrapper = document.getElementById('search-account-wrapper');
-          
-          // Reset relevant parts of the form, but preserve customer_type and cusID
-          const currentCusID = document.getElementById('cusID').value;
-          const form = document.getElementById('customerForm');
-          const elementsToReset = Array.from(form.elements).filter(el => el.id !== 'customer_type' && el.id !== 'cusID');
-
-          elementsToReset.forEach(element => {
-            if (element.type === 'file') {
-                element.value = ''; // Clear file input
-            } else if (element.type === 'select-one') {
-                element.selectedIndex = 0;
-            } else if (element.type !== 'button' && element.type !== 'submit' && element.type !== 'reset') {
-                element.value = '';
-            }
-            if (element.readOnly) {
-                element.readOnly = false;
-                element.style.backgroundColor = '';
-            }
-            // Reset required attributes to a default (e.g., true for walk-in, false for handled initially)
-            // This will be fine-tuned below based on customerType
-          });
-          document.getElementById('cusID').value = currentCusID; // Restore cusID
-          document.getElementById('customer_type').value = customerType; // Restore customer_type
-
-          // Hide all dynamic displays initially
-          document.getElementById('accountInfoDisplay').style.display = 'none';
-          handledClientPersonalInfoDisplay.style.display = 'none';
-          document.getElementById('profileImagePreview').style.display = 'none';
-          document.getElementById('validIdImagePreview').style.display = 'none';
-
-          // Default state for search elements: hidden. Also ensure account_search is not required by default.
-          if (searchLabel) searchLabel.style.display = 'none';
-          if (searchWrapper) searchWrapper.style.display = 'none';
-          accountSearchInput.required = false;
-          
-          if (customerType === 'Handled') {
-            handledSection.style.display = 'block';
-            walkInSection.style.display = 'none';
-            personalInfoSectionInputs.style.display = 'none'; // Hide input section
-            
-            // For 'Handled' type, show search elements by default.
-            // editCustomer will hide these if it's an edit operation.
-            if (searchLabel) searchLabel.style.display = 'block'; 
-            if (searchWrapper) searchWrapper.style.display = 'block';
-            
-            accountSearchInput.required = true;
-            // accountId.required = true; // account_id is hidden, its requirement is implicit via account_search
-            
-            document.getElementById('profile_image').required = false;
-            document.getElementById('firstname').required = false;
-            document.getElementById('lastname').required = false;
-            document.getElementById('birthday').required = false;
-          } else if (customerType === 'Walk In') {
-            handledSection.style.display = 'none';
-            walkInSection.style.display = 'block';
-            personalInfoSectionInputs.style.display = 'block'; // Show input section
-            
-            // accountSearchInput.required is already false from default
-            
-            document.getElementById('profile_image').required = false; // Optional for walk-in
-            document.getElementById('firstname').required = true;
-            document.getElementById('lastname').required = true;
-            document.getElementById('birthday').required = true;
-          } else {
-            // No customer type selected
-            handledSection.style.display = 'none';
-            walkInSection.style.display = 'none';
-            personalInfoSectionInputs.style.display = 'none'; // Hide input section
-            
-            // accountSearchInput.required is already false from default
-            // Set default required for general fields if form can be submitted without type (should not happen with validation)
-            document.getElementById('firstname').required = true; 
-            document.getElementById('lastname').required = true;
-            document.getElementById('birthday').required = true;
-          }
-        }
-
-        // Function to preview profile image
-        function previewProfileImage(input) {
-          if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              document.getElementById('profilePreviewImg').src = e.target.result;
-              document.getElementById('profileImagePreview').style.display = 'block';
-            };
-            reader.readAsDataURL(input.files[0]);
-          }
-        }
-
-        // Function to preview valid ID image
-        function previewValidIdImage(input) {
-          if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              document.getElementById('validIdPreviewImg').src = e.target.result;
-              document.getElementById('validIdImagePreview').style.display = 'block';
-            };
-            reader.readAsDataURL(input.files[0]);
-          }
-        }
-
-        // Update selectAccount function to populate the new display area
-        function selectAccount(account) {
-          // Check account status first
-          if (account.Status === 'Pending' || account.Status === 'Rejected') {
-            let message = '';
-            if (account.Status === 'Pending') {
-              message = 'This account is currently pending approval by an administrator. Customer information cannot be added until the account is approved.';
-            } else { // Rejected
-              message = 'This account has been rejected. Customer information cannot be added for a rejected account.';
-            }
-            Swal.fire({
-              title: `Account Status: ${account.Status}`,
-              text: message,
-              icon: 'warning',
-              confirmButtonColor: '#d60000',
-              confirmButtonText: 'OK',
-              allowOutsideClick: true,
-              allowEscapeKey: true,
-              backdrop: true,
-              heightAuto: false,
-              width: '450px'
-            });
-            // Clear search and prevent further processing for this account
-            document.getElementById('account_search').value = '';
-            document.getElementById('account_id').value = '';
-            document.getElementById('searchResults').style.display = 'none';
-            document.getElementById('accountInfoDisplay').style.display = 'none';
-            document.getElementById('handledClientPersonalInfoDisplay').style.display = 'none';
-            return; // Stop further execution
-          }
-
-          document.getElementById('account_id').value = account.Id;
-          document.getElementById('account_search').value = account.Username;
-          document.getElementById('searchResults').style.display = 'none';
-          
-          // Show account info (Username, Email, Status)
-          document.getElementById('display_username').textContent = account.Username || 'N/A';
-          document.getElementById('display_email').textContent = account.Email || 'N/A';
-          document.getElementById('display_status').textContent = account.Status || 'N/A';
-          document.getElementById('accountInfoDisplay').style.display = 'block';
-
-          // Populate and show handled client personal info display section
-          // Fields from 'accounts' table (available directly from 'account' object)
-          document.getElementById('display_handled_firstname').textContent = account.FirstName || 'N/A';
-          document.getElementById('display_handled_lastname').textContent = account.LastName || 'N/A';
-          
-          let ageDisplay = 'N/A';
-          if (account.DateOfBirth) {
-            document.getElementById('display_handled_birthday').textContent = new Date(account.DateOfBirth).toLocaleDateString('en-CA'); // YYYY-MM-DD format
-            const birthday = new Date(account.DateOfBirth);
-            const today = new Date();
-            let age = today.getFullYear() - birthday.getFullYear();
-            const monthDiff = today.getMonth() - birthday.getMonth();
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthday.getDate())) {
-              age--;
-            }
-            ageDisplay = age;
-          } else {
-            document.getElementById('display_handled_birthday').textContent = 'N/A';
-          }
-          document.getElementById('display_handled_age').textContent = ageDisplay;
-
-          // Fields from 'customer_information' (not available from basic account search, set to N/A)
-          // These will be populated by editCustomer if a record exists.
-          document.getElementById('display_handled_middlename').textContent = 'N/A';
-          document.getElementById('display_handled_suffix').textContent = 'N/A';
-          document.getElementById('display_handled_gender').textContent = 'N/A';
-          document.getElementById('display_handled_nationality').textContent = 'N/A';
-          document.getElementById('display_handled_civil_status').textContent = 'N/A';
-          document.getElementById('display_handled_mobile_number').textContent = 'N/A';
-          document.getElementById('display_handled_complete_address').textContent = 'N/A';
-          
-          document.getElementById('handledClientPersonalInfoDisplay').style.display = 'block';
-          document.getElementById('personalInfoSection').style.display = 'none';
-        }
-
-        // Update editCustomer function to properly handle customer types and new display
+        // Simplified editCustomer function for walk-in clients only
         async function editCustomer(cusID) {
           try {
             const response = await fetch(`customer-accounts-ajax.php?action=get_customer&id=${cusID}`);
             const data = await response.json();
-            console.log('[editCustomer] get_customer payload:', data);
-            
+
             if (data.success) {
-              const customer = data.customer; // This object contains joined data
-              document.getElementById('modalTitle').textContent = 'Edit Customer Information';
+              const customer = data.customer;
+              document.getElementById('modalTitle').textContent = 'Edit Walk-in Customer';
               document.getElementById('submitBtnText').textContent = 'Update Customer Information';
-              document.getElementById('customerForm').reset(); // Reset form before populating
+              document.getElementById('customerForm').reset();
               document.getElementById('cusID').value = customer.cusID;
-              
-              document.getElementById('customer_type').value = customer.customer_type || '';
-              // Call toggleCustomerType first to set up sections based on the customer's actual type
-              toggleCustomerType(); 
-              // Disable customer_type select in edit mode
-              document.getElementById('customer_type').disabled = true;
-              
-              if (customer.customer_type === 'Handled') {
-                console.log('[editCustomer] Handled client branch for cusID:', cusID);
-                // toggleCustomerType would have made search input elements visible.
-                // Hide them specifically for edit mode of a Handled client.
-                const searchLabel = document.querySelector('label[for="account_search"]');
-                if (searchLabel) searchLabel.style.display = 'none';
-                const searchWrapper = document.getElementById('search-account-wrapper');
-                if (searchWrapper) searchWrapper.style.display = 'none';
-                document.getElementById('account_search').required = false; // No longer required as it's hidden
 
-                document.getElementById('account_id').value = customer.account_id || '';
-                // account_search input value is not needed as it's hidden
-                
-                document.getElementById('display_username').textContent = customer.Username || 'N/A';
-                document.getElementById('display_email').textContent = customer.Email || 'N/A';
-                document.getElementById('display_status').textContent = customer.AccountStatus || 'N/A'; 
-                document.getElementById('accountInfoDisplay').style.display = 'block';
+              // Fill personal information
+              document.getElementById('firstname').value = customer.firstname || '';
+              document.getElementById('lastname').value = customer.lastname || '';
+              document.getElementById('middlename').value = customer.middlename || '';
+              document.getElementById('suffix').value = customer.suffix || '';
+              document.getElementById('nationality').value = customer.nationality || 'Filipino';
+              document.getElementById('birthday').value = customer.birthday || '';
 
-                // Populate handledClientPersonalInfoDisplay
-                const acctFirst = customer.AccountFirstName || '';
-                const acctLast = customer.AccountLastName || '';
-                const acctDob = customer.AccountDateOfBirth || '';
-
-                document.getElementById('display_handled_firstname').textContent = (customer.firstname || acctFirst || 'N/A');
-                document.getElementById('display_handled_middlename').textContent = (customer.middlename || 'N/A');
-                document.getElementById('display_handled_lastname').textContent = (customer.lastname || acctLast || 'N/A');
-                document.getElementById('display_handled_suffix').textContent = (customer.suffix || 'N/A');
-                
-                let ageDisplay = 'N/A';
-                const dob = customer.birthday || acctDob;
-                if (dob) {
-                    document.getElementById('display_handled_birthday').textContent = new Date(dob).toLocaleDateString('en-CA');
-                    const birthdayDate = new Date(dob);
-                    const today = new Date();
-                    let age = today.getFullYear() - birthdayDate.getFullYear();
-                    const monthDiff = today.getMonth() - birthdayDate.getMonth();
-                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdayDate.getDate())) {
-                        age--;
-                    }
-                    ageDisplay = age;
-                } else {
-                    document.getElementById('display_handled_birthday').textContent = 'N/A';
+              // Calculate and set age
+              if(customer.birthday) {
+                const birthdayDate = new Date(customer.birthday);
+                const today = new Date();
+                let age = today.getFullYear() - birthdayDate.getFullYear();
+                const monthDiff = today.getMonth() - birthdayDate.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdayDate.getDate())) {
+                  age--;
                 }
-                document.getElementById('display_handled_age').textContent = customer.age || ageDisplay; // Use stored age if available, else calculate
-
-                document.getElementById('display_handled_gender').textContent = customer.gender || 'N/A';
-                document.getElementById('display_handled_nationality').textContent = customer.nationality || 'N/A';
-                document.getElementById('display_handled_civil_status').textContent = customer.civil_status || 'N/A';
-                document.getElementById('display_handled_mobile_number').textContent = customer.mobile_number || 'N/A';
-                document.getElementById('display_handled_complete_address').textContent = customer.complete_address || 'N/A';
-                
-                document.getElementById('handledClientPersonalInfoDisplay').style.display = 'block';
-
-                // Also show editable personal info inputs so missing fields can be updated
-                const personalInfoSection = document.getElementById('personalInfoSection');
-                if (personalInfoSection) {
-                  personalInfoSection.style.display = 'block';
-                  console.log('[editCustomer] Showing personalInfoSection for handled edit');
-                  // Scroll into view to make it obvious
-                  try {
-                    document.querySelector('#customerForm .modal-body').scrollTo({ top: personalInfoSection.offsetTop - 20, behavior: 'smooth' });
-                  } catch (e) {
-                    // no-op if scrollTo not supported
-                  }
-                }
-
-                // Prefill inputs with data (fallbacks to account fields where appropriate)
-                const firstNameInput = document.getElementById('firstname');
-                const lastNameInput = document.getElementById('lastname');
-                const middleNameInput = document.getElementById('middlename');
-                const suffixInput = document.getElementById('suffix');
-                const nationalityInput = document.getElementById('nationality');
-                const birthdayInput = document.getElementById('birthday');
-                const ageInput = document.getElementById('age');
-                const genderInput = document.getElementById('gender');
-                const civilStatusInput = document.getElementById('civil_status');
-                const mobileInput = document.getElementById('mobile_number');
-                const addressInput = document.getElementById('complete_address');
-
-                if (firstNameInput) firstNameInput.value = (customer.firstname || acctFirst || '');
-                if (lastNameInput) lastNameInput.value = (customer.lastname || acctLast || '');
-                if (middleNameInput) middleNameInput.value = (customer.middlename || '');
-                if (suffixInput) suffixInput.value = (customer.suffix || '');
-                if (nationalityInput) nationalityInput.value = (customer.nationality || '');
-
-                // Set birthday (YYYY-MM-DD) using dob fallback
-                if (birthdayInput) {
-                  if (dob) {
-                    const dt = new Date(dob);
-                    const y = dt.getFullYear();
-                    const m = String(dt.getMonth() + 1).padStart(2, '0');
-                    const d = String(dt.getDate()).padStart(2, '0');
-                    birthdayInput.value = `${y}-${m}-${d}`;
-                  } else {
-                    birthdayInput.value = '';
-                  }
-                }
-                if (ageInput) ageInput.value = customer.age || ageDisplay || '';
-
-                if (genderInput) genderInput.value = (customer.gender || '');
-                if (civilStatusInput) civilStatusInput.value = (customer.civil_status || '');
-                if (mobileInput) mobileInput.value = (customer.mobile_number || '');
-                if (addressInput) addressInput.value = (customer.complete_address || '');
-
-                // Ensure these are required for update
-                if (firstNameInput) firstNameInput.required = true;
-                if (lastNameInput) lastNameInput.required = true;
-                if (birthdayInput) birthdayInput.required = true;
-
-              } else { // Walk In
-                // personalInfoSection is correctly shown by toggleCustomerType for 'Walk In'
-                // Fill input form fields in personalInfoSection
-                document.getElementById('firstname').value = customer.firstname || '';
-                document.getElementById('lastname').value = customer.lastname || '';
-                document.getElementById('middlename').value = customer.middlename || '';
-                document.getElementById('suffix').value = customer.suffix || '';
-                document.getElementById('nationality').value = customer.nationality || 'Filipino';
-                document.getElementById('birthday').value = customer.birthday || '';
-                if(customer.birthday) { // Recalculate age for display in input
-                    const birthdayDate = new Date(customer.birthday);
-                    const today = new Date();
-                    let age = today.getFullYear() - birthdayDate.getFullYear();
-                    const monthDiff = today.getMonth() - birthdayDate.getMonth();
-                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdayDate.getDate())) {
-                        age--;
-                    }
-                    document.getElementById('age').value = age;
-                } else {
-                    document.getElementById('age').value = '';
-                }
-                document.getElementById('gender').value = customer.gender || '';
-                document.getElementById('civil_status').value = customer.civil_status || '';
-                document.getElementById('mobile_number').value = customer.mobile_number || '';
-
-                // Display existing profile image for Walk-in if available
-                // Assumes backend sends 'profile_image_url' (e.g., base64 data URI)
-                if (customer.profile_image_url) {
-                    document.getElementById('profilePreviewImg').src = customer.profile_image_url;
-                    document.getElementById('profileImagePreview').style.display = 'block';
-                } else {
-                    document.getElementById('profileImagePreview').style.display = 'none';
-                    document.getElementById('profilePreviewImg').src = '';
-                }
+                document.getElementById('age').value = age;
               }
-              
-              // Common fields for both types (Employment & Financial, Valid ID)
+
+              document.getElementById('gender').value = customer.gender || '';
+              document.getElementById('civil_status').value = customer.civil_status || '';
+              document.getElementById('mobile_number').value = customer.mobile_number || '';
+              document.getElementById('complete_address').value = customer.complete_address || '';
+
+              // Fill employment & financial information
               document.getElementById('employment_status').value = customer.employment_status || '';
               document.getElementById('company_name').value = customer.company_name || '';
               document.getElementById('position').value = customer.position || '';
               document.getElementById('monthly_income').value = customer.monthly_income || '';
+
+              // Fill valid ID information
               document.getElementById('valid_id_type').value = customer.valid_id_type || '';
               document.getElementById('valid_id_number').value = customer.valid_id_number || '';
-              
+
               // Display existing valid ID image if available
-              // Assumes backend sends 'valid_id_image_url' (e.g., base64 data URI)
               if (customer.valid_id_image_url) {
-                  document.getElementById('validIdPreviewImg').src = customer.valid_id_image_url;
-                  document.getElementById('validIdImagePreview').style.display = 'block';
-              } else {
-                  document.getElementById('validIdImagePreview').style.display = 'none';
-                  document.getElementById('validIdPreviewImg').src = '';
+                document.getElementById('validIdPreviewImg').src = customer.valid_id_image_url;
+                document.getElementById('validIdImagePreview').style.display = 'block';
               }
-              
-              document.getElementById('valid_id_image').required = false; // Not required when editing, user can choose to update
-              document.getElementById('profile_image').required = false; // Not required when editing for walk-in
-              
+
+              // Valid ID image not required when editing
+              document.getElementById('valid_id_image').required = false;
+
               openCustomerModal();
             } else {
               Swal.fire({
@@ -1759,6 +1228,22 @@ try {
             });
           }
         }
+
+
+
+        // Function to preview valid ID image
+        function previewValidIdImage(input) {
+          if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              document.getElementById('validIdPreviewImg').src = e.target.result;
+              document.getElementById('validIdImagePreview').style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+          }
+        }
+
+
 
         // Delete customer function
         function deleteCustomer(cusID) {

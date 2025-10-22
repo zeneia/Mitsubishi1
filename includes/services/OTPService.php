@@ -288,19 +288,24 @@ class OTPService
     public function resendOTP($accountId, $email, $context = 'registration')
     {
         try {
-            // Get the latest OTP record
+            error_log("DEBUG: resendOTP called for accountId=$accountId, email=$email, context=$context");
+
+            // Get the latest ACTIVE (non-used) OTP record
             $stmt = $this->pdo->prepare("
                 SELECT * FROM email_verifications
-                WHERE account_id = ?
+                WHERE account_id = ? AND is_used = 0
                 ORDER BY created_at DESC
                 LIMIT 1
             ");
             $stmt->execute([$accountId]);
             $otpRecord = $stmt->fetch(\PDO::FETCH_ASSOC);
 
+            error_log("DEBUG: OTP Record found: " . ($otpRecord ? "YES (ID: {$otpRecord['id']}, resend_count: {$otpRecord['resend_count']}, last_resend_at: {$otpRecord['last_resend_at']})" : "NO"));
+
             if ($otpRecord) {
                 // Check resend count
                 if ($otpRecord['resend_count'] >= self::MAX_RESENDS) {
+                    error_log("DEBUG: Max resend limit reached");
                     return [
                         'success' => false,
                         'message' => 'Maximum resend limit reached. Please contact support.'
@@ -313,6 +318,7 @@ class OTPService
                     $cooldownRemaining = self::RESEND_COOLDOWN_SECONDS - (time() - $lastResendTime);
 
                     if ($cooldownRemaining > 0) {
+                        error_log("DEBUG: Cooldown active, $cooldownRemaining seconds remaining");
                         return [
                             'success' => false,
                             'message' => "Please wait $cooldownRemaining seconds before requesting a new OTP."
@@ -322,16 +328,20 @@ class OTPService
             }
 
             // Generate and send new OTP
+            error_log("DEBUG: Calling sendOTP...");
             $result = $this->sendOTP($accountId, $email, $context);
+            error_log("DEBUG: sendOTP result: " . json_encode($result));
 
-            if ($result['success']) {
-                // Update resend count
+            // If successful, update resend count on the NEW OTP record
+            if ($result['success'] && isset($result['otp_id'])) {
+                $newResendCount = $otpRecord ? ($otpRecord['resend_count'] + 1) : 1;
                 $updateResend = $this->pdo->prepare("
                     UPDATE email_verifications
-                    SET resend_count = resend_count + 1, last_resend_at = NOW()
+                    SET resend_count = ?, last_resend_at = NOW()
                     WHERE id = ?
                 ");
-                $updateResend->execute([$result['otp_id']]);
+                $updateResend->execute([$newResendCount, $result['otp_id']]);
+                error_log("DEBUG: Updated resend count to $newResendCount for new OTP record ID: {$result['otp_id']}");
             }
 
             return $result;

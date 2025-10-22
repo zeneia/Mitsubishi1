@@ -39,6 +39,9 @@ try {
         case 'get_workload_stats':
             getWorkloadStats();
             break;
+        case 'get_summary_stats':
+            getSummaryStats();
+            break;
         default:
             http_response_code(400);
             echo json_encode(['success' => false, 'message' => 'Invalid action']);
@@ -353,27 +356,32 @@ function archiveClient() {
 
 function getAvailableAgents() {
     global $pdo;
-    
+
+    // Get all agents who either:
+    // 1. Have the SalesAgent role and are active, OR
+    // 2. Have at least one client assigned to them (regardless of role/status)
     $sql = "
-        SELECT 
+        SELECT
             a.Id as account_id,
             a.FirstName as first_name,
             a.LastName as last_name,
             COALESCE(sap.display_name, CONCAT(a.FirstName, ' ', a.LastName)) as position,
             COALESCE(sap.status, 'Active') as status,
-            COUNT(ci.cusID) as active_clients
+            COUNT(CASE WHEN COALESCE(ci.status, 'Active') IN ('Active', 'Pending') THEN 1 END) as active_clients,
+            COUNT(ci.cusID) as total_clients
         FROM accounts a
         LEFT JOIN sales_agent_profiles sap ON a.Id = sap.account_id
-        LEFT JOIN customer_information ci ON a.Id = ci.agent_id AND COALESCE(ci.status, 'Active') IN ('Active', 'Pending')
-        WHERE a.Role = 'SalesAgent' AND COALESCE(sap.status, 'Active') = 'Active'
+        LEFT JOIN customer_information ci ON a.Id = ci.agent_id
+        WHERE (a.Role = 'SalesAgent' AND COALESCE(sap.status, 'Active') = 'Active')
+           OR a.Id IN (SELECT DISTINCT agent_id FROM customer_information WHERE agent_id IS NOT NULL)
         GROUP BY a.Id
-        ORDER BY active_clients ASC, a.FirstName ASC
+        ORDER BY active_clients DESC, a.FirstName ASC
     ";
-    
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     echo json_encode(['success' => true, 'data' => $agents]);
 }
 
@@ -402,5 +410,47 @@ function getWorkloadStats() {
     $stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo json_encode(['success' => true, 'data' => $stats]);
+}
+
+function getSummaryStats() {
+    global $pdo;
+
+    try {
+        // Get total client assignments
+        $totalQuery = "SELECT COUNT(*) as total FROM customer_information WHERE agent_id IS NOT NULL";
+        $totalStmt = $pdo->prepare($totalQuery);
+        $totalStmt->execute();
+        $totalClients = $totalStmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+        // Get active clients
+        $activeQuery = "SELECT COUNT(*) as active FROM customer_information
+                       WHERE agent_id IS NOT NULL
+                       AND COALESCE(status, 'Active') IN ('Active', 'Pending')";
+        $activeStmt = $pdo->prepare($activeQuery);
+        $activeStmt->execute();
+        $activeClients = $activeStmt->fetch(PDO::FETCH_ASSOC)['active'];
+
+        // Get average handle time (in days)
+        $handleTimeQuery = "SELECT AVG(DATEDIFF(
+                              COALESCE(updated_at, NOW()),
+                              created_at
+                            )) as avg_days
+                            FROM customer_information
+                            WHERE agent_id IS NOT NULL";
+        $handleTimeStmt = $pdo->prepare($handleTimeQuery);
+        $handleTimeStmt->execute();
+        $avgHandleTime = $handleTimeStmt->fetch(PDO::FETCH_ASSOC)['avg_days'];
+        $avgHandleTime = $avgHandleTime ? round($avgHandleTime) : 0;
+
+        $stats = [
+            'total_assignments' => $totalClients,
+            'active_clients' => $activeClients,
+            'avg_handle_time' => $avgHandleTime
+        ];
+
+        echo json_encode(['success' => true, 'data' => $stats]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Error fetching summary stats: ' . $e->getMessage()]);
+    }
 }
 ?>
