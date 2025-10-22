@@ -611,19 +611,27 @@ function updateVehicle($pdo) {
             $additionalImagesPaths = [];
             $view360ImagesPaths = [];
             $updateImages = false;
-            
+
+            // Variable to store existing 3D models from hidden input
+            $existingView360Images = null;
+
             // Create unique identifier for this vehicle's files
             $vehicleId = 'vehicle_' . $input['id'];
-            
+
             if (isset($_POST['_method']) && $_POST['_method'] === 'PUT') {
+                // Check if we should preserve existing 3D models
+                if (isset($_POST['existing_view_360_images']) && !empty($_POST['existing_view_360_images'])) {
+                    $existingView360Images = $_POST['existing_view_360_images'];
+                }
+
                 // Handle main image upload
                 if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] === UPLOAD_ERR_OK) {
                     $mainImagePath = handleFileUpload($_FILES['main_image'], '../uploads/vehicle_images/main/', $vehicleId . '_main_update');
                     $updateImages = true;
                 }
-                
+
                 // Handle additional images upload
-                if (isset($_FILES['additional_images']) && is_array($_FILES['additional_images']['tmp_name'])) {
+                if (isset($_FILES['additional_images']) && is_array($_FILES['additional_images']['tmp_name']) && !empty(array_filter($_FILES['additional_images']['tmp_name']))) {
                     foreach ($_FILES['additional_images']['tmp_name'] as $key => $tmpName) {
                         if ($_FILES['additional_images']['error'][$key] === UPLOAD_ERR_OK) {
                             $file = [
@@ -642,9 +650,9 @@ function updateVehicle($pdo) {
                         $updateImages = true;
                     }
                 }
-                
+
                 // Handle 360/3D images upload
-                if (isset($_FILES['view_360_images']) && is_array($_FILES['view_360_images']['tmp_name'])) {
+                if (isset($_FILES['view_360_images']) && is_array($_FILES['view_360_images']['tmp_name']) && !empty(array_filter($_FILES['view_360_images']['tmp_name']))) {
                     foreach ($_FILES['view_360_images']['tmp_name'] as $key => $tmpName) {
                         if ($_FILES['view_360_images']['error'][$key] === UPLOAD_ERR_OK) {
                             $file = [
@@ -670,7 +678,7 @@ function updateVehicle($pdo) {
                 }
 
                 // Handle color-specific 3D models mapping
-                if (isset($_FILES['color_model_files']) && is_array($_FILES['color_model_files']['tmp_name'])) {
+                if (isset($_FILES['color_model_files']) && is_array($_FILES['color_model_files']['tmp_name']) && !empty(array_filter($_FILES['color_model_files']['tmp_name']))) {
                     $colors = isset($_POST['color_model_colors']) && is_array($_POST['color_model_colors']) ? $_POST['color_model_colors'] : [];
                     $colorModelMap = [];
                     foreach ($_FILES['color_model_files']['tmp_name'] as $key => $tmpName) {
@@ -692,6 +700,17 @@ function updateVehicle($pdo) {
                     if (!empty($colorModelMap)) {
                         // Replace generic list with explicit color mapping
                         $view360ImagesPaths = $colorModelMap;
+                        $updateImages = true;
+                    }
+                }
+
+                // If no new files uploaded but we have existing models, preserve them
+                if (empty($view360ImagesPaths) && $existingView360Images !== null && !empty($existingView360Images)) {
+                    // Decode existing models and use them
+                    $decodedExisting = json_decode($existingView360Images, true);
+                    if (json_last_error() === JSON_ERROR_NONE && !empty($decodedExisting)) {
+                        $view360ImagesPaths = $decodedExisting;
+                        // Set updateImages to true so we include this in the UPDATE query
                         $updateImages = true;
                     }
                 }

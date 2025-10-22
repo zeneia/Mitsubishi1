@@ -787,6 +787,7 @@ $accountStats = getAccountStats($connect);
     <form id="addVehicleForm" enctype="multipart/form-data">
       <div class="modal-body">
         <input type="hidden" id="adminVehicleId" name="id">
+        <input type="hidden" id="adminExistingView360Images" name="existing_view_360_images" value="">
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Model Name *</label>
@@ -925,9 +926,61 @@ $accountStats = getAccountStats($connect);
           <div class="file-info">Max size: 10MB per file</div>
 
           <label class="image-upload-label" style="margin-top:12px;">3D Models by Color</label>
+
+          <!-- Display existing 3D models -->
+          <div id="adminExistingModelsDisplay" style="margin-top: 12px; display: none;">
+            <label class="image-upload-label">Current 3D Models:</label>
+            <div id="adminExistingModelsList" style="padding: 10px; background: #f5f5f5; border-radius: 4px; margin-bottom: 10px;">
+              <!-- Will be populated dynamically -->
+            </div>
+            <div class="file-info" style="color: #666; margin-top: 5px;">
+              Upload new models below to replace these, or leave empty to keep existing models.
+            </div>
+          </div>
+
           <div id="adminColorModelList"></div>
           <button type="button" class="btn btn-secondary" id="adminAddColorModelBtn" style="margin-top:8px;">Add Color & Model</button>
           <div class="file-info">Pair each color with its .glb/.gltf file.</div>
+
+          <!-- Upload Progress Bar -->
+          <div id="adminUploadProgressContainer" style="display: none; margin-top: 15px;">
+            <label class="form-label" style="margin-bottom: 8px;">Upload Progress</label>
+            <div style="background: #f0f0f0; border-radius: 8px; overflow: hidden; height: 30px; position: relative; border: 1px solid #ddd;">
+              <div id="adminUploadProgressBar" style="
+                width: 0%;
+                height: 100%;
+                background: linear-gradient(90deg, #e60012 0%, #ff3333 100%);
+                transition: width 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+              ">
+                <span id="adminUploadProgressText" style="
+                  position: absolute;
+                  width: 100%;
+                  text-align: center;
+                  color: #333;
+                  font-weight: 600;
+                  font-size: 13px;
+                  z-index: 2;
+                  mix-blend-mode: difference;
+                  color: white;
+                ">0%</span>
+              </div>
+            </div>
+            <div id="adminUploadProgressDetails" style="
+              display: flex;
+              justify-content: space-between;
+              margin-top: 5px;
+              font-size: 12px;
+              color: #666;
+            ">
+              <span id="adminUploadSpeed">Speed: 0 MB/s</span>
+              <span id="adminUploadETA">Time remaining: calculating...</span>
+              <span id="adminUploadSize">0 MB / 0 MB</span>
+            </div>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -1697,6 +1750,16 @@ $accountStats = getAccountStats($connect);
     window.closeAdminVehicleModal = function() {
       document.getElementById('adminVehicleModal').classList.remove('active');
       document.getElementById('adminVehicleModal').style.display = 'none';
+
+      // Clear existing models display
+      document.getElementById('adminExistingModelsDisplay').style.display = 'none';
+      document.getElementById('adminExistingModelsList').innerHTML = '';
+      document.getElementById('adminExistingView360Images').value = '';
+      document.getElementById('adminColorModelList').innerHTML = '';
+
+      // Hide and reset progress bar immediately
+      document.getElementById('adminUploadProgressContainer').style.display = 'none';
+      resetAdminProgressBar();
     };
 
     // Color-model add button for admin form
@@ -1751,49 +1814,230 @@ $accountStats = getAccountStats($connect);
         const formData = new FormData(adminVehicleForm);
         const submitBtn = adminVehicleForm.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
+
+        // Calculate total upload size
+        const totalSize = calculateAdminFormDataSize(formData);
+        const hasLargeFiles = totalSize > 1 * 1024 * 1024; // Show progress for files > 1MB
+
+        if (hasLargeFiles) {
+          document.getElementById('adminUploadProgressContainer').style.display = 'block';
+          resetAdminProgressBar();
+        }
+
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding Vehicle...';
         submitBtn.disabled = true;
 
-        try {
-          const response = await fetch('../../api/vehicles.php', {
-            method: 'POST',
-            body: formData
+        // Use XMLHttpRequest for accurate progress tracking
+        const xhr = new XMLHttpRequest();
+
+        // Track upload progress
+        let startTime = Date.now();
+        let lastLoaded = 0;
+        let lastTime = startTime;
+
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            const currentTime = Date.now();
+            const timeDiff = (currentTime - lastTime) / 1000; // seconds
+            const bytesDiff = e.loaded - lastLoaded;
+
+            // Update progress bar
+            updateAdminProgressBar(percentComplete, e.loaded, e.total, bytesDiff, timeDiff);
+
+            lastLoaded = e.loaded;
+            lastTime = currentTime;
+          }
+        });
+
+        // Handle upload completion
+        xhr.upload.addEventListener('load', () => {
+          // Upload complete, now waiting for server processing
+          if (hasLargeFiles) {
+            updateAdminProgressBar(100, totalSize, totalSize, 0, 0);
+            document.getElementById('adminUploadProgressText').textContent = 'Processing...';
+            document.getElementById('adminUploadProgressDetails').innerHTML =
+              '<span style="color: #e60012; font-weight: 600;">Server is processing your upload...</span>';
+          }
+        });
+
+        // Handle errors
+        xhr.upload.addEventListener('error', () => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Upload Failed',
+            text: 'Please check your connection and try again.'
           });
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+          hideAdminProgressBar();
+        });
 
-          const result = await response.json();
+        xhr.upload.addEventListener('abort', () => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Upload Cancelled',
+            text: 'The upload was cancelled.'
+          });
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+          hideAdminProgressBar();
+        });
 
-          if (result.success) {
-            SwalSuccess.fire({
-              title: 'Success!',
-              text: result.message || 'Vehicle added successfully!'
-            });
+        // Handle response
+        xhr.addEventListener('load', () => {
+          try {
+            const result = JSON.parse(xhr.responseText);
 
-            adminVehicleForm.reset();
-            document.getElementById('adminColorModelList').innerHTML = '';
-            closeAdminVehicleModal();
+            if (xhr.status === 200 && result.success) {
+              // Complete the progress bar and hide it after a short delay
+              if (hasLargeFiles) {
+                document.getElementById('adminUploadProgressText').textContent = '✓ Complete';
+                document.getElementById('adminUploadProgressDetails').innerHTML =
+                  '<span style="color: #28a745; font-weight: 600;">Upload successful!</span>';
 
-            setTimeout(() => {
-              location.reload();
-            }, 2000);
-          } else {
+                // Hide progress bar after 1.5 seconds
+                setTimeout(() => {
+                  document.getElementById('adminUploadProgressContainer').style.display = 'none';
+                  resetAdminProgressBar();
+                }, 1500);
+              }
+
+              SwalSuccess.fire({
+                title: 'Success!',
+                text: result.message || 'Vehicle added successfully!'
+              });
+
+              adminVehicleForm.reset();
+              document.getElementById('adminColorModelList').innerHTML = '';
+              closeAdminVehicleModal();
+
+              setTimeout(() => {
+                location.reload();
+              }, 2000);
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: result.message || 'Failed to add vehicle'
+              });
+              hideAdminProgressBar();
+            }
+          } catch (error) {
+            console.error('Error parsing response:', error);
             Swal.fire({
               icon: 'error',
               title: 'Error!',
-              text: result.message || 'Failed to add vehicle'
+              text: 'An error occurred while processing the response'
             });
+            hideAdminProgressBar();
+          } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
           }
-        } catch (error) {
-          console.error('Error:', error);
+        });
+
+        // Handle network errors
+        xhr.addEventListener('error', () => {
           Swal.fire({
             icon: 'error',
-            title: 'Error!',
-            text: 'An error occurred while adding the vehicle'
+            title: 'Network Error',
+            text: 'Please check your connection.'
           });
-        } finally {
           submitBtn.innerHTML = originalText;
           submitBtn.disabled = false;
+          hideAdminProgressBar();
+        });
+
+        // Send the request
+        xhr.open('POST', '../../api/vehicles.php', true);
+        xhr.send(formData);
+      });
+    }
+
+    // Helper functions for admin progress bar
+    function calculateAdminFormDataSize(formData) {
+      let totalSize = 0;
+      const fileInputs = adminVehicleForm.querySelectorAll('input[type="file"]');
+      fileInputs.forEach(input => {
+        if (input.files) {
+          for (let i = 0; i < input.files.length; i++) {
+            totalSize += input.files[i].size;
+          }
         }
       });
+      return totalSize;
+    }
+
+    function updateAdminProgressBar(percentage, loaded, total, bytesDiff, timeDiff) {
+      const progressBar = document.getElementById('adminUploadProgressBar');
+      const progressText = document.getElementById('adminUploadProgressText');
+      const speedElement = document.getElementById('adminUploadSpeed');
+      const etaElement = document.getElementById('adminUploadETA');
+      const sizeElement = document.getElementById('adminUploadSize');
+
+      progressBar.style.width = percentage.toFixed(1) + '%';
+      progressText.textContent = percentage.toFixed(1) + '%';
+
+      let speed = 0;
+      if (timeDiff > 0) {
+        speed = (bytesDiff / timeDiff) / (1024 * 1024);
+      }
+
+      let eta = 'calculating...';
+      if (speed > 0 && loaded < total) {
+        const remainingBytes = total - loaded;
+        const remainingSeconds = remainingBytes / (speed * 1024 * 1024);
+        eta = formatAdminTime(remainingSeconds);
+      } else if (loaded >= total) {
+        eta = 'complete';
+      }
+
+      speedElement.textContent = `Speed: ${speed.toFixed(2)} MB/s`;
+      etaElement.textContent = `Time remaining: ${eta}`;
+      sizeElement.textContent = `${formatAdminBytes(loaded)} / ${formatAdminBytes(total)}`;
+    }
+
+    function resetAdminProgressBar() {
+      const progressBar = document.getElementById('adminUploadProgressBar');
+      const progressText = document.getElementById('adminUploadProgressText');
+      const speedElement = document.getElementById('adminUploadSpeed');
+      const etaElement = document.getElementById('adminUploadETA');
+      const sizeElement = document.getElementById('adminUploadSize');
+
+      progressBar.style.width = '0%';
+      progressText.textContent = '0%';
+      speedElement.textContent = 'Speed: 0 MB/s';
+      etaElement.textContent = 'Time remaining: calculating...';
+      sizeElement.textContent = '0 MB / 0 MB';
+    }
+
+    function hideAdminProgressBar() {
+      setTimeout(() => {
+        document.getElementById('adminUploadProgressContainer').style.display = 'none';
+        resetAdminProgressBar();
+      }, 3000);
+    }
+
+    function formatAdminBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function formatAdminTime(seconds) {
+      if (seconds < 1) return 'less than a second';
+      if (seconds < 60) return Math.round(seconds) + ' seconds';
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = Math.round(seconds % 60);
+      if (minutes < 60) {
+        return `${minutes}m ${remainingSeconds}s`;
+      }
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      return `${hours}h ${remainingMinutes}m`;
     }
 
     // Close buttons

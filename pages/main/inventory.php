@@ -1065,7 +1065,8 @@ if ($user_role === 'Sales Agent') {
       <form id="vehicleForm" enctype="multipart/form-data">
         <div class="modal-body">
           <input type="hidden" id="vehicleId" name="id">
-          
+          <input type="hidden" id="existingView360Images" name="existing_view_360_images" value="">
+
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Model Name *</label>
@@ -1204,9 +1205,61 @@ if ($user_role === 'Sales Agent') {
             <div class="file-info">Max size: 10MB per file</div>
 
             <label class="image-upload-label" style="margin-top:12px;">3D Models by Color</label>
+
+            <!-- Display existing 3D models -->
+            <div id="existingModelsDisplay" style="margin-top: 12px; display: none;">
+              <label class="image-upload-label">Current 3D Models:</label>
+              <div id="existingModelsList" style="padding: 10px; background: #f5f5f5; border-radius: 4px; margin-bottom: 10px;">
+                <!-- Will be populated dynamically -->
+              </div>
+              <div class="file-info" style="color: #666; margin-top: 5px;">
+                Upload new models below to replace these, or leave empty to keep existing models.
+              </div>
+            </div>
+
             <div id="colorModelList"></div>
             <button type="button" class="btn btn-secondary" id="addColorModelBtn" style="margin-top:8px;">Add Color & Model</button>
             <div class="file-info">Pair each color with its .glb/.gltf file.</div>
+
+            <!-- Upload Progress Bar -->
+            <div id="uploadProgressContainer" style="display: none; margin-top: 15px;">
+              <label class="form-label" style="margin-bottom: 8px;">Upload Progress</label>
+              <div style="background: #f0f0f0; border-radius: 8px; overflow: hidden; height: 30px; position: relative; border: 1px solid #ddd;">
+                <div id="uploadProgressBar" style="
+                  width: 0%;
+                  height: 100%;
+                  background: linear-gradient(90deg, #e60012 0%, #ff3333 100%);
+                  transition: width 0.3s ease;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  position: relative;
+                ">
+                  <span id="uploadProgressText" style="
+                    position: absolute;
+                    width: 100%;
+                    text-align: center;
+                    color: #333;
+                    font-weight: 600;
+                    font-size: 13px;
+                    z-index: 2;
+                    mix-blend-mode: difference;
+                    color: white;
+                  ">0%</span>
+                </div>
+              </div>
+              <div id="uploadProgressDetails" style="
+                display: flex;
+                justify-content: space-between;
+                margin-top: 5px;
+                font-size: 12px;
+                color: #666;
+              ">
+                <span id="uploadSpeed">Speed: 0 MB/s</span>
+                <span id="uploadETA">Time remaining: calculating...</span>
+                <span id="uploadSize">0 MB / 0 MB</span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -1587,7 +1640,51 @@ if ($user_role === 'Sales Agent') {
           document.getElementById('minStockAlert').value = vehicle.min_stock_alert;
           document.getElementById('availabilityStatus').value = vehicle.availability_status;
           document.getElementById('expectedDelivery').value = vehicle.expected_delivery_time || '';
-          
+
+          // Handle existing 3D models display
+          if (vehicle.view_360_images) {
+            try {
+              console.log('Raw view_360_images:', vehicle.view_360_images);
+
+              let view360Data;
+              if (typeof vehicle.view_360_images === 'string') {
+                view360Data = JSON.parse(vehicle.view_360_images);
+              } else {
+                view360Data = vehicle.view_360_images;
+              }
+
+              console.log('Parsed view360Data:', view360Data);
+
+              if (view360Data && (Array.isArray(view360Data) || typeof view360Data === 'object')) {
+                // Check if it's not empty
+                const hasData = Array.isArray(view360Data) ? view360Data.length > 0 : Object.keys(view360Data).length > 0;
+
+                if (hasData) {
+                  displayExistingModels(view360Data);
+                  // Store in hidden input for preservation
+                  document.getElementById('existingView360Images').value = JSON.stringify(view360Data);
+                } else {
+                  console.log('view360Data is empty');
+                  document.getElementById('existingModelsDisplay').style.display = 'none';
+                  document.getElementById('existingView360Images').value = '';
+                }
+              } else {
+                console.log('view360Data is not valid array or object');
+                document.getElementById('existingModelsDisplay').style.display = 'none';
+                document.getElementById('existingView360Images').value = '';
+              }
+            } catch (e) {
+              console.error('Error parsing view_360_images:', e);
+              document.getElementById('existingModelsDisplay').style.display = 'none';
+              document.getElementById('existingView360Images').value = '';
+            }
+          } else {
+            // No existing models
+            console.log('No view_360_images found');
+            document.getElementById('existingModelsDisplay').style.display = 'none';
+            document.getElementById('existingView360Images').value = '';
+          }
+
           document.getElementById('vehicleModal').classList.add('active');
         } else {
           showToast('Failed to load vehicle details', 'error');
@@ -1603,17 +1700,110 @@ if ($user_role === 'Sales Agent') {
     function closeVehicleModal() {
       document.getElementById('vehicleModal').classList.remove('active');
       vehicleForm.reset();
-      
+
       // Reset hidden fields and clear any remaining data following memory requirements
       document.getElementById('vehicleId').value = '';
-      
+
+      // Clear existing models display
+      document.getElementById('existingModelsDisplay').style.display = 'none';
+      document.getElementById('existingModelsList').innerHTML = '';
+      document.getElementById('existingView360Images').value = '';
+      document.getElementById('colorModelList').innerHTML = '';
+
+      // Hide and reset progress bar immediately
+      document.getElementById('uploadProgressContainer').style.display = 'none';
+      resetProgressBar();
+
       // Clear any validation states
       const inputs = vehicleForm.querySelectorAll('input, select, textarea');
       inputs.forEach(input => {
         input.classList.remove('error', 'valid');
       });
     }
-    
+
+    // Display existing 3D models in edit modal
+    function displayExistingModels(modelsData) {
+      console.log('displayExistingModels called with:', modelsData);
+
+      const displaySection = document.getElementById('existingModelsDisplay');
+      const modelsList = document.getElementById('existingModelsList');
+
+      if (!displaySection || !modelsList) {
+        console.error('Display elements not found!');
+        return;
+      }
+
+      if (!modelsData || (Array.isArray(modelsData) && modelsData.length === 0)) {
+        console.log('No models data to display');
+        displaySection.style.display = 'none';
+        return;
+      }
+
+      displaySection.style.display = 'block';
+      modelsList.innerHTML = '';
+
+      // Check if it's color-model mapping format
+      const isColorMapping = Array.isArray(modelsData) &&
+        modelsData.length > 0 &&
+        modelsData[0].color !== undefined &&
+        modelsData[0].model !== undefined;
+
+      console.log('Is color mapping format:', isColorMapping);
+
+      if (isColorMapping) {
+        // Display color-specific models
+        console.log('Displaying color-specific models:', modelsData.length);
+        modelsData.forEach((item, index) => {
+          const modelDiv = document.createElement('div');
+          modelDiv.style.cssText = 'padding: 8px; margin-bottom: 5px; background: white; border-radius: 3px; display: flex; justify-content: space-between; align-items: center;';
+          modelDiv.innerHTML = `
+            <div>
+              <strong style="color: #e60012;">Color:</strong> ${escapeHtml(item.color || 'Unknown')}
+              <span style="margin-left: 15px;"><strong>Model:</strong> ${escapeHtml(item.model.split('/').pop())}</span>
+            </div>
+            <span style="color: #28a745; font-size: 12px;">
+              <i class="fas fa-check-circle"></i> Uploaded
+            </span>
+          `;
+          modelsList.appendChild(modelDiv);
+        });
+      } else if (Array.isArray(modelsData)) {
+        // Display generic model list
+        console.log('Displaying generic models:', modelsData.length);
+        modelsData.forEach((modelPath, index) => {
+          const modelDiv = document.createElement('div');
+          modelDiv.style.cssText = 'padding: 8px; margin-bottom: 5px; background: white; border-radius: 3px; display: flex; justify-content: space-between; align-items: center;';
+
+          const fileName = modelPath.split('/').pop();
+          const isModel = fileName.toLowerCase().endsWith('.glb') || fileName.toLowerCase().endsWith('.gltf');
+          const icon = isModel ? 'fa-cube' : 'fa-image';
+
+          modelDiv.innerHTML = `
+            <div>
+              <i class="fas ${icon}" style="margin-right: 8px; color: #666;"></i>
+              <strong>${escapeHtml(fileName)}</strong>
+            </div>
+            <span style="color: #28a745; font-size: 12px;">
+              <i class="fas fa-check-circle"></i> Uploaded
+            </span>
+          `;
+          modelsList.appendChild(modelDiv);
+        });
+      } else {
+        console.log('Unknown data format:', typeof modelsData);
+      }
+
+      console.log('Display section visible:', displaySection.style.display);
+      console.log('Models list children:', modelsList.children.length);
+    }
+
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
     function openDeleteModal(id) {
       deleteVehicleId = id;
       const vehicle = vehicles.find(v => v.id === id);
@@ -1811,7 +2001,7 @@ if (vehicle.additional_images && Array.isArray(vehicle.additional_images) && veh
     // Handle form submission
     async function handleVehicleSubmit(e) {
       e.preventDefault();
-      
+
       // Validate file sizes before submission
       const mainImage = document.getElementById('mainImage').files[0];
       const additionalImages = document.getElementById('additionalImages').files;
@@ -1843,42 +2033,225 @@ if (vehicle.additional_images && Array.isArray(vehicle.additional_images) && veh
       const formData = new FormData(vehicleForm);
       const vehicleId = document.getElementById('vehicleId').value;
       const isEdit = vehicleId !== '';
-      
+
       // Add method override for PUT requests since FormData doesn't support PUT directly
       if (isEdit) {
         formData.append('_method', 'PUT');
       }
-      
-      showLoading(true);
-      
-      try {
-        const url = '../../api/vehicles.php';
-        
-        // Always use POST with FormData to preserve file uploads
-        // The API will check for _method parameter to handle PUT requests
-        const response = await fetch(url, {
-          method: 'POST',
-          body: formData
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-          showToast(result.message, 'success');
-          closeVehicleModal();
-          loadVehicles();
-          loadStats();
-        } else {
-          showToast(result.message || 'Operation failed', 'error');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        showToast('An error occurred', 'error');
-      } finally {
-        showLoading(false);
+
+      // Calculate total upload size
+      const totalSize = calculateFormDataSize(formData);
+      const hasLargeFiles = totalSize > 1 * 1024 * 1024; // Show progress for files > 1MB
+
+      if (hasLargeFiles) {
+        document.getElementById('uploadProgressContainer').style.display = 'block';
+        resetProgressBar();
       }
+
+      showLoading(true);
+
+      // Use XMLHttpRequest for accurate progress tracking
+      const xhr = new XMLHttpRequest();
+
+      // Track upload progress
+      let startTime = Date.now();
+      let lastLoaded = 0;
+      let lastTime = startTime;
+
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable) {
+          const percentComplete = (e.loaded / e.total) * 100;
+          const currentTime = Date.now();
+          const timeDiff = (currentTime - lastTime) / 1000; // seconds
+          const bytesDiff = e.loaded - lastLoaded;
+
+          // Update progress bar
+          updateProgressBar(percentComplete, e.loaded, e.total, bytesDiff, timeDiff);
+
+          lastLoaded = e.loaded;
+          lastTime = currentTime;
+        }
+      });
+
+      // Handle upload completion
+      xhr.upload.addEventListener('load', () => {
+        // Upload complete, now waiting for server processing
+        if (hasLargeFiles) {
+          updateProgressBar(100, totalSize, totalSize, 0, 0);
+          document.getElementById('uploadProgressText').textContent = 'Processing...';
+          document.getElementById('uploadProgressDetails').innerHTML =
+            '<span style="color: #e60012; font-weight: 600;">Server is processing your upload...</span>';
+        }
+      });
+
+      // Handle errors
+      xhr.upload.addEventListener('error', () => {
+        showToast('Upload failed. Please check your connection and try again.', 'error');
+        showLoading(false);
+        hideProgressBar();
+      });
+
+      xhr.upload.addEventListener('abort', () => {
+        showToast('Upload cancelled.', 'error');
+        showLoading(false);
+        hideProgressBar();
+      });
+
+      // Handle response
+      xhr.addEventListener('load', () => {
+        try {
+          const result = JSON.parse(xhr.responseText);
+
+          if (xhr.status === 200 && result.success) {
+            showToast(result.message || (isEdit ? 'Vehicle updated successfully!' : 'Vehicle added successfully!'), 'success');
+
+            // Complete the progress bar and hide it after a short delay
+            if (hasLargeFiles) {
+              document.getElementById('uploadProgressText').textContent = '✓ Complete';
+              document.getElementById('uploadProgressDetails').innerHTML =
+                '<span style="color: #28a745; font-weight: 600;">Upload successful!</span>';
+
+              // Hide progress bar after 1.5 seconds, then close modal
+              setTimeout(() => {
+                document.getElementById('uploadProgressContainer').style.display = 'none';
+                resetProgressBar();
+                closeVehicleModal();
+                loadVehicles();
+                loadStats();
+              }, 1500);
+            } else {
+              // No large files, close immediately
+              closeVehicleModal();
+              loadVehicles();
+              loadStats();
+            }
+          } else {
+            showToast(result.message || 'Operation failed', 'error');
+            hideProgressBar();
+          }
+        } catch (error) {
+          console.error('Error parsing response:', error);
+          showToast('An error occurred while processing the response', 'error');
+          hideProgressBar();
+        } finally {
+          showLoading(false);
+        }
+      });
+
+      // Handle network errors
+      xhr.addEventListener('error', () => {
+        showToast('Network error. Please check your connection.', 'error');
+        showLoading(false);
+        hideProgressBar();
+      });
+
+      // Send the request
+      xhr.open('POST', '../../api/vehicles.php', true);
+      xhr.send(formData);
     }
-    
+
+    // Calculate total size of FormData (approximate)
+    function calculateFormDataSize(formData) {
+      let totalSize = 0;
+
+      // Get all file inputs
+      const fileInputs = vehicleForm.querySelectorAll('input[type="file"]');
+      fileInputs.forEach(input => {
+        if (input.files) {
+          for (let i = 0; i < input.files.length; i++) {
+            totalSize += input.files[i].size;
+          }
+        }
+      });
+
+      return totalSize;
+    }
+
+    // Update progress bar with accurate information
+    function updateProgressBar(percentage, loaded, total, bytesDiff, timeDiff) {
+      const progressBar = document.getElementById('uploadProgressBar');
+      const progressText = document.getElementById('uploadProgressText');
+      const speedElement = document.getElementById('uploadSpeed');
+      const etaElement = document.getElementById('uploadETA');
+      const sizeElement = document.getElementById('uploadSize');
+
+      // Update percentage
+      progressBar.style.width = percentage.toFixed(1) + '%';
+      progressText.textContent = percentage.toFixed(1) + '%';
+
+      // Calculate upload speed (MB/s)
+      let speed = 0;
+      if (timeDiff > 0) {
+        speed = (bytesDiff / timeDiff) / (1024 * 1024); // Convert to MB/s
+      }
+
+      // Calculate ETA
+      let eta = 'calculating...';
+      if (speed > 0 && loaded < total) {
+        const remainingBytes = total - loaded;
+        const remainingSeconds = remainingBytes / (speed * 1024 * 1024);
+        eta = formatTime(remainingSeconds);
+      } else if (loaded >= total) {
+        eta = 'complete';
+      }
+
+      // Update display
+      speedElement.textContent = `Speed: ${speed.toFixed(2)} MB/s`;
+      etaElement.textContent = `Time remaining: ${eta}`;
+      sizeElement.textContent = `${formatBytes(loaded)} / ${formatBytes(total)}`;
+    }
+
+    // Reset progress bar
+    function resetProgressBar() {
+      const progressBar = document.getElementById('uploadProgressBar');
+      const progressText = document.getElementById('uploadProgressText');
+      const speedElement = document.getElementById('uploadSpeed');
+      const etaElement = document.getElementById('uploadETA');
+      const sizeElement = document.getElementById('uploadSize');
+
+      progressBar.style.width = '0%';
+      progressText.textContent = '0%';
+      speedElement.textContent = 'Speed: 0 MB/s';
+      etaElement.textContent = 'Time remaining: calculating...';
+      sizeElement.textContent = '0 MB / 0 MB';
+    }
+
+    // Hide progress bar
+    function hideProgressBar() {
+      setTimeout(() => {
+        document.getElementById('uploadProgressContainer').style.display = 'none';
+        resetProgressBar();
+      }, 3000); // Keep visible for 3 seconds after completion
+    }
+
+    // Format bytes to human-readable format
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Format seconds to human-readable time
+    function formatTime(seconds) {
+      if (seconds < 1) return 'less than a second';
+      if (seconds < 60) return Math.round(seconds) + ' seconds';
+
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = Math.round(seconds % 60);
+
+      if (minutes < 60) {
+        return `${minutes}m ${remainingSeconds}s`;
+      }
+
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      return `${hours}h ${remainingMinutes}m`;
+    }
+
     // Delete vehicle
     async function confirmDelete() {
       if (!deleteVehicleId) return;
