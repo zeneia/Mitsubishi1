@@ -29,26 +29,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $register_error = "Email or username already exists.";
     } else {
       $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-      $sql = "INSERT INTO accounts (Username, Email, PasswordHash, Role, FirstName, LastName, CreatedAt, UpdatedAt)
-                    VALUES (?, ?, ?, 'Customer', ?, ?, NOW(), NOW())";
+      // Create account with email_verified = 0 (unverified)
+      $sql = "INSERT INTO accounts (Username, Email, PasswordHash, Role, FirstName, LastName, email_verified, CreatedAt, UpdatedAt)
+                    VALUES (?, ?, ?, 'Customer', ?, ?, 0, NOW(), NOW())";
       $stmt = $connect->prepare($sql);
       if ($stmt->execute([$username, $email, $passwordHash, $firstName, $lastName])) {
         // Get the newly created user ID
         $newUserId = $connect->lastInsertId();
-        // Send notifications to agents and admins
-        require_once(dirname(__DIR__) . '/includes/api/notification_api.php');
-        $notifTitle = 'New Account Registered';
-        $notifMsg = "A new user has registered: $username (Customer).";
-        createNotification(null, 'Admin', $notifTitle, $notifMsg, 'account', $newUserId);
-        createNotification(null, 'SalesAgent', $notifTitle, $notifMsg, 'account', $newUserId);
-        // Automatically log in the user
-        $_SESSION['user_id'] = $newUserId;
-        $_SESSION['user_role'] = 'Customer';
-        $_SESSION['username'] = $username;
-        $_SESSION['email'] = $email;
-        // Redirect to verification page
-        header("Location: verification.php");
-        exit;
+
+        // Generate and send OTP
+        require_once(dirname(__DIR__) . '/includes/services/OTPService.php');
+        $otpService = new \Mitsubishi\Services\OTPService($connect);
+        $otpResult = $otpService->sendOTP($newUserId, $email);
+
+        if ($otpResult['success']) {
+          // Set pending verification session
+          $_SESSION['pending_verification_user_id'] = $newUserId;
+          $_SESSION['pending_verification_email'] = $email;
+
+          // Redirect to OTP verification page
+          header("Location: verify_otp.php");
+          exit;
+        } else {
+          // OTP sending failed, but account was created
+          $register_error = "Account created but failed to send verification email. Please contact support.";
+        }
       } else {
         $register_error = "Failed to create account. Please try again.";
       }

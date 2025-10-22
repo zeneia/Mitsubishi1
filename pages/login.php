@@ -43,6 +43,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Existing account is disabled; do not allow login or auto-creation
     $login_error = "Your account has been disabled. Please contact support.";
   } elseif ($account && password_verify($password, $account['PasswordHash'])) {
+    // Check email verification for customers
+    if ($account['Role'] === 'Customer' && isset($account['email_verified']) && $account['email_verified'] == 0) {
+      // Email not verified, redirect to OTP verification
+      $_SESSION['pending_verification_user_id'] = $account['Id'];
+      $_SESSION['pending_verification_email'] = $account['Email'];
+
+      // Resend OTP
+      require_once(dirname(__DIR__) . '/includes/services/OTPService.php');
+      $otpService = new \Mitsubishi\Services\OTPService($connect);
+      $otpService->sendOTP($account['Id'], $account['Email']);
+
+      header("Location: verify_otp.php");
+      exit;
+    }
+
     // Update LastLoginAt
     $update = $connect->prepare("UPDATE accounts SET LastLoginAt = NOW() WHERE Id = ?");
     $update->execute([$account['Id']]);

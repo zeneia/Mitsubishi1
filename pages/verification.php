@@ -8,6 +8,23 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'Customer') {
 }
 
 $account_id = $_SESSION['user_id'];
+
+// Check if email is verified
+$stmt_email_check = $connect->prepare("SELECT email_verified FROM accounts WHERE Id = ?");
+$stmt_email_check->execute([$account_id]);
+$account = $stmt_email_check->fetch(PDO::FETCH_ASSOC);
+
+if ($account && isset($account['email_verified']) && $account['email_verified'] == 0) {
+	// Email not verified, redirect to OTP verification
+	$_SESSION['pending_verification_user_id'] = $account_id;
+	$stmt_email = $connect->prepare("SELECT Email FROM accounts WHERE Id = ?");
+	$stmt_email->execute([$account_id]);
+	$email_result = $stmt_email->fetch(PDO::FETCH_ASSOC);
+	$_SESSION['pending_verification_email'] = $email_result['Email'] ?? '';
+	header("Location: verify_otp.php");
+	exit;
+}
+
 $error_message = '';
 $success_message = '';
 $show_form = true;
