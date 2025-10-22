@@ -1,4 +1,5 @@
 <?php
+session_start();
 include_once(dirname(__DIR__) . '/includes/database/db_conn.php');
 
 $reset_error = '';
@@ -13,11 +14,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $account = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($account) {
-        // Show a button to go to reset_password.php with the user's email
-        $reset_success = "<form action='reset_password.php' method='get' style='display:inline;'>"
-            . "<input type='hidden' name='email' value='" . htmlspecialchars($email, ENT_QUOTES) . "' />"
-            . "<button type='submit' style='background:#2B952B;color:#fff;font-weight:bold;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:1rem;'>Go to Reset Password</button>"
-            . "</form>";
+        // Generate and send OTP for password reset
+        require_once(dirname(__DIR__) . '/includes/services/OTPService.php');
+        $otpService = new \Mitsubishi\Services\OTPService($connect);
+        $otpResult = $otpService->sendOTP($account['Id'], $email, 'password_reset');
+
+        if ($otpResult['success']) {
+            // Set session variables for password reset
+            $_SESSION['pending_password_reset_user_id'] = $account['Id'];
+            $_SESSION['pending_password_reset_email'] = $email;
+
+            // Redirect to OTP verification page
+            header("Location: verify_reset_otp.php");
+            exit;
+        } else {
+            $reset_error = "Failed to send verification code. Please try again.";
+        }
     } else {
         $reset_error = "No account found with that email address.";
     }
@@ -225,7 +237,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <label for="email">Email</label>
           <input type="email" id="email" name="email" placeholder="Enter your email" required value="<?php echo isset($email) ? htmlspecialchars($email, ENT_QUOTES) : ''; ?>" />
         </div>
-        <button type="submit">Send Reset Link</button>
+        <button type="submit">Send Verification Code</button>
         <button type="button" style="background:#ffd700;color:#b80000;font-weight:bold;padding:12px 0;width:100%;border-radius:8px;border:none;cursor:pointer;font-size:1rem;" onclick="window.location.href='landingpage.php';return false;">
           Return to Landing Page
         </button>

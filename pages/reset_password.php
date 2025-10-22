@@ -1,12 +1,31 @@
 <?php
+session_start();
 include_once(dirname(__DIR__) . '/includes/database/db_conn.php');
 
-$email = trim($_GET['email'] ?? '');
+// Check if password reset was verified
+if (!isset($_SESSION['password_reset_verified']) ||
+    !isset($_SESSION['pending_password_reset_user_id']) ||
+    !isset($_SESSION['pending_password_reset_email'])) {
+    header("Location: forgot_password.php");
+    exit;
+}
+
+// Check if verification is still valid (10 minutes)
+$verificationTime = $_SESSION['password_reset_verified'];
+if (time() - $verificationTime > 600) { // 10 minutes
+    unset($_SESSION['password_reset_verified']);
+    unset($_SESSION['pending_password_reset_user_id']);
+    unset($_SESSION['pending_password_reset_email']);
+    header("Location: forgot_password.php?error=expired");
+    exit;
+}
+
+$accountId = $_SESSION['pending_password_reset_user_id'];
+$email = $_SESSION['pending_password_reset_email'];
 $reset_error = '';
 $reset_success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm = $_POST['confirm'] ?? '';
 
@@ -18,20 +37,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $reset_error = "Password must be at least 6 characters.";
     } else {
         // Check if account exists
-        $stmt = $connect->prepare("SELECT * FROM accounts WHERE Email = ?");
-        $stmt->execute([$email]);
+        $stmt = $connect->prepare("SELECT * FROM accounts WHERE Id = ?");
+        $stmt->execute([$accountId]);
         $account = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($account) {
             $hash = password_hash($password, PASSWORD_DEFAULT);
-            $update = $connect->prepare("UPDATE accounts SET PasswordHash = ? WHERE Email = ?");
-            $update->execute([$hash, $email]);
+            $update = $connect->prepare("UPDATE accounts SET PasswordHash = ? WHERE Id = ?");
+            $update->execute([$hash, $accountId]);
+
+            // Clear all password reset sessions
+            unset($_SESSION['password_reset_verified']);
+            unset($_SESSION['pending_password_reset_user_id']);
+            unset($_SESSION['pending_password_reset_email']);
+
             $reset_success = "Password has been reset successfully. <a href='login.php' style='color:#ffd700;'>Log in</a>";
         } else {
             $reset_error = "Account not found.";
         }
     }
 }
+
+// Function to mask email for display
+function maskEmail($email) {
+    $parts = explode('@', $email);
+    if (count($parts) !== 2) {
+        return $email;
+    }
+
+    $username = $parts[0];
+    $domain = $parts[1];
+
+    if (strlen($username) <= 2) {
+        $masked = $username[0] . '***';
+    } else {
+        $masked = $username[0] . '***';
+    }
+
+    return $masked . '@' . $domain;
+}
+
+$maskedEmail = maskEmail($email);
+
+// Calculate remaining time for session expiration
+$remainingSeconds = 600 - (time() - $verificationTime);
+$remainingMinutes = floor($remainingSeconds / 60);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -185,8 +235,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div style="color:#ffd700;margin-bottom:10px;"><?php echo $reset_success; ?></div>
       <?php endif; ?>
       <?php if (empty($reset_success)): ?>
+      <div style="background:rgba(255,215,0,0.2);border:1px solid #ffd700;padding:10px;border-radius:5px;margin-bottom:15px;font-size:0.85rem;">
+        <p style="margin:0;color:#ffd700;">Resetting password for: <strong><?php echo htmlspecialchars($maskedEmail); ?></strong></p>
+        <p style="margin:5px 0 0 0;color:#ffd700;font-size:0.8rem;">⏱️ You have <?php echo $remainingMinutes; ?> minute(s) to complete this</p>
+      </div>
       <form method="post" autocomplete="off">
-        <input type="hidden" name="email" value="<?php echo htmlspecialchars($email, ENT_QUOTES); ?>" />
         <div>
           <label for="password">New Password</label>
           <input type="password" id="password" name="password" placeholder="Enter new password" required minlength="6" />

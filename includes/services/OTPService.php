@@ -89,35 +89,36 @@ class OTPService
     
     /**
      * Send OTP to user's email
-     * 
+     *
      * @param int $accountId Account ID
      * @param string $email User's email address
+     * @param string $context Context for email template ('registration' or 'password_reset')
      * @return array ['success' => bool, 'message' => string, 'otp_id' => int|null]
      */
-    public function sendOTP($accountId, $email)
+    public function sendOTP($accountId, $email, $context = 'registration')
     {
         try {
             // Generate OTP
             $otp = $this->generateOTP();
             $otpHash = $this->hashOTP($otp);
-            
+
             // Calculate expiry time
             $expiresAt = date('Y-m-d H:i:s', strtotime('+' . self::OTP_EXPIRY_MINUTES . ' minutes'));
-            
+
             // Get client information
             $ipAddress = $_SERVER['REMOTE_ADDR'] ?? null;
             $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? null;
-            
+
             // Invalidate any existing OTPs for this account
             $this->invalidateExistingOTPs($accountId);
-            
+
             // Store OTP in database
             $stmt = $this->pdo->prepare("
-                INSERT INTO email_verifications 
+                INSERT INTO email_verifications
                 (account_id, email, otp_code, otp_hash, expires_at, ip_address, user_agent)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             ");
-            
+
             $stmt->execute([
                 $accountId,
                 $email,
@@ -127,12 +128,12 @@ class OTPService
                 $ipAddress,
                 $userAgent
             ]);
-            
+
             $otpId = $this->pdo->lastInsertId();
-            
+
             // Send OTP email
-            $emailResult = $this->sendOTPEmail($email, $otp);
-            
+            $emailResult = $this->sendOTPEmail($email, $otp, $context);
+
             if ($emailResult['success']) {
                 return [
                     'success' => true,
@@ -147,7 +148,7 @@ class OTPService
                     'otp_id' => $otpId
                 ];
             }
-            
+
         } catch (\Exception $e) {
             error_log("OTP Send Error: " . $e->getMessage());
             return [
@@ -160,19 +161,28 @@ class OTPService
     
     /**
      * Send OTP email using email template
-     * 
+     *
      * @param string $email Recipient email
      * @param string $otp OTP code
+     * @param string $context Context for email template ('registration' or 'password_reset')
      * @return array Email sending result
      */
-    private function sendOTPEmail($email, $otp)
+    private function sendOTPEmail($email, $otp, $context = 'registration')
     {
-        // Load email template
-        require_once dirname(__DIR__) . '/email_templates/otp_verification.php';
-        
-        $subject = 'Verify Your Email - Mitsubishi Motors';
-        $body = getOTPEmailTemplate($otp);
-        
+        if ($context === 'password_reset') {
+            // Load password reset email template
+            require_once dirname(__DIR__) . '/email_templates/password_reset_otp.php';
+
+            $subject = 'Password Reset Request - Mitsubishi Motors';
+            $body = getPasswordResetOTPTemplate($otp, $email);
+        } else {
+            // Load registration email template
+            require_once dirname(__DIR__) . '/email_templates/otp_verification.php';
+
+            $subject = 'Verify Your Email - Mitsubishi Motors';
+            $body = getOTPEmailTemplate($otp);
+        }
+
         return $this->mailer->sendEmail($email, $subject, $body, ['is_html' => true]);
     }
     
@@ -269,24 +279,25 @@ class OTPService
     
     /**
      * Resend OTP with rate limiting
-     * 
+     *
      * @param int $accountId Account ID
      * @param string $email User's email
+     * @param string $context Context for email template ('registration' or 'password_reset')
      * @return array ['success' => bool, 'message' => string]
      */
-    public function resendOTP($accountId, $email)
+    public function resendOTP($accountId, $email, $context = 'registration')
     {
         try {
             // Get the latest OTP record
             $stmt = $this->pdo->prepare("
-                SELECT * FROM email_verifications 
-                WHERE account_id = ? 
-                ORDER BY created_at DESC 
+                SELECT * FROM email_verifications
+                WHERE account_id = ?
+                ORDER BY created_at DESC
                 LIMIT 1
             ");
             $stmt->execute([$accountId]);
             $otpRecord = $stmt->fetch(\PDO::FETCH_ASSOC);
-            
+
             if ($otpRecord) {
                 // Check resend count
                 if ($otpRecord['resend_count'] >= self::MAX_RESENDS) {
@@ -295,12 +306,12 @@ class OTPService
                         'message' => 'Maximum resend limit reached. Please contact support.'
                     ];
                 }
-                
+
                 // Check cooldown period
                 if ($otpRecord['last_resend_at']) {
                     $lastResendTime = strtotime($otpRecord['last_resend_at']);
                     $cooldownRemaining = self::RESEND_COOLDOWN_SECONDS - (time() - $lastResendTime);
-                    
+
                     if ($cooldownRemaining > 0) {
                         return [
                             'success' => false,
@@ -309,22 +320,22 @@ class OTPService
                     }
                 }
             }
-            
+
             // Generate and send new OTP
-            $result = $this->sendOTP($accountId, $email);
-            
+            $result = $this->sendOTP($accountId, $email, $context);
+
             if ($result['success']) {
                 // Update resend count
                 $updateResend = $this->pdo->prepare("
-                    UPDATE email_verifications 
-                    SET resend_count = resend_count + 1, last_resend_at = NOW() 
+                    UPDATE email_verifications
+                    SET resend_count = resend_count + 1, last_resend_at = NOW()
                     WHERE id = ?
                 ");
                 $updateResend->execute([$result['otp_id']]);
             }
-            
+
             return $result;
-            
+
         } catch (\Exception $e) {
             error_log("OTP Resend Error: " . $e->getMessage());
             return [
