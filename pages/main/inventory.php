@@ -674,12 +674,14 @@ if ($user_role === 'Sales Agent') {
     }
 
     .vehicle-card {
-      background: white;
-      border-radius: 10px;
-      padding: 20px;
-      border: 1px solid var(--border-light);
-      transition: var(--transition);
-      margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* distributes space so bottom area stays fixed */
+  height: 100%; /* ensures consistent height in grid */
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  padding: 20px;
     }
 
     .vehicle-card:hover {
@@ -687,10 +689,12 @@ if ($user_role === 'Sales Agent') {
     }
 
     .vehicle-header {
+      height: 90px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+      padding-bottom: 20px;
+      
     }
 
     .vehicle-name {
@@ -717,6 +721,17 @@ if ($user_role === 'Sales Agent') {
       height: 100%;
       background: linear-gradient(135deg, var(--primary-red), #b91c3c);
       border-radius: 4px;
+    }
+
+
+    .vehicle-card p {
+      flex-grow: 1; /* Take available space */
+      text-align: justify;
+      display: flex;
+      align-items: flex-start; /* Vertically center */
+      justify-content: center;
+      margin: 0 10px;
+      color: var(--text-light);
     }
 
     /* Responsive Design */

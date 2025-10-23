@@ -92,6 +92,11 @@ try {
             transition: var(--transition);
             position: relative;
             overflow: hidden;
+
+            flex: 1; /* Pushes the button to the bottom */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
         }
 
         .card:hover {
@@ -117,7 +122,10 @@ try {
         }
 
         .card-content {
+            flex: 1; /* Pushes the button to the bottom */
             padding: 20px;
+            display: flex;
+            flex-direction: column;
         }
 
         .card h3 {
@@ -149,6 +157,7 @@ try {
             align-items: center;
             justify-content: center;
             gap: 10px;
+            margin-top: auto
         }
 
         .card-btn:hover {
