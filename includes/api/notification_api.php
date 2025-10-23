@@ -28,7 +28,7 @@ function createNotification($user_id, $target_role, $title, $message, $type = nu
     return $stmt->execute([$user_id, $target_role, $title, $message, $type, $related_id]);
 }
 
-function getNotifications($user_id, $user_role, $filter = 'all') {
+function getNotifications($user_id, $user_role, $filter = 'all',$limit = null) {
     global $connect;
     $where = "(user_id = ? OR target_role = ? OR (user_id IS NULL AND target_role IS NULL))";
     $params = [$user_id, $user_role];
@@ -39,6 +39,11 @@ function getNotifications($user_id, $user_role, $filter = 'all') {
         $params[] = $filter;
     }
     $sql = "SELECT * FROM notifications WHERE $where ORDER BY created_at DESC";
+    if ($limit !== null) {
+    $sql .= " LIMIT " . (int)$limit;
+        
+    }
+
     $stmt = $connect->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);

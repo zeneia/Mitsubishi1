@@ -312,10 +312,7 @@ foreach ($new_inquiries as $inquiry) {
     <i class="fas fa-credit-card"></i>
     Payment Transactions
   </button>
-  <button class="action-btn" id="amortizationBtn">
-    <i class="fas fa-calendar-check"></i>
-    Amortization Management
-  </button>
+
   <button class="action-btn" id="inquiryBtn">
     <i class="fas fa-question-circle"></i>
     Inquiry Management

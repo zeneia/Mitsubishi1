@@ -70,19 +70,30 @@ if ($user_data) {
 
 // Define page titles
 $page_titles = [
-    'dashboard' => 'Dashboard',
-    'inventory' => 'Inventory Management',
-    'customer-accounts' => 'Customer Accounts',
-    'orders' => 'Orders Management',
-    'customer-payments' => 'Customer Payments',
-    'order-approval' => 'Order Approval',
-    'customer-chats' => 'Customer Chats',
-    'sales-report' => 'Sales Report',
-    'analytics' => 'Analytics Dashboard',
-    'profile' => 'Profile Settings',
-    'settings' => 'Settings',
-    'notifications' => 'All Notifications',
-    'sms' => 'SMS'
+    'dashboard' => 'DASHBOARD',
+    'inventory' => 'INVENTORY MANAGEMENT',
+    'customer-accounts' => 'CUSTOMER ACCOUNTS',
+    'orders' => 'ORDERS MANAGEMENT',
+    'payment-management' => 'CUSTOMERS PAYMENT',
+    'order-approval' => 'ORDER APPROVAL',
+    'customer-chats' => 'CUSTOMER CHATS',
+    'sales-report' => 'SALES REPORT',
+    'analytics' => 'ANALYTICS DASHBOARD',
+    'profile' => 'PROFILE SETTINGS',
+    'inquiries' => 'VEHICLE INQUIRIES',
+    'pms-requests' => 'PMS MANAGEMENT',
+    'product-list' => 'PRODUCT LIST',
+    'accounts' => 'ACCOUNT CONTROL',
+    'pms-tracking' => 'PMS RECORDS',
+    'solved-units' => 'SOLD UNITS RECORDS',
+    'handled-clients' => 'HANDLED CLIENTS RECORDS',
+    'transaction-records' => 'TRANSACTION RECORDS',
+    'loan-applications' => 'LOAN APPROVAL',
+    'loan-status' => 'LOAN MANAGEMENT',
+    'settings' => 'SETTINGS',
+    'notifications' => 'ALL NOTIFICATIONS',
+    'sms' => 'SMS',
+    'email-management' => 'EMAILS'
 ];
 
 // Get page title or default
@@ -197,8 +208,10 @@ if ($user_id && $user_role) {
   <div class="user-section">
     <div class="notifications" id="notificationBtn">
       <i class="fas fa-bell"></i>
-      <div class="notification-badge"><?php echo $notification_count > 0 ? $notification_count : ''; ?></div>
-      <div class="dropdown notification-dropdown" id="notificationDropdown">
+      <div class="notification-badge">
+          <?php echo $notification_count > 0 ? $notification_count : ''; ?>
+          </div>
+      <div class=dropdown notification-dropdown" id="notificationDropdown">
         <div class="dropdown-header">Notifications</div>
         <?php if (empty($notifications)): ?>
           <div class="dropdown-item" style="opacity:0.7;">No new notifications</div>

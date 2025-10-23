@@ -390,6 +390,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
   <link rel="stylesheet" href="../../includes/css/dashboard-styles.css">
 
 </head>
+<style>
+    body{
+        zoom: 85%;
+    }
+</style>
 
 <body>
   <?php include '../../includes/components/sidebar.php'; ?>
