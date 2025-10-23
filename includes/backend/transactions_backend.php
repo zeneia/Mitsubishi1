@@ -41,9 +41,10 @@ try {
         case 'get_filters':
             getFilters();
             break;
-        case 'export_transactions':
-            exportTransactions();
-            break;
+        // Removed: Excel export replaced with PDF export (transaction_records_pdf.php)
+        // case 'export_transactions':
+        //     exportTransactions();
+        //     break;
         case 'get_all_receipts':
             getAllReceipts();
             break;
@@ -432,7 +433,7 @@ function exportTransactions()
     if ($date_to !== '') { $where[] = 'DATE(o.created_at) <= ?'; $params[] = $date_to; }
     $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
-    $sql = "SELECT 
+    $sql = "SELECT
                 o.order_number AS TransactionID,
                 CONCAT(ci.firstname,' ',ci.lastname) AS ClientName,
                 acc.Email AS Email,
@@ -457,19 +458,89 @@ function exportTransactions()
     $stmt->execute($params);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-    // Output CSV
-    header_remove('Content-Type');
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename=transactions_' . date('Ymd_His') . '.csv');
-
-    $out = fopen('php://output', 'w');
-    if (!empty($rows)) {
-        fputcsv($out, array_keys($rows[0]));
-        foreach ($rows as $r) { fputcsv($out, $r); }
-    } else {
-        fputcsv($out, ['No data']);
+    // Get logo as base64
+    $logoPath = dirname(dirname(__DIR__)) . '/includes/images/mitsubishi_logo.png';
+    $logoBase64 = '';
+    if (file_exists($logoPath)) {
+        $logoData = file_get_contents($logoPath);
+        $logoBase64 = 'data:image/png;base64,' . base64_encode($logoData);
     }
-    fclose($out);
+
+    // Output Excel file (HTML format that Excel can open)
+    header_remove('Content-Type');
+    header('Content-Type: application/vnd.ms-excel');
+    header('Content-Disposition: attachment; filename=transactions_' . date('Ymd_His') . '.xls');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
+    echo '<?xml version="1.0"?>';
+    echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+    echo '<head>';
+    echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
+    echo '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Transactions</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
+    echo '<style>';
+    echo 'table { border-collapse: collapse; width: 100%; }';
+    echo 'th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }';
+    echo 'th { background-color: #DC143C; color: white; font-weight: bold; }';
+    echo '.header-section { text-align: center; padding: 20px; }';
+    echo '.company-name { font-size: 24px; font-weight: bold; color: #DC143C; margin: 10px 0; }';
+    echo '.report-title { font-size: 18px; font-weight: bold; margin: 10px 0; }';
+    echo '.report-date { font-size: 12px; color: #666; margin: 5px 0; }';
+    echo '</style>';
+    echo '</head>';
+    echo '<body>';
+
+    // Header with logo
+    echo '<div class="header-section">';
+    if ($logoBase64) {
+        echo '<img src="' . $logoBase64 . '" alt="Mitsubishi Logo" style="height: 80px; margin-bottom: 10px;">';
+    }
+    echo '<div class="company-name">MITSUBISHI MOTORS</div>';
+    echo '<div style="font-size: 14px; color: #666;">Drive Your Ambition</div>';
+    echo '<div class="report-title">Transaction Records Report</div>';
+    echo '<div class="report-date">Generated: ' . date('F d, Y h:i A') . '</div>';
+    if ($status) {
+        echo '<div class="report-date">Status: ' . ucfirst($status) . '</div>';
+    }
+    echo '</div>';
+
+    // Data table
+    echo '<table>';
+
+    if (!empty($rows)) {
+        // Header row
+        echo '<thead><tr>';
+        foreach (array_keys($rows[0]) as $header) {
+            echo '<th>' . htmlspecialchars($header) . '</th>';
+        }
+        echo '</tr></thead>';
+
+        // Data rows
+        echo '<tbody>';
+        foreach ($rows as $row) {
+            echo '<tr>';
+            foreach ($row as $key => $value) {
+                // Format currency for SalePrice
+                if ($key === 'SalePrice' && is_numeric($value)) {
+                    echo '<td style="text-align: right;">₱' . number_format($value, 2) . '</td>';
+                } elseif (in_array($key, ['CreatedAt', 'CompletedAt']) && $value) {
+                    // Format dates
+                    $date = date('M d, Y', strtotime($value));
+                    echo '<td>' . htmlspecialchars($date) . '</td>';
+                } else {
+                    echo '<td>' . htmlspecialchars($value ?? '') . '</td>';
+                }
+            }
+            echo '</tr>';
+        }
+        echo '</tbody>';
+    } else {
+        echo '<tr><td colspan="12" style="text-align: center; padding: 20px;">No data available</td></tr>';
+    }
+
+    echo '</table>';
+    echo '</body>';
+    echo '</html>';
     exit;
 }
 

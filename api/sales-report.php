@@ -29,10 +29,24 @@ if (!$pdo) {
 
 // Get request parameters
 $action = $_GET['action'] ?? 'summary';
-$start_date = $_GET['start_date'] ?? date('Y-m-01'); // First day of current month
-$end_date = $_GET['end_date'] ?? date('Y-m-t');     // Last day of current month
 $year = $_GET['year'] ?? date('Y');
 $month = $_GET['month'] ?? date('m');
+
+// Calculate date range based on year and month parameters
+if ($month === 'all') {
+    // If "All Months" is selected, use the entire year
+    $start_date = "$year-01-01";
+    $end_date = "$year-12-31";
+} else {
+    // Use specific month
+    $month_padded = str_pad($month, 2, '0', STR_PAD_LEFT);
+    $start_date = "$year-$month_padded-01";
+    $last_day = date('t', strtotime($start_date)); // Get last day of the month
+    $end_date = "$year-$month_padded-$last_day";
+}
+
+// Log the date range for debugging
+error_log("Sales Report API - Action: $action, Year: $year, Month: $month, Date Range: $start_date to $end_date");
 
 try {
     switch ($action) {
@@ -49,7 +63,7 @@ try {
             echo json_encode(getSalesByAgent($pdo, $start_date, $end_date));
             break;
         case 'revenue-trend':
-            echo json_encode(getRevenueTrend($pdo, $year));
+            echo json_encode(getRevenueTrend($pdo, $year, $month));
             break;
         case 'inventory':
             echo json_encode(getInventoryData($pdo));
@@ -101,6 +115,8 @@ function getSalesSummary($pdo, $start_date, $end_date) {
     $inventory = $stmt->fetch(PDO::FETCH_ASSOC);
     
     return [
+        'start_date' => $start_date,
+        'end_date' => $end_date,
         'total_revenue' => floatval($current['total_revenue'] ?? 0),
         'revenue_growth' => $revenue_growth,
         'units_sold' => intval($current['units_sold'] ?? 0),
@@ -238,29 +254,65 @@ function getSalesByAgent($pdo, $start_date, $end_date) {
 }
 
 /**
- * Get revenue trend for the last 6 months
+ * Get revenue trend for the last 6 months ending with the selected month
  */
-function getRevenueTrend($pdo, $year) {
+function getRevenueTrend($pdo, $year, $month) {
+    // If "all" is selected, use current month
+    if ($month === 'all') {
+        $month = date('m');
+    }
+
+    // Create the end date (last day of selected month)
+    $month_padded = str_pad($month, 2, '0', STR_PAD_LEFT);
+    $end_date = "$year-$month_padded-01";
+
+    // Generate 6 months ending with the selected month
+    $months = [];
+    for ($i = 5; $i >= 0; $i--) {
+        $date = date('Y-m-01', strtotime("-$i months", strtotime($end_date)));
+        $months[] = [
+            'year' => date('Y', strtotime($date)),
+            'month' => date('n', strtotime($date)),
+            'month_name' => date('F', strtotime($date)),
+            'revenue' => 0
+        ];
+    }
+
+    // Calculate the start date (6 months before the selected month)
+    $start_date = date('Y-m-01', strtotime("-5 months", strtotime($end_date)));
+    $end_date_last_day = date('Y-m-t', strtotime($end_date));
+
+    // Get actual revenue data for the 6-month period
     $stmt = $pdo->prepare("
-        SELECT 
+        SELECT
             YEAR(o.created_at) as year,
             MONTH(o.created_at) as month,
             MONTHNAME(o.created_at) as month_name,
             SUM(CASE WHEN o.order_status = 'Completed' THEN o.total_price ELSE 0 END) as revenue
         FROM orders o
-        WHERE o.created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        WHERE DATE(o.created_at) BETWEEN ? AND ?
         GROUP BY YEAR(o.created_at), MONTH(o.created_at), MONTHNAME(o.created_at)
         ORDER BY YEAR(o.created_at), MONTH(o.created_at)
     ");
-    $stmt->execute();
+    $stmt->execute([$start_date, $end_date_last_day]);
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    foreach ($results as &$row) {
-        $row['revenue'] = floatval($row['revenue']);
-        $row['month_year'] = $row['month_name'] . ' ' . $row['year'];
+
+    // Merge actual data with all months
+    foreach ($results as $row) {
+        foreach ($months as &$month_data) {
+            if ($month_data['year'] == $row['year'] && $month_data['month'] == $row['month']) {
+                $month_data['revenue'] = floatval($row['revenue']);
+                break;
+            }
+        }
     }
-    
-    return $results;
+
+    // Add month_year field
+    foreach ($months as &$month_data) {
+        $month_data['month_year'] = $month_data['month_name'] . ' ' . $month_data['year'];
+    }
+
+    return $months;
 }
 
 /**

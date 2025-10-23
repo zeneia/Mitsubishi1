@@ -169,7 +169,82 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
                 echo json_encode(['success' => true, 'message' => 'PMS request rescheduled successfully']);
                 break;
-                
+
+            case 'mark_completed':
+                $pms_id = (int)$_POST['pms_id'];
+                $completion_date = $_POST['completion_date'] ?? '';
+                $service_notes = $_POST['service_notes'] ?? '';
+                $next_pms_due = $_POST['next_pms_due'] ?? '';
+
+                if (!$completion_date || !$service_notes) {
+                    echo json_encode(['success' => false, 'message' => 'Completion date and service notes are required']);
+                    break;
+                }
+
+                // Update PMS request status to Completed
+                $updateFields = [
+                    'p.request_status = ?',
+                    'p.pms_date = ?',
+                    'p.service_notes_findings = ?',
+                    'p.approved_by = ?',
+                    'p.approved_at = NOW()'
+                ];
+                $params = ['Completed', $completion_date, $service_notes, $_SESSION['user_id']];
+
+                if (!empty($next_pms_due)) {
+                    $updateFields[] = 'p.next_pms_due = ?';
+                    $params[] = $next_pms_due;
+                }
+
+                $updateFields[] = 'p.pms_id = ?';
+                $params[] = $pms_id;
+                $updateFields[] = 'ci.agent_id = ?';
+                $params[] = $sales_agent_id;
+
+                $stmt = $pdo->prepare("
+                    UPDATE car_pms_records p
+                    INNER JOIN customer_information ci ON p.customer_id = ci.account_id
+                    SET " . implode(', ', array_slice($updateFields, 0, -2)) . "
+                    WHERE " . implode(' AND ', array_slice($updateFields, -2))
+                );
+                $stmt->execute($params);
+
+                // Get customer_id and request details for notification
+                $stmt = $pdo->prepare("
+                    SELECT p.customer_id, CONCAT('PMS-', YEAR(p.created_at), '-', LPAD(p.pms_id, 3, '0')) as request_id
+                    FROM car_pms_records p
+                    WHERE p.pms_id = ?
+                ");
+                $stmt->execute([$pms_id]);
+                $pms_data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                // Create notification for customer
+                if ($pms_data && $pms_data['customer_id']) {
+                    try {
+                        $formatted_date = date('F j, Y', strtotime($completion_date));
+                        $notification_message = 'Your PMS request ' . $pms_data['request_id'] . ' has been completed on ' . $formatted_date . '.';
+
+                        if (!empty($next_pms_due)) {
+                            $notification_message .= ' Next PMS due: ' . $next_pms_due;
+                        }
+
+                        createNotification(
+                            $pms_data['customer_id'],
+                            null,
+                            'PMS Request Completed',
+                            $notification_message,
+                            'pms',
+                            $pms_id
+                        );
+                    } catch (Exception $e) {
+                        // Log error but don't fail the completion
+                        error_log("Failed to create PMS completion notification: " . $e->getMessage());
+                    }
+                }
+
+                echo json_encode(['success' => true, 'message' => 'PMS request marked as completed successfully']);
+                break;
+
             case 'view_details':
                 $pms_id = (int)$_POST['pms_id'];
                 $stmt = $pdo->prepare("
@@ -258,13 +333,27 @@ if (isset($_GET['download_receipt']) && isset($_GET['pms_id'])) {
     }
 }
 
+// Auto-update No Show status for scheduled PMS that have passed their scheduled date
+$auto_noshow_query = "
+    UPDATE car_pms_records p
+    INNER JOIN customer_information ci ON p.customer_id = ci.account_id
+    SET p.request_status = 'No Show'
+    WHERE p.request_status = 'Scheduled'
+    AND p.scheduled_date < NOW()
+    AND ci.agent_id = :sales_agent_id
+";
+$stmt = $pdo->prepare($auto_noshow_query);
+$stmt->bindParam(':sales_agent_id', $sales_agent_id, PDO::PARAM_INT);
+$stmt->execute();
+
 // Fetch statistics
 $stats_query = "
-    SELECT 
+    SELECT
         COUNT(CASE WHEN p.request_status = 'Pending' THEN 1 END) as pending,
         COUNT(CASE WHEN p.request_status = 'Approved' AND DATE(p.approved_at) = CURDATE() THEN 1 END) as approved_today,
         COUNT(CASE WHEN p.request_status = 'Rejected' THEN 1 END) as rejected,
-        COUNT(CASE WHEN p.request_status = 'Scheduled' THEN 1 END) as scheduled
+        COUNT(CASE WHEN p.request_status = 'Scheduled' THEN 1 END) as scheduled,
+        COUNT(CASE WHEN p.request_status = 'No Show' THEN 1 END) as no_show
     FROM car_pms_records p
     LEFT JOIN customer_information ci ON p.customer_id = ci.account_id
     WHERE ci.agent_id = :sales_agent_id
@@ -279,6 +368,7 @@ $search = $_GET['search'] ?? '';
 $status_filter = $_GET['status'] ?? 'all';
 $service_filter = $_GET['service'] ?? 'all';
 $date_filter = $_GET['date'] ?? 'all';
+$odometer_filter = $_GET['odometer'] ?? '';
 
 $where_conditions = ["ci.agent_id = ?"];
 $params = [$sales_agent_id];
@@ -297,6 +387,17 @@ if ($status_filter !== 'all') {
 if ($service_filter !== 'all') {
     $where_conditions[] = "p.pms_info LIKE ?";
     $params[] = "%$service_filter%";
+}
+
+// Odometer range filter (e.g., 20000 filters 20000-25000)
+if (!empty($odometer_filter)) {
+    $odometer_value = preg_replace('/\D/', '', $odometer_filter);
+    $odometer_value = intval($odometer_value);
+    if ($odometer_value > 0) {
+        $where_conditions[] = "p.current_odometer >= ? AND p.current_odometer <= ?";
+        $params[] = $odometer_value;
+        $params[] = $odometer_value + 5000;
+    }
 }
 
 switch ($date_filter) {
@@ -401,15 +502,31 @@ $pms_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <p>Scheduled</p>
           </div>
         </div>
+        <div class="stat-card">
+          <div class="stat-icon purple">
+            <i class="fas fa-user-slash"></i>
+          </div>
+          <div class="stat-info">
+            <h3><?php echo $stats['no_show']; ?></h3>
+            <p>No Show</p>
+          </div>
+        </div>
       </div>
 
       <div class="filters-section">
         <form method="GET" class="filter-row">
           <div class="filter-group">
             <label for="search">Search Requests</label>
-            <input type="text" id="search" name="search" class="filter-input" 
-                   value="<?php echo htmlspecialchars($search); ?>" 
+            <input type="text" id="search" name="search" class="filter-input"
+                   value="<?php echo htmlspecialchars($search); ?>"
                    placeholder="Request ID or Customer name">
+          </div>
+          <div class="filter-group" style="position: relative;">
+            <label for="odometer">Odometer (KM)</label>
+            <input type="text" id="odometer" name="odometer" class="filter-input"
+                   value="<?php echo htmlspecialchars($odometer_filter); ?>"
+                   placeholder="e.g., 20000" pattern="[0-9]*" inputmode="numeric"
+                   title="Enter value to filter range (e.g., 20000 shows 20000-25000 km)">
           </div>
           <div class="filter-group">
             <label for="status">Request Status</label>
@@ -417,8 +534,10 @@ $pms_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <option value="all" <?php echo $status_filter === 'all' ? 'selected' : ''; ?>>All Statuses</option>
               <option value="pending" <?php echo $status_filter === 'pending' ? 'selected' : ''; ?>>Pending</option>
               <option value="approved" <?php echo $status_filter === 'approved' ? 'selected' : ''; ?>>Approved</option>
-              <option value="rejected" <?php echo $status_filter === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
               <option value="scheduled" <?php echo $status_filter === 'scheduled' ? 'selected' : ''; ?>>Scheduled</option>
+              <option value="completed" <?php echo $status_filter === 'completed' ? 'selected' : ''; ?>>Completed</option>
+              <option value="no show" <?php echo $status_filter === 'no show' ? 'selected' : ''; ?>>No Show</option>
+              <option value="rejected" <?php echo $status_filter === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
             </select>
           </div>
           <div class="filter-group">
@@ -510,11 +629,31 @@ $pms_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <button class="btn-small btn-info" title="View Details" onclick="viewDetails(<?php echo $request['pms_id']; ?>)" style="background: #3498db;">
                       <i class="fas fa-eye"></i>
                     </button>
+                    <?php elseif ($request['request_status'] === 'Approved' || $request['request_status'] === 'Scheduled'): ?>
+                    <button class="btn-small btn-view" title="View Details" onclick="viewDetails(<?php echo $request['pms_id']; ?>)">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-small btn-edit" title="Reschedule" onclick="rescheduleRequest(<?php echo $request['pms_id']; ?>, '<?php echo $request['request_id']; ?>')">
+                      <i class="fas fa-calendar-alt"></i>
+                    </button>
+                    <button class="btn-small btn-success" title="Mark as Completed" onclick="markCompleted(<?php echo $request['pms_id']; ?>, '<?php echo $request['request_id']; ?>')" style="background: #27ae60;">
+                      <i class="fas fa-check-circle"></i>
+                    </button>
+                    <?php elseif ($request['request_status'] === 'No Show'): ?>
+                    <button class="btn-small btn-view" title="View Details" onclick="viewDetails(<?php echo $request['pms_id']; ?>)">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-small btn-edit" title="Reschedule" onclick="rescheduleRequest(<?php echo $request['pms_id']; ?>, '<?php echo $request['request_id']; ?>')">
+                      <i class="fas fa-calendar-alt"></i>
+                    </button>
+                    <button class="btn-small btn-success" title="Mark as Completed" onclick="markCompleted(<?php echo $request['pms_id']; ?>, '<?php echo $request['request_id']; ?>')" style="background: #27ae60;">
+                      <i class="fas fa-check-circle"></i>
+                    </button>
                     <?php else: ?>
                     <button class="btn-small btn-view" title="View Details" onclick="viewDetails(<?php echo $request['pms_id']; ?>)">
                       <i class="fas fa-eye"></i>
                     </button>
-                    <?php if ($request['request_status'] === 'Approved'): ?>
+                    <?php if ($request['request_status'] !== 'Completed' && $request['request_status'] !== 'Rejected'): ?>
                     <button class="btn-small btn-edit" title="Reschedule" onclick="rescheduleRequest(<?php echo $request['pms_id']; ?>, '<?php echo $request['request_id']; ?>')">
                       <i class="fas fa-calendar-alt"></i>
                     </button>
@@ -636,6 +775,51 @@ $pms_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </div>
 
+  <!-- Mark as Completed Modal -->
+  <div class="modal-overlay" id="markCompletedModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 40px; height: 40px; background: #27ae60; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-check-circle" style="color: white; font-size: 18px;"></i>
+          </div>
+          <h3>Mark PMS as Completed</h3>
+        </div>
+        <button class="modal-close" onclick="closeMarkCompletedModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="markCompletedForm">
+        <div class="modal-body">
+          <input type="hidden" id="completedRequestId" name="requestId">
+          <input type="hidden" id="completedPmsId" name="pmsId">
+          <p style="margin-bottom: 20px; color: #666;">Complete PMS request <strong id="completedRequestDisplay"></strong></p>
+
+          <div class="form-group">
+            <label class="form-label">Completion Date <span style="color: red;">*</span></label>
+            <input type="date" class="form-control" id="completionDate" name="completionDate" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Service Notes/Findings <span style="color: red;">*</span></label>
+            <textarea class="form-control" id="serviceNotes" name="serviceNotes" rows="4"
+                      placeholder="Enter service notes, findings, or work performed..." required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Next PMS Due (Optional)</label>
+            <input type="text" class="form-control" id="nextPmsDue" name="nextPmsDue"
+                   placeholder="e.g., 10,000 KM or 6 months">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeMarkCompletedModal()">Cancel</button>
+          <button type="submit" class="btn btn-success">Mark as Completed</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Success/Error Message Modal -->
   <div class="modal-overlay" id="messageModal">
     <div class="modal">
@@ -725,6 +909,26 @@ $pms_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
     function closeRescheduleModal() {
       document.getElementById('rescheduleModal').classList.remove('active');
       document.getElementById('rescheduleForm').reset();
+      clearModalData();
+    }
+
+    function markCompleted(pmsId, requestId) {
+      currentPmsId = pmsId;
+      currentRequestId = requestId;
+      document.getElementById('completedPmsId').value = pmsId;
+      document.getElementById('completedRequestId').value = requestId;
+      document.getElementById('completedRequestDisplay').textContent = requestId;
+
+      // Set default completion date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('completionDate').value = today;
+
+      document.getElementById('markCompletedModal').classList.add('active');
+    }
+
+    function closeMarkCompletedModal() {
+      document.getElementById('markCompletedModal').classList.remove('active');
+      document.getElementById('markCompletedForm').reset();
       clearModalData();
     }
 
@@ -1035,12 +1239,12 @@ $pms_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
         const newDate = document.getElementById('newDate').value;
         const newTime = document.getElementById('newTime').value;
         const reason = document.getElementById('rescheduleReason').value;
-        
+
         if (!newDate || !newTime) {
           alert('Please select both date and time');
           return;
         }
-        
+
         // Check if date is not in the past
         const selectedDate = new Date(newDate + ' ' + newTime);
         const now = new Date();
@@ -1048,12 +1252,42 @@ $pms_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
           alert('Please select a future date and time');
           return;
         }
-        
-        performAction('reschedule', pmsId, { 
-          pms_id: pmsId, 
+
+        performAction('reschedule', pmsId, {
+          pms_id: pmsId,
           new_date: newDate,
           new_time: newTime,
-          reschedule_reason: reason 
+          reschedule_reason: reason
+        });
+      });
+
+      // Mark as Completed form handler
+      document.getElementById('markCompletedForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const pmsId = document.getElementById('completedPmsId').value;
+        const completionDate = document.getElementById('completionDate').value;
+        const serviceNotes = document.getElementById('serviceNotes').value;
+        const nextPmsDue = document.getElementById('nextPmsDue').value;
+
+        if (!completionDate || !serviceNotes.trim()) {
+          alert('Please fill in all required fields');
+          return;
+        }
+
+        // Check if completion date is not in the future
+        const selectedDate = new Date(completionDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (selectedDate > today) {
+          alert('Completion date cannot be in the future');
+          return;
+        }
+
+        performAction('mark_completed', pmsId, {
+          pms_id: pmsId,
+          completion_date: completionDate,
+          service_notes: serviceNotes,
+          next_pms_due: nextPmsDue
         });
       });
 
@@ -1062,7 +1296,26 @@ $pms_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
       tomorrow.setDate(tomorrow.getDate() + 1);
       const tomorrowStr = tomorrow.toISOString().split('T')[0];
       document.getElementById('newDate').min = tomorrowStr;
+
+      // Set maximum date for completion to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('completionDate').max = today;
     });
+
+    // Odometer input validation - only allow numbers
+    const odometerInput = document.getElementById('odometer');
+    if (odometerInput) {
+      odometerInput.addEventListener('input', function(e) {
+        // Remove all non-numeric characters
+        this.value = this.value.replace(/\D/g, '');
+      });
+
+      odometerInput.addEventListener('paste', function(e) {
+        setTimeout(() => {
+          this.value = this.value.replace(/\D/g, '');
+        }, 0);
+      });
+    }
   </script>
 
   <style>
@@ -1332,6 +1585,12 @@ $pms_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
       background-color: #e2e3e5;
       color: #383d41;
       border-color: #d6d8db;
+    }
+
+    .status-badge.no.show {
+      background-color: #f5d0fe;
+      color: #86198f;
+      border-color: #f0abfc;
     }
 
     /* Also style status badges in detail view */

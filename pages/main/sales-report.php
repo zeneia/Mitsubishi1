@@ -728,31 +728,15 @@ if (!$pdo) {
               <option value="12">December</option>
             </select>
           </div>
-          <div class="control-group">
-            <label class="control-label" for="report-type">
-              <i class="fas fa-file-alt"></i> Report Type
-            </label>
-            <select id="report-type" class="control-select">
-              <option value="summary">Summary Report</option>
-              <option value="detailed">Detailed Report</option>
-              <option value="comparison">Year Comparison</option>
-              <option value="model-analysis">Model Analysis</option>
-            </select>
-          </div>
-          <div class="control-group">
-            <label class="control-label" for="date-range">
-              <i class="fas fa-calendar-week"></i> Custom Range
-            </label>
-            <input type="date" id="date-range" class="control-input">
-          </div>
+
         </div>
         <div class="action-buttons">
-          <button class="btn-generate" onclick="generateReport()">
-            <i class="fas fa-chart-bar"></i> Generate Report
+          <button class="btn-export" onclick="exportAllReports()">
+            <i class="fas fa-file-pdf"></i> Export All Reports to PDF
           </button>
-          <button class="btn-export" onclick="exportReport()">
-            <i class="fas fa-download"></i> Export Data
-          </button>
+        </div>
+        <div id="date-range-indicator" style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 4px; font-size: 14px; color: #1976d2;">
+          <i class="fas fa-info-circle"></i> <strong>Viewing data for:</strong> <span id="current-date-range">Loading...</span>
         </div>
       </div>
 
@@ -887,9 +871,6 @@ if (!$pdo) {
             <button class="btn-small-enhanced" style="background: #9b59b6; color: white;" onclick="refreshAgentData()">
               <i class="fas fa-sync-alt"></i> Refresh
             </button>
-            <button class="btn-small-enhanced" style="background: #27ae60; color: white;" onclick="exportAgentData()">
-              <i class="fas fa-file-excel"></i> Export
-            </button>
           </div>
         </div>
         
@@ -911,9 +892,6 @@ if (!$pdo) {
           <div class="section-actions">
             <button class="btn-small-enhanced" style="background: #3498db; color: white;" onclick="refreshData()">
               <i class="fas fa-sync-alt"></i> Refresh
-            </button>
-            <button class="btn-small-enhanced" style="background: #27ae60; color: white;" onclick="exportTable()">
-              <i class="fas fa-file-excel"></i> Export
             </button>
           </div>
         </div>
@@ -956,16 +934,32 @@ if (!$pdo) {
     let salesByModelChart = null;
     let revenueChart = null;
     
+    // Helper function to get filter parameters
+    function getFilterParams() {
+      const year = document.getElementById('report-year').value;
+      const month = document.getElementById('report-month').value;
+      return { year, month };
+    }
+
     // Initialize dashboard
     document.addEventListener('DOMContentLoaded', function() {
       // Set current month as default
       const currentMonth = new Date().getMonth() + 1;
       document.getElementById('report-month').value = currentMonth;
-      
+
       // Set current year as default
       const currentYear = new Date().getFullYear();
       document.getElementById('report-year').value = currentYear;
-      
+
+      // Add event listeners for filter changes
+      document.getElementById('report-year').addEventListener('change', function() {
+        loadDashboardData();
+      });
+
+      document.getElementById('report-month').addEventListener('change', function() {
+        loadDashboardData();
+      });
+
       // Load all data
       loadDashboardData();
     });
@@ -973,12 +967,17 @@ if (!$pdo) {
     // Load all dashboard data
     async function loadDashboardData() {
       try {
+        const { year, month } = getFilterParams();
+        console.log('Loading dashboard data for:', { year, month });
+
         await Promise.all([
           loadKPIData(),
           loadChartData(),
           loadPerformanceTable(),
           loadAgentPerformance()
         ]);
+
+        console.log('Dashboard data loaded successfully');
       } catch (error) {
         console.error('Error loading dashboard data:', error);
         showErrorMessage('Failed to load dashboard data');
@@ -988,9 +987,31 @@ if (!$pdo) {
     // Load KPI summary data
     async function loadKPIData() {
       try {
-        const response = await fetch('../../api/sales-report.php?action=summary');
+        const { year, month } = getFilterParams();
+        const url = `../../api/sales-report.php?action=summary&year=${year}&month=${month}`;
+        console.log('Fetching KPI data from:', url);
+
+        const response = await fetch(url);
         const data = await response.json();
-        
+
+        console.log('KPI data received:', {
+          year: year,
+          month: month,
+          date_range: `${data.start_date} to ${data.end_date}`,
+          total_revenue: data.total_revenue,
+          units_sold: data.units_sold,
+          total_transactions: data.total_transactions
+        });
+
+        // Update date range indicator
+        if (data.start_date && data.end_date) {
+          const startDate = new Date(data.start_date);
+          const endDate = new Date(data.end_date);
+          const options = { year: 'numeric', month: 'long', day: 'numeric' };
+          const rangeText = `${startDate.toLocaleDateString('en-US', options)} to ${endDate.toLocaleDateString('en-US', options)}`;
+          document.getElementById('current-date-range').textContent = rangeText;
+        }
+
         if (data.error) {
           throw new Error(data.error);
         }
@@ -1034,9 +1055,12 @@ if (!$pdo) {
     // Load chart data
     async function loadChartData() {
       try {
+        const { year, month } = getFilterParams();
+        console.log('Fetching chart data for:', { year, month });
+
         const [salesByModelResponse, revenueTrendResponse] = await Promise.all([
-          fetch('../../api/sales-report.php?action=by-model'),
-          fetch('../../api/sales-report.php?action=revenue-trend')
+          fetch(`../../api/sales-report.php?action=by-model&year=${year}&month=${month}`),
+          fetch(`../../api/sales-report.php?action=revenue-trend&year=${year}&month=${month}`)
         ]);
         
         const salesByModelData = await salesByModelResponse.json();
@@ -1061,7 +1085,8 @@ if (!$pdo) {
     // Load performance table data
     async function loadPerformanceTable() {
       try {
-        const response = await fetch('../../api/sales-report.php?action=by-model');
+        const { year, month } = getFilterParams();
+        const response = await fetch(`../../api/sales-report.php?action=by-model&year=${year}&month=${month}`);
         const data = await response.json();
         
         if (data.error) {
@@ -1079,7 +1104,8 @@ if (!$pdo) {
     // Load agent performance data
     async function loadAgentPerformance() {
       try {
-        const response = await fetch('../../api/sales-report.php?action=by-agent');
+        const { year, month } = getFilterParams();
+        const response = await fetch(`../../api/sales-report.php?action=by-agent&year=${year}&month=${month}`);
         const data = await response.json();
         
         if (data.error) {
@@ -1201,29 +1227,21 @@ if (!$pdo) {
       });
     }
 
-    // Export agent data
-    function exportAgentData() {
-      Swal.fire({
-        title: 'Export Agent Performance',
-        text: 'Export agent performance data to Excel?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#27ae60',
-        cancelButtonColor: '#95a5a6',
-        confirmButtonText: 'Export Excel',
-        cancelButtonText: 'Cancel'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          Swal.fire({
-            title: 'Exporting...',
-            text: 'Generating Excel file with agent performance data...',
-            icon: 'info',
-            timer: 2000,
-            showConfirmButton: false
-          });
-          // Here you would implement actual export functionality
-        }
+    // Centralized export function for all reports
+    function exportAllReports() {
+      // Get current filter values
+      const year = document.getElementById('report-year').value;
+      const month = document.getElementById('report-month').value;
+
+      // Build query parameters
+      const params = new URLSearchParams({
+        year: year,
+        month: month
       });
+
+      // Open PDF export in new window
+      const url = 'sales_report_pdf.php?' + params.toString();
+      window.open(url, '_blank');
     }
 
     // Initialize sales by model chart
@@ -1474,82 +1492,172 @@ if (!$pdo) {
       });
     }
 
-    // Initialize revenue chart
+    // Initialize revenue chart as bar graph
     function initializeRevenueChart(data) {
       const ctx = document.getElementById('revenueChart').getContext('2d');
-      
+
       // Destroy existing chart if it exists
       if (revenueChart) {
         revenueChart.destroy();
       }
-      
+
       // Prepare chart data
       const labels = data.length > 0 ? data.map(item => item.month_name) : ['No Data'];
       const values = data.length > 0 ? data.map(item => (item.revenue / 1000000)) : [0]; // Convert to millions
-      
+
+      // Create gradient for bars
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, 'rgba(52, 152, 219, 0.9)');
+      gradient.addColorStop(1, 'rgba(52, 152, 219, 0.6)');
+
+      // Create dynamic colors based on growth
+      const backgroundColors = values.map((value, index) => {
+        if (index === 0) return 'rgba(52, 152, 219, 0.8)';
+        const previous = values[index - 1];
+        if (value > previous) {
+          return 'rgba(39, 174, 96, 0.8)'; // Green for growth
+        } else if (value < previous) {
+          return 'rgba(231, 76, 60, 0.8)'; // Red for decline
+        } else {
+          return 'rgba(52, 152, 219, 0.8)'; // Blue for no change
+        }
+      });
+
+      const borderColors = values.map((value, index) => {
+        if (index === 0) return '#3498db';
+        const previous = values[index - 1];
+        if (value > previous) {
+          return '#27ae60'; // Green for growth
+        } else if (value < previous) {
+          return '#e74c3c'; // Red for decline
+        } else {
+          return '#3498db'; // Blue for no change
+        }
+      });
+
       revenueChart = new Chart(ctx, {
-        type: 'line',
+        type: 'bar',
         data: {
           labels: labels,
           datasets: [{
-            label: 'Revenue (Millions)',
+            label: 'Revenue',
             data: values,
-            borderColor: '#3498db',
-            backgroundColor: 'rgba(52, 152, 219, 0.1)',
-            borderWidth: 3,
-            fill: true,
-            tension: 0.4,
-            pointBackgroundColor: '#3498db',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 3,
-            pointRadius: 6,
-            pointHoverRadius: 8
+            backgroundColor: backgroundColors,
+            borderColor: borderColors,
+            borderWidth: 2,
+            borderRadius: 8,
+            borderSkipped: false,
+            hoverBackgroundColor: values.map((value, index) => {
+              if (index === 0) return 'rgba(52, 152, 219, 1)';
+              const previous = values[index - 1];
+              if (value > previous) return 'rgba(39, 174, 96, 1)';
+              else if (value < previous) return 'rgba(231, 76, 60, 1)';
+              else return 'rgba(52, 152, 219, 1)';
+            }),
+            hoverBorderColor: borderColors,
+            hoverBorderWidth: 3
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              grid: {
-                color: 'rgba(0,0,0,0.1)'
-              },
-              ticks: {
-                callback: function(value) {
-                  return '₱' + value + 'M';
-                },
-                font: {
-                  size: 11
-                }
-              }
-            },
-            x: {
-              grid: {
-                color: 'rgba(0,0,0,0.1)'
-              },
-              ticks: {
-                font: {
-                  size: 11
-                }
-              }
-            }
+          interaction: {
+            mode: 'index',
+            intersect: false,
           },
           plugins: {
             legend: {
               display: false
             },
             tooltip: {
-              backgroundColor: 'rgba(0,0,0,0.8)',
+              enabled: true,
+              backgroundColor: 'rgba(44, 62, 80, 0.95)',
               titleColor: '#fff',
               bodyColor: '#fff',
+              titleFont: {
+                size: 13,
+                weight: 'bold'
+              },
+              bodyFont: {
+                size: 12
+              },
+              padding: 12,
               borderColor: '#3498db',
-              borderWidth: 1,
+              borderWidth: 2,
+              displayColors: true,
               callbacks: {
+                title: function(context) {
+                  return context[0].label;
+                },
                 label: function(context) {
-                  return `Revenue: ₱${context.raw.toFixed(2)}M`;
+                  const value = context.raw.toFixed(2);
+                  return `Revenue: ₱${value}M`;
+                },
+                afterLabel: function(context) {
+                  // Show growth percentage if not first point
+                  if (context.dataIndex > 0) {
+                    const current = context.raw;
+                    const previous = context.dataset.data[context.dataIndex - 1];
+                    const growth = ((current - previous) / previous * 100).toFixed(1);
+                    const arrow = growth >= 0 ? '↑' : '↓';
+                    const color = growth >= 0 ? '+' : '';
+                    return `${arrow} ${color}${growth}% from previous month`;
+                  }
+                  return '';
                 }
               }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)',
+                drawBorder: false,
+                lineWidth: 1
+              },
+              border: {
+                display: false
+              },
+              ticks: {
+                callback: function(value) {
+                  return '₱' + value.toFixed(1) + 'M';
+                },
+                font: {
+                  size: 11,
+                  family: "'Inter', 'Segoe UI', sans-serif"
+                },
+                color: '#7f8c8d',
+                padding: 8
+              }
+            },
+            x: {
+              grid: {
+                display: false,
+                drawBorder: false
+              },
+              border: {
+                display: false
+              },
+              ticks: {
+                font: {
+                  size: 11,
+                  family: "'Inter', 'Segoe UI', sans-serif"
+                },
+                color: '#7f8c8d',
+                padding: 8
+              }
+            }
+          },
+          animation: {
+            duration: 1500,
+            easing: 'easeInOutQuart',
+            delay: (context) => {
+              let delay = 0;
+              if (context.type === 'data' && context.mode === 'default') {
+                delay = context.dataIndex * 100;
+              }
+              return delay;
             }
           }
         }
@@ -1848,79 +1956,7 @@ if (!$pdo) {
       });
     }
 
-    function exportTable() {
-      Swal.fire({
-        title: 'Export Table Data',
-        text: 'Choose export format for the performance table:',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#27ae60',
-        cancelButtonColor: '#3498db',
-        confirmButtonText: 'Export Excel',
-        cancelButtonText: 'Export CSV'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          Swal.fire({
-            title: 'Exporting...',
-            text: 'Generating Excel file...',
-            icon: 'info',
-            timer: 2000,
-            showConfirmButton: false
-          });
-        } else if (result.dismiss === Swal.DismissReason.cancel) {
-          Swal.fire({
-            title: 'Exporting...',
-            text: 'Generating CSV file...',
-            icon: 'info',
-            timer: 2000,
-            showConfirmButton: false
-          });
-        }
-      });
-    }
 
-    function exportReport() {
-      Swal.fire({
-        title: 'Export Sales Report',
-        html: `
-          <div style="text-align: left;">
-            <p style="margin-bottom: 15px;">Select export options:</p>
-            <div style="margin: 10px 0;">
-              <input type="checkbox" id="include-charts" checked>
-              <label for="include-charts" style="margin-left: 8px;">Include Charts</label>
-            </div>
-            <div style="margin: 10px 0;">
-              <input type="checkbox" id="include-kpis" checked>
-              <label for="include-kpis" style="margin-left: 8px;">Include KPI Dashboard</label>
-            </div>
-            <div style="margin: 10px 0;">
-              <input type="checkbox" id="include-table" checked>
-              <label for="include-table" style="margin-left: 8px;">Include Performance Table</label>
-            </div>
-          </div>
-        `,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#27ae60',
-        cancelButtonColor: '#95a5a6',
-        confirmButtonText: 'Export PDF',
-        cancelButtonText: 'Cancel',
-        showDenyButton: true,
-        denyButtonText: 'Export Excel',
-        denyButtonColor: '#3498db'
-      }).then((result) => {
-        if (result.isConfirmed || result.isDenied) {
-          const format = result.isConfirmed ? 'PDF' : 'Excel';
-          Swal.fire({
-            title: 'Generating Report...',
-            text: `Creating ${format} export with selected options...`,
-            icon: 'info',
-            timer: 3000,
-            showConfirmButton: false
-          });
-        }
-      });
-    }
 
     // ...existing code...
   </script>

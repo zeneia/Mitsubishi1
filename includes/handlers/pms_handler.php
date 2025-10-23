@@ -76,12 +76,11 @@ class PMSHandler {
                         c.Status as customer_status,
                         TRIM(CONCAT(IFNULL(c.firstname, ''), ' ', IFNULL(c.middlename, ''), ' ', IFNULL(c.lastname, ''))) as full_name,
                         a.Email,
-                        COALESCE(sa.display_name, CONCAT(aa.FirstName, ' ', aa.LastName), 'N/A') as approved_by_name
+                        CONCAT(COALESCE(approver.FirstName, ''), ' ', COALESCE(approver.LastName, '')) as approved_by_name
                       FROM car_pms_records p
                       LEFT JOIN customer_information c ON p.customer_id = c.account_id
                       LEFT JOIN accounts a ON c.account_id = a.Id
-                      LEFT JOIN sales_agent_profiles sa ON p.approved_by = sa.account_id
-                      LEFT JOIN accounts aa ON p.approved_by = aa.Id";
+                      LEFT JOIN accounts approver ON p.approved_by = approver.Id";
 
             $whereConditions = [];
             $params = [];
@@ -92,9 +91,14 @@ class PMSHandler {
                 $params['search'] = '%' . $filters['customer_search'] . '%';
             }
 
-            if (!empty($filters['pms_type']) && $filters['pms_type'] !== 'all') {
-                $whereConditions[] = "p.pms_info LIKE :pms_type";
-                $params['pms_type'] = '%' . $filters['pms_type'] . '%';
+            // Odometer range filter (e.g., 20000 filters 20000-25000)
+            if (!empty($filters['odometer_filter'])) {
+                $odometerValue = intval($filters['odometer_filter']);
+                if ($odometerValue > 0) {
+                    $whereConditions[] = "p.current_odometer >= :odometer_min AND p.current_odometer <= :odometer_max";
+                    $params['odometer_min'] = $odometerValue;
+                    $params['odometer_max'] = $odometerValue + 5000;
+                }
             }
 
             if (!empty($filters['status']) && $filters['status'] !== 'all') {
@@ -169,11 +173,15 @@ class PMSHandler {
             $query = "SELECT
                         p.*,
                         CASE WHEN p.uploaded_receipt IS NOT NULL THEN 1 ELSE 0 END as has_receipt,
-                        COALESCE(sa.display_name, CONCAT(aa.FirstName, ' ', aa.LastName), 'N/A') as approved_by_name,
+                        COALESCE(
+                            sa.display_name,
+                            CONCAT(COALESCE(approver.FirstName, ''), ' ', COALESCE(approver.LastName, '')),
+                            'N/A'
+                        ) as approved_by_name,
                         TIMESTAMPDIFF(HOUR, p.scheduled_date, p.updated_at) as duration_hours
                       FROM car_pms_records p
-                      LEFT JOIN sales_agent_profiles sa ON p.approved_by = sa.account_id
-                      LEFT JOIN accounts aa ON p.approved_by = aa.Id
+                      LEFT JOIN accounts approver ON p.approved_by = approver.Id
+                      LEFT JOIN sales_agent_profiles sa ON approver.Id = sa.account_id
                       WHERE p.customer_id = :customer_id
                       ORDER BY p.pms_date DESC";
             
@@ -228,23 +236,27 @@ class PMSHandler {
     public function trackNewSession($data) {
         try {
             $this->pdo->beginTransaction();
-            
+
+            // Sanitize odometer value
+            $odometer = isset($data['current_odometer']) ? preg_replace('/\D/', '', $data['current_odometer']) : '0';
+            $odometer = $odometer === '' ? 0 : intval($odometer);
+
             $query = "INSERT INTO car_pms_records (
-                        customer_id, plate_number, model, current_odometer, 
-                        pms_info, pms_date, request_status, approved_by, 
+                        customer_id, plate_number, model, current_odometer,
+                        pms_info, pms_date, request_status, approved_by,
                         approved_at, service_notes_findings, created_at
                       ) VALUES (
                         :customer_id, :plate_number, :model, :current_odometer,
                         :pms_info, :pms_date, 'Completed', :approved_by,
                         NOW(), :service_notes, NOW()
                       )";
-            
+
             $stmt = $this->pdo->prepare($query);
             $result = $stmt->execute([
                 'customer_id' => $data['customer_id'],
                 'plate_number' => $data['plate_number'] ?? '',
                 'model' => $data['model'] ?? '',
-                'current_odometer' => $data['current_odometer'] ?? 0,
+                'current_odometer' => $odometer,
                 'pms_info' => $data['service_type'],
                 'pms_date' => $data['service_date'],
                 'approved_by' => $data['approved_by'],
@@ -410,8 +422,12 @@ class PMSHandler {
             }
             
             if (isset($data['current_odometer'])) {
+                // Sanitize odometer value - remove any non-numeric characters
+                $odometer = preg_replace('/\D/', '', $data['current_odometer']);
+                $odometer = $odometer === '' ? 0 : intval($odometer);
+
                 $updateFields[] = 'current_odometer = :current_odometer';
-                $params['current_odometer'] = $data['current_odometer'];
+                $params['current_odometer'] = $odometer;
             }
             
             if (isset($data['service_notes_findings'])) {
@@ -472,7 +488,7 @@ class PMSHandler {
      */
     public function getPMSRecordById($pmsId) {
         try {
-            $query = "SELECT 
+            $query = "SELECT
                         p.*,
                         CASE WHEN p.uploaded_receipt IS NOT NULL THEN 1 ELSE 0 END as has_receipt,
                         c.firstname,
@@ -480,11 +496,15 @@ class PMSHandler {
                         c.middlename,
                         c.mobile_number,
                         CONCAT(c.firstname, ' ', IFNULL(c.middlename, ''), ' ', c.lastname) as full_name,
-                        COALESCE(sa.display_name, CONCAT(aa.FirstName, ' ', aa.LastName), 'N/A') as approved_by_name
+                        COALESCE(
+                            sa.display_name,
+                            CONCAT(COALESCE(approver.FirstName, ''), ' ', COALESCE(approver.LastName, '')),
+                            'N/A'
+                        ) as approved_by_name
                       FROM car_pms_records p
                       LEFT JOIN customer_information c ON p.customer_id = c.account_id
-                      LEFT JOIN sales_agent_profiles sa ON p.approved_by = sa.account_id
-                      LEFT JOIN accounts aa ON p.approved_by = aa.Id
+                      LEFT JOIN accounts approver ON p.approved_by = approver.Id
+                      LEFT JOIN sales_agent_profiles sa ON approver.Id = sa.account_id
                       WHERE p.pms_id = :pms_id";
             
             $stmt = $this->pdo->prepare($query);

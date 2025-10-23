@@ -24,7 +24,14 @@ try {
     $transmission = $_POST['transmission'] ?? null;
     $engine_type = $_POST['engine_type'] ?? null;
     $color = $_POST['color'] ?? null;
+
+    // Sanitize odometer value - remove any non-numeric characters
     $current_odometer = $_POST['current_odometer'] ?? null;
+    if ($current_odometer !== null) {
+        $current_odometer = preg_replace('/\D/', '', $current_odometer);
+        $current_odometer = $current_odometer === '' ? null : intval($current_odometer);
+    }
+
     $pms_info = $_POST['pms_info'] ?? null;
     $pms_date = $_POST['pms_date'] ?? null;
     $next_pms_due = $_POST['next_pms_due'] ?? null;

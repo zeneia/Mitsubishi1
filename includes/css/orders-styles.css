@@ -83,7 +83,7 @@ body {
   background: var(--primary-red);
 }
 .stat-icon.purple {
-  background: var(--primary-red);
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
 }
 
 .stat-info h3 {

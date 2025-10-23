@@ -106,18 +106,9 @@ $customers = $pmsHandler->getCustomers();
             <label for="client-search">Search Client/Vehicle</label>
             <input type="text" id="client-search" class="filter-input" placeholder="Search by client name, vehicle model, or plate number">
           </div>
-          <div class="filter-group">
-            <label for="pms-type">PMS Type</label>
-            <select id="pms-type" class="filter-select">
-              <option value="all">All PMS Types</option>
-              <option value="First 1K KM">First 1K KM</option>
-              <option value="5K KM">5K KM</option>
-              <option value="10K KM">10K KM</option>
-              <option value="15K KM">15K KM</option>
-              <option value="20K KM">20K KM</option>
-              <option value="40K KM">40K KM</option>
-              <option value="60K KM">60K KM</option>
-            </select>
+          <div class="filter-group" style="position: relative;">
+            <label for="odometer-filter">Odometer (KM)</label>
+            <input type="text" id="odometer-filter" class="filter-input" placeholder="e.g., 20000" pattern="[0-9]*" inputmode="numeric" title="Enter value to filter range (e.g., 20000 shows 20000-25000 km)">
           </div>
           <div class="filter-group">
             <label for="completion-period">Completion Period</label>
@@ -162,7 +153,6 @@ $customers = $pmsHandler->getCustomers();
                 <th>Service Date</th>
                 <th>Status</th>
                 <th>Approved By</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="pmsTableBody">
@@ -215,52 +205,11 @@ $customers = $pmsHandler->getCustomers();
                         </small>
                       </div>
                     </td>
-                    <td>
-                      <div class="order-actions-enhanced">
-                        <button class="btn-small btn-view" title="View PMS History" onclick="viewPMSHistory(<?php echo $record['customer_id'] ?? 0; ?>)">
-                          <i class="fas fa-history"></i>
-                        </button>
-                        <button class="btn-small btn-edit" title="Edit Record" onclick="editPMSRecord(<?php echo $record['pms_id'] ?? 0; ?>)">
-                          <i class="fas fa-edit"></i>
-                        </button>
-
-                        <?php if (!empty($record['has_receipt'])): ?>
-                          <button class="btn-small btn-view" title="View Receipt" onclick="viewReceipt(<?php echo $record['pms_id']; ?>)" style="background: #17a2b8;">
-                            <i class="fas fa-receipt"></i>
-                          </button>
-                        <?php endif; ?>
-
-                        <?php
-                        $status = $record['request_status'] ?? '';
-                        // Show Reschedule button for Scheduled or Approved status
-                        if (in_array($status, ['Scheduled', 'Approved'])):
-                        ?>
-                          <button class="btn-small btn-edit" title="Reschedule" onclick="rescheduleRequest(<?php echo $record['pms_id'] ?? 0; ?>)" style="background: #f39c12;">
-                            <i class="fas fa-calendar-alt"></i>
-                          </button>
-                        <?php endif; ?>
-
-                        <?php
-                        // Show Mark as Completed button for Scheduled or Approved status
-                        if (in_array($status, ['Scheduled', 'Approved'])):
-                        ?>
-                          <button class="btn-small btn-view" title="Mark as Completed" onclick="markAsCompleted(<?php echo $record['pms_id'] ?? 0; ?>)" style="background: #27ae60;">
-                            <i class="fas fa-check-circle"></i>
-                          </button>
-                        <?php endif; ?>
-
-                        <?php if (($_SESSION['user_role'] ?? '') === 'SalesAgent' && $status === 'Pending'): ?>
-                          <button class="btn-small btn-view" title="Approve" onclick="updateStatus(<?php echo $record['pms_id'] ?? 0; ?>, 'Approved')" style="background: #27ae60;">
-                            <i class="fas fa-check"></i>
-                          </button>
-                        <?php endif; ?>
-                      </div>
-                    </td>
                   </tr>
                 <?php endforeach; ?>
               <?php else: ?>
                 <tr>
-                  <td colspan="7" style="text-align: center; padding: 20px;">No PMS records found.</td>
+                  <td colspan="6" style="text-align: center; padding: 20px;">No PMS records found.</td>
                 </tr>
               <?php endif; ?>
             </tbody>
@@ -364,11 +313,13 @@ $customers = $pmsHandler->getCustomers();
                 <option value="20K KM">20K KM</option>
                 <option value="40K KM">40K KM</option>
                 <option value="60K KM">60K KM</option>
+                <option value="General PMS">General PMS</option>
               </select>
             </div>
             <div class="form-group">
               <label for="edit_current_odometer">Current Odometer (KM)</label>
-              <input type="number" id="edit_current_odometer" name="current_odometer" class="form-input" min="0" required>
+              <input type="text" id="edit_current_odometer" name="current_odometer" class="form-input" pattern="[0-9]*" inputmode="numeric" placeholder="e.g., 20000" required>
+              <small style="color: #666; font-size: 0.85em;">Enter numbers only (e.g., 20000)</small>
             </div>
           </div>
 
@@ -560,20 +511,26 @@ $customers = $pmsHandler->getCustomers();
     
     // Function to view PMS history
     function viewPMSHistory(customerId) {
-      if (!customerId) {
+      if (!customerId || customerId === 0) {
         showNotification('Error: Invalid customer ID', 'error');
         return;
       }
-      
+
       // Show loading
       document.getElementById('historyStats').innerHTML = '<div style="text-align: center; padding: 20px;">Loading...</div>';
       document.getElementById('historyTimeline').innerHTML = '';
       document.getElementById('pmsHistoryModal').classList.add('active');
-      
+
       // Fetch history data
       fetch(`../../api/pms_api.php?action=get_customer_history&customer_id=${customerId}`)
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
         .then(data => {
+          console.log('API Response:', data); // Debug log
           if (data.success) {
             displayCustomerHistory(data.data);
           } else {
@@ -582,56 +539,65 @@ $customers = $pmsHandler->getCustomers();
         })
         .catch(error => {
           console.error('Error loading history:', error);
-          document.getElementById('historyStats').innerHTML = '<div style="text-align: center; padding: 20px; color: red;">Error loading history</div>';
+          document.getElementById('historyStats').innerHTML = `<div style="text-align: center; padding: 20px; color: red;">Error loading history: ${error.message}</div>`;
+          document.getElementById('historyTimeline').innerHTML = '';
         });
     }
     
     function displayCustomerHistory(data) {
+      console.log('Displaying history data:', data); // Debug log
+
+      if (!data || !data.stats || !data.history) {
+        document.getElementById('historyStats').innerHTML = '<div style="text-align: center; padding: 20px; color: red;">Invalid data format</div>';
+        document.getElementById('historyTimeline').innerHTML = '';
+        return;
+      }
+
       const stats = data.stats;
       const history = data.history;
-      
+
       // Display stats
       document.getElementById('historyStats').innerHTML = `
         <div class="history-stat">
           <span class="stat-label">Total Sessions:</span>
-          <span class="stat-value">${stats.total_sessions}</span>
+          <span class="stat-value">${stats.total_sessions || 0}</span>
         </div>
         <div class="history-stat">
           <span class="stat-label">Total Service Time:</span>
-          <span class="stat-value">${stats.total_time.toFixed(1)} hours</span>
+          <span class="stat-value">${(stats.total_time || 0).toFixed(1)} hours</span>
         </div>
         <div class="history-stat">
           <span class="stat-label">Average Session Time:</span>
-          <span class="stat-value">${stats.avg_time.toFixed(1)} hours</span>
+          <span class="stat-value">${(stats.avg_time || 0).toFixed(1)} hours</span>
         </div>
       `;
-      
+
       // Display timeline
       let timelineHTML = '';
-      history.forEach((record, index) => {
-        const sessionNumber = history.length - index;
-        const receiptButton = record.has_receipt ? 
-          `<button class="btn btn-small btn-info" onclick="viewReceipt(${record.pms_id})" style="margin-left: 10px;">
-            <i class="fas fa-receipt"></i> View Receipt
-          </button>` : '';
-        
-        timelineHTML += `
-          <div class="timeline-item completed">
-            <div class="timeline-date">${new Date(record.pms_date).toLocaleDateString()}</div>
-            <div class="timeline-content">
-              <h4>${record.pms_info} (Session #${sessionNumber})</h4>
-              <p>${record.service_notes_findings || 'Standard maintenance service'}</p>
-              <div class="session-details">
-                <span class="service-tech">Approved by: ${record.approved_by_name || 'N/A'}</span>
-                <span class="service-duration">Status: ${record.request_status}</span>
-                ${receiptButton}
+      if (history && history.length > 0) {
+        history.forEach((record, index) => {
+          const sessionNumber = history.length - index;
+          const pmsDate = record.pms_date ? new Date(record.pms_date).toLocaleDateString() : 'N/A';
+
+          timelineHTML += `
+            <div class="timeline-item completed">
+              <div class="timeline-date">${pmsDate}</div>
+              <div class="timeline-content">
+                <h4>${record.pms_info || 'PMS Service'} (Session #${sessionNumber})</h4>
+                <p>${record.service_notes_findings || 'Standard maintenance service'}</p>
+                <div class="session-details">
+                  <span class="service-tech">Approved by: ${record.approved_by_name || 'N/A'}</span>
+                  <span class="service-duration">Status: ${record.request_status || 'N/A'}</span>
+                </div>
               </div>
             </div>
-          </div>
-        `;
-      });
-      
-      document.getElementById('historyTimeline').innerHTML = timelineHTML || '<p style="text-align: center; color: #666;">No history records found.</p>';
+          `;
+        });
+      } else {
+        timelineHTML = '<p style="text-align: center; color: #666;">No PMS history found for this customer.</p>';
+      }
+
+      document.getElementById('historyTimeline').innerHTML = timelineHTML;
     }
 
     function updateStatus(pmsId, status) {
@@ -671,7 +637,7 @@ $customers = $pmsHandler->getCustomers();
     function applyFilters() {
       const filters = {
         customer_search: document.getElementById('client-search').value,
-        pms_type: document.getElementById('pms-type').value,
+        odometer_filter: document.getElementById('odometer-filter').value,
         completion_period: document.getElementById('completion-period').value,
         status: document.getElementById('status-filter').value
       };
@@ -695,63 +661,12 @@ $customers = $pmsHandler->getCustomers();
     function updateTable(records) {
       const tbody = document.getElementById('pmsTableBody');
       let html = '';
-      
+
       if (records.length === 0) {
-        html = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No records found matching the filters.</td></tr>';
+        html = '<tr><td colspan="6" style="text-align: center; padding: 20px;">No records found matching the filters.</td></tr>';
       } else {
         records.forEach(record => {
           const isRejected = (record.request_status || '') === 'Rejected';
-          const isPending = (record.request_status || '') === 'Pending';
-          
-          let actionButtons = '';
-          
-          // View and Edit buttons for all records (including rejected)
-          actionButtons += `
-            <button class="btn-small btn-view" title="View PMS History" onclick="viewPMSHistory(${record.customer_id || 0})">
-              <i class="fas fa-history"></i>
-            </button>
-            <button class="btn-small btn-edit" title="Edit Record" onclick="editPMSRecord(${record.pms_id || 0})">
-              <i class="fas fa-edit"></i>
-            </button>
-          `;
-          
-          // Receipt button for records with receipts
-          if (record.has_receipt) {
-            actionButtons += `
-              <button class="btn-small btn-view" title="View Receipt" onclick="viewReceipt(${record.pms_id})" style="background: #17a2b8;">
-                <i class="fas fa-receipt"></i>
-              </button>
-            `;
-          }
-
-          // Reschedule button for Scheduled or Approved status
-          const isScheduledOrApproved = ['Scheduled', 'Approved'].includes(record.request_status || '');
-          if (isScheduledOrApproved) {
-            actionButtons += `
-              <button class="btn-small btn-edit" title="Reschedule" onclick="rescheduleRequest(${record.pms_id || 0})" style="background: #f39c12;">
-                <i class="fas fa-calendar-alt"></i>
-              </button>
-            `;
-          }
-
-          // Mark as Completed button for Scheduled or Approved status
-          if (isScheduledOrApproved) {
-            actionButtons += `
-              <button class="btn-small btn-view" title="Mark as Completed" onclick="markAsCompleted(${record.pms_id || 0})" style="background: #27ae60;">
-                <i class="fas fa-check-circle"></i>
-              </button>
-            `;
-          }
-
-          // Approve button for pending records (only for sales agents)
-          if (isPending && userRole === 'SalesAgent') {
-            actionButtons += `
-              <button class="btn-small btn-view" title="Approve" onclick="updateStatus(${record.pms_id || 0}, 'Approved')" style="background: #27ae60;">
-                <i class="fas fa-check"></i>
-              </button>
-            `;
-          }
-          
           html += `
             <tr data-customer-id="${record.customer_id || 0}">
               <td>
@@ -794,11 +709,6 @@ $customers = $pmsHandler->getCustomers();
                 <div class="service-duration">
                   <span class="duration-time">${record.approved_by_name || 'N/A'}</span>
                   <small>${record.approved_at ? new Date(record.approved_at).toLocaleDateString() : ''}</small>
-                </div>
-              </td>
-              <td>
-                <div class="order-actions-enhanced">
-                  ${actionButtons}
                 </div>
               </td>
             </tr>
@@ -1101,9 +1011,35 @@ $customers = $pmsHandler->getCustomers();
       });
 
       // Also trigger filter when other dropdowns change
-      document.getElementById('pms-type').addEventListener('change', applyFilters);
       document.getElementById('completion-period').addEventListener('change', applyFilters);
       document.getElementById('status-filter').addEventListener('change', applyFilters);
+
+      // Add input event for odometer filter with debounce
+      const odometerInput = document.getElementById('odometer-filter');
+      let odometerTimeout;
+      odometerInput.addEventListener('input', function(e) {
+        // Only allow numbers
+        this.value = this.value.replace(/\D/g, '');
+
+        clearTimeout(odometerTimeout);
+        odometerTimeout = setTimeout(() => {
+          applyFilters();
+        }, 500);
+      });
+
+      // Odometer input validation for edit form
+      const editOdometerInput = document.getElementById('edit_current_odometer');
+      if (editOdometerInput) {
+        editOdometerInput.addEventListener('input', function(e) {
+          this.value = this.value.replace(/\D/g, '');
+        });
+
+        editOdometerInput.addEventListener('paste', function(e) {
+          setTimeout(() => {
+            this.value = this.value.replace(/\D/g, '');
+          }, 0);
+        });
+      }
 
       // Reschedule form handler
       document.getElementById('rescheduleForm').addEventListener('submit', function(e) {

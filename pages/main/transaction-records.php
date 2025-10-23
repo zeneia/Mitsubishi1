@@ -472,9 +472,11 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
         </div>
 
         <div class="action-area">
-          <button class="btn btn-primary" id="btn-export-completed">Export Transactions</button>
-          <button class="btn btn-secondary">Generate Report</button>
-          <button class="btn btn-outline">Print Summary</button>
+          <button class="btn btn-primary" id="btn-export-completed">
+            <i class="fas fa-file-pdf"></i> Export to PDF
+          </button>
+          <!-- <button class="btn btn-secondary">Generate Report</button>
+          <button class="btn btn-outline">Print Summary</button> -->
         </div>
 
         <!-- Transaction Details Pane (Hidden by default) -->
@@ -579,8 +581,10 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
         </div>
 
         <div class="action-area">
-          <button class="btn btn-primary">Send Bulk Reminders</button>
-          <button class="btn btn-secondary" id="btn-export-pending">Export Pending List</button>
+          <!-- <button class="btn btn-primary">Send Bulk Reminders</button> -->
+          <button class="btn btn-secondary" id="btn-export-pending">
+            <i class="fas fa-file-pdf"></i> Export to PDF
+          </button>
         </div>
       </div>
 
@@ -826,13 +830,13 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
       if (pPrev) pPrev.addEventListener('click', () => { if (pendingPage > 1) loadTransactions('pending', pendingPage - 1); });
       if (pNext) pNext.addEventListener('click', () => { const totalPages = Math.max(1, Math.ceil(pendingTotal / PAGE_LIMIT)); if (pendingPage < totalPages) loadTransactions('pending', pendingPage + 1); });
 
-      // Export buttons
+      // Export buttons - PDF export
       function buildQuery(params) {
         const esc = encodeURIComponent;
         return Object.keys(params).filter(k => params[k] !== undefined && params[k] !== null && params[k] !== '').map(k => esc(k) + '=' + esc(params[k])).join('&');
       }
       function exportNow(status) {
-        const params = { action: 'export_transactions', status };
+        const params = { status };
         if (status === 'completed') {
           params.search = document.getElementById('completed-search').value || '';
           params.model = document.getElementById('completed-model').value || '';
@@ -841,7 +845,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
           if (from) params.date_from = from;
           if (to) params.date_to = to;
         }
-        const url = TXN_API + '?' + buildQuery(params);
+        const url = 'transaction_records_pdf.php?' + buildQuery(params);
         window.open(url, '_blank');
       }
       const btnExportCompleted = document.getElementById('btn-export-completed');

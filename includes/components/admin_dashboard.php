@@ -761,12 +761,11 @@ $accountStats = getAccountStats($connect);
           <th>Progress</th>
           <th>Next Due</th>
           <th>Status</th>
-          <th>Actions</th>
         </tr>
       </thead>
       <tbody id="loanCustomersTable">
         <tr>
-          <td colspan="9" class="text-center">Loading loan customers...</td>
+          <td colspan="8" class="text-center">Loading loan customers...</td>
         </tr>
       </tbody>
     </table>
@@ -1402,21 +1401,21 @@ $accountStats = getAccountStats($connect);
         } else {
           console.error('Error loading loan customers:', data.error);
           document.getElementById('loanCustomersTable').innerHTML =
-            '<tr><td colspan="9" class="text-center">Error loading loan customers</td></tr>';
+            '<tr><td colspan="8" class="text-center">Error loading loan customers</td></tr>';
         }
       })
       .catch(error => {
         console.error('Error:', error);
         document.getElementById('loanCustomersTable').innerHTML =
-          '<tr><td colspan="9" class="text-center">Error loading loan customers</td></tr>';
+          '<tr><td colspan="8" class="text-center">Error loading loan customers</td></tr>';
       });
   };
 
   function displayLoanCustomers(customers) {
     const tbody = document.getElementById('loanCustomersTable');
-    
+
     if (customers.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="9" class="text-center">No loan customers found</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center">No loan customers found</td></tr>';
       return;
     }
 
@@ -1448,11 +1447,6 @@ $accountStats = getAccountStats($connect);
           </td>
           <td>${customer.next_due_date ? new Date(customer.next_due_date).toLocaleDateString() : 'N/A'}</td>
           <td><span class="${statusClass}">${customer.payment_status_label}</span></td>
-          <td class="table-actions">
-            <button class="btn btn-small btn-primary" onclick="viewLoanDetails(${customer.order_id})" title="View Loan Details">
-              <i class="fas fa-file-invoice"></i> Details
-            </button>
-          </td>
         </tr>
       `;
     }).join('');

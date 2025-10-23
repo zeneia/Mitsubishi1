@@ -57,7 +57,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($missing_fields)) {
             throw new Exception("Please fill in all required fields: " . implode(', ', $missing_fields));
         }
-        
+
+        // Sanitize odometer value - remove any non-numeric characters
+        $current_odometer = preg_replace('/\D/', '', $_POST['current_odometer']);
+        $current_odometer = $current_odometer === '' ? 0 : intval($current_odometer);
+
         // Handle checkboxes
         $service_oil_change = isset($_POST['service_oil_change']) ? 1 : 0;
         $service_oil_filter_replacement = isset($_POST['service_oil_filter_replacement']) ? 1 : 0;
@@ -97,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST['transmission'] ?? null,
             $_POST['engine_type'] ?? null,
             $_POST['color'] ?? null,
-            $_POST['current_odometer'],
+            $current_odometer, // Use sanitized odometer value
             $_POST['pms_info'],
             $_POST['pms_date'],
             $_POST['next_pms_due'] ?? null,
@@ -473,8 +477,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             <div class="form-group">
                                 <label class="form-label required">Current Odometer (km)</label>
-                                <input type="number" name="current_odometer" class="form-input" 
-                                       value="<?php echo htmlspecialchars($_POST['current_odometer'] ?? '0'); ?>" required>
+                                <input type="text" name="current_odometer" class="form-input"
+                                       value="<?php echo htmlspecialchars($_POST['current_odometer'] ?? ''); ?>"
+                                       pattern="[0-9]*" inputmode="numeric"
+                                       placeholder="e.g., 20000" required>
+                                <small style="color: #666; font-size: 0.85em;">Enter numbers only (e.g., 20000)</small>
                             </div>
                             <div class="form-group">
                                 <label class="form-label required">PMS Info</label>
@@ -485,6 +492,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <option value="10K KM" <?php echo (($_POST['pms_info'] ?? '') === '10K KM') ? 'selected' : ''; ?>>10K KM</option>
                                     <option value="15K KM" <?php echo (($_POST['pms_info'] ?? '') === '15K KM') ? 'selected' : ''; ?>>15K KM</option>
                                     <option value="20K KM" <?php echo (($_POST['pms_info'] ?? '') === '20K KM') ? 'selected' : ''; ?>>20K KM</option>
+                                    <option value="General PMS" <?php echo (($_POST['pms_info'] ?? '') === 'General PMS') ? 'selected' : ''; ?>>General PMS</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -594,6 +602,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const fileName = this.files[0]?.name || '';
             document.querySelector('.file-name').textContent = fileName;
         });
+
+        // Odometer input validation - only allow numbers
+        const odometerInput = document.querySelector('input[name="current_odometer"]');
+        if (odometerInput) {
+            odometerInput.addEventListener('input', function(e) {
+                // Remove all non-numeric characters
+                this.value = this.value.replace(/\D/g, '');
+            });
+
+            odometerInput.addEventListener('paste', function(e) {
+                setTimeout(() => {
+                    this.value = this.value.replace(/\D/g, '');
+                }, 0);
+            });
+        }
     </script>
 </body>
 </html>

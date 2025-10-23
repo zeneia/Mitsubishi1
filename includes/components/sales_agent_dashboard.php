@@ -719,12 +719,11 @@ foreach ($new_inquiries as $inquiry) {
           <th>Progress</th>
           <th>Next Due</th>
           <th>Status</th>
-          <th>Actions</th>
         </tr>
       </thead>
       <tbody id="agentLoanCustomersTable">
         <tr>
-          <td colspan="8" class="text-center">Loading loan customers...</td>
+          <td colspan="7" class="text-center">Loading loan customers...</td>
         </tr>
       </tbody>
     </table>
@@ -2228,22 +2227,22 @@ document.head.appendChild(modalInspiredStyle);
             updateAgentLoanCustomerStats(data.data);
           } else {
             console.error('Error loading loan customers:', data.error);
-            document.getElementById('agentLoanCustomersTable').innerHTML = 
-              '<tr><td colspan="8" class="text-center">Error loading loan customers</td></tr>';
+            document.getElementById('agentLoanCustomersTable').innerHTML =
+              '<tr><td colspan="7" class="text-center">Error loading loan customers</td></tr>';
           }
         })
         .catch(error => {
           console.error('Error:', error);
-          document.getElementById('agentLoanCustomersTable').innerHTML = 
-            '<tr><td colspan="8" class="text-center">Error loading loan customers</td></tr>';
+          document.getElementById('agentLoanCustomersTable').innerHTML =
+            '<tr><td colspan="7" class="text-center">Error loading loan customers</td></tr>';
         });
     };
 
     function displayAgentLoanCustomers(customers) {
       const tbody = document.getElementById('agentLoanCustomersTable');
-      
+
       if (customers.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center">No loan customers found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No loan customers found</td></tr>';
         return;
       }
 
@@ -2274,11 +2273,6 @@ document.head.appendChild(modalInspiredStyle);
             </td>
             <td>${customer.next_due_date ? new Date(customer.next_due_date).toLocaleDateString() : 'N/A'}</td>
             <td><span class="${statusClass}">${customer.payment_status_label}</span></td>
-            <td class="table-actions">
-              <button class="btn btn-small btn-primary" onclick="viewAgentLoanDetails(${customer.order_id})" title="View Loan Details">
-                <i class="fas fa-file-invoice"></i> Details
-              </button>
-            </td>
           </tr>
         `;
       }).join('');

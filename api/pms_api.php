@@ -27,7 +27,7 @@ try {
         case 'get_pms_records':
             $filters = [
                 'customer_search' => $_GET['customer_search'] ?? '',
-                'pms_type' => $_GET['pms_type'] ?? '',
+                'odometer_filter' => $_GET['odometer_filter'] ?? '',
                 'status' => $_GET['status'] ?? '',
                 'completion_period' => $_GET['completion_period'] ?? ''
             ];
