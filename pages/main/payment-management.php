@@ -39,6 +39,10 @@ $agent_id = $_SESSION['user_id'] ?? null;
     <link href="../../includes/css/common-styles.css" rel="stylesheet">
     <link href="../../includes/css/orders-styles.css" rel="stylesheet">
     <style>
+    
+        body{
+            zoom: 85%;
+        }
         .payment-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -60,19 +64,19 @@ $agent_id = $_SESSION['user_id'] ?? null;
         }
 
         .payment-stat-card.pending {
-            background: #afafafff;
+            background: #F9A825;
         }
 
         .payment-stat-card.confirmed {
-            background: #afafafff;
+            background: #43A047;
         }
 
         .payment-stat-card.failed {
-            background: #afafafff;
+            background: #E53935;
         }
 
         .payment-stat-card.total {
-            background: #afafafff;
+            background: #1E88E5;
             color: #ffffffff;
         }
 
@@ -84,6 +88,7 @@ $agent_id = $_SESSION['user_id'] ?? null;
         }
 
         .stat-icon {
+            
             font-size: 2rem;
             opacity: 0.8;
         }
@@ -95,6 +100,7 @@ $agent_id = $_SESSION['user_id'] ?? null;
         }
 
         .stat-label {
+            
             font-size: 0.9rem;
             opacity: 0.9;
         }
@@ -155,7 +161,7 @@ $agent_id = $_SESSION['user_id'] ?? null;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #007BFF;
             color: white;
         }
 
@@ -178,7 +184,7 @@ $agent_id = $_SESSION['user_id'] ?? null;
         }
 
         .table-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #707070ff;
             color: white;
             padding: 20px 25px;
             display: flex;

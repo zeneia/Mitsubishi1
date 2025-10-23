@@ -79,6 +79,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
   <link href="../../includes/css/admin-styles.css" rel="stylesheet">
   <link href="../../includes/css/notification-styles.css" rel="stylesheet">
 </head>
+<style>
+    body{
+        zoom: 85%;
+    }
+</style>
 
 <body>
   <?php include '../../includes/components/sidebar.php'; ?>

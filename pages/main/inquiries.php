@@ -155,7 +155,7 @@ $stats = getInquiryStats($pdo);
     }
     
     body {
-      zoom: 80%;
+      zoom: 85%;
     }
 
     .inquiry-stats {

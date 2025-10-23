@@ -34,7 +34,7 @@ if ($user_role === 'Sales Agent') {
     }
     
     body {
-      zoom: 80%;
+      zoom: 85%;
     }
     .page-header {
       display: flex;

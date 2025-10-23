@@ -26,6 +26,10 @@ $current_page = 'sms';
   <link href="../../includes/css/common-styles.css" rel="stylesheet">
 
   <style>
+  
+  body{
+      zoom: 85%;
+  }
     /* Page header */
     .page-header {
       background: #fff;

@@ -345,11 +345,16 @@ if (isset($_GET['conversation_id'])) {
 
     html,
     body {
+      background: #ffffff;
       height: 100%;
       width: 100%;
       margin: 0;
       padding: 0;
       overflow: hidden;
+    }
+    
+    body{
+        zoom: 85%;
     }
 
     .main {
@@ -382,7 +387,7 @@ if (isset($_GET['conversation_id'])) {
     .chat-header {
       padding: 20px;
       border-bottom: 1px solid var(--border-light);
-      background: var(--primary-light);
+      background: #fef2f3;
     }
 
     .chat-header h2 {
