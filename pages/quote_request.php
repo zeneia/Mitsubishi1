@@ -568,7 +568,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <label for="phone">Phone Number*</label>
                                 <input type="tel" id="phone" name="phone" 
                                        value="<?php echo htmlspecialchars($user['mobile_number'] ?? ''); ?>" 
-                                       required>
+                                       required
+                                       oninput="this.value = this.value.replace(/[^0-9+]/g, '')"
+                                       onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
                             </div>
                         </div>
                     </div>
@@ -624,7 +626,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="form-group">
                                 <label for="down_payment">Down Payment (₱)</label>
                                 <input type="number" id="down_payment" name="down_payment" min="0" step="0.01" 
-                                       placeholder="Enter down payment amount">
+                                       placeholder="Enter down payment amount"
+                                       onkeydown="if(['e','E','+','-'].includes(event.key)) event.preventDefault();" />
                                 <small style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">Minimum recommended: ₱<?php echo number_format(($vehicle['promotional_price'] > 0 && $vehicle['promotional_price'] < $vehicle['base_price'] ? $vehicle['promotional_price'] : $vehicle['base_price']) * 0.2, 2); ?></small>
                             </div>
                             <div class="form-group">
