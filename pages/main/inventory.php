@@ -1096,7 +1096,8 @@ if ($user_role === 'Sales Agent') {
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Year Model *</label>
-              <input type="number" class="form-control" id="yearModel" name="year_model" min="2000" max="2030" required>
+              <input type="number" class="form-control" id="yearModel" name="year_model" min="2000" max="2030" required
+              onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
             </div>
             <div class="form-group">
               <label class="form-label">Category *</label>
@@ -1140,7 +1141,8 @@ if ($user_role === 'Sales Agent') {
             </div>
             <div class="form-group">
               <label class="form-label">Seating Capacity *</label>
-              <input type="number" class="form-control" id="seatingCapacity" name="seating_capacity" min="2" max="9" required>
+              <input type="number" class="form-control" id="seatingCapacity" name="seating_capacity" min="2" max="9" required
+              onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
             </div>
           </div>
           
@@ -1154,22 +1156,26 @@ if ($user_role === 'Sales Agent') {
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Base Price *</label>
-              <input type="number" class="form-control" id="basePrice" name="base_price" min="0" step="0.01" required>
+              <input type="number" class="form-control" id="basePrice" name="base_price" min="0" step="0.01" required
+              onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
             </div>
             <div class="form-group">
               <label class="form-label">Promotional Price</label>
-              <input type="number" class="form-control" id="promotionalPrice" name="promotional_price" min="0" step="0.01">
+              <input type="number" class="form-control" id="promotionalPrice" name="promotional_price" min="0" step="0.01"
+              onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
             </div>
           </div>
           
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Min Downpayment % *</label>
-              <input type="number" class="form-control" id="minDownpayment" name="min_downpayment_percentage" min="0" max="100" required>
+              <input type="number" class="form-control" id="minDownpayment" name="min_downpayment_percentage" min="0" max="100" required
+              onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
             </div>
             <div class="form-group">
               <label class="form-label">Financing Terms</label>
-              <input type="text" class="form-control" id="financingTerms" name="financing_terms">
+              <input type="number" class="form-control" id="financingTerms" name="financing_terms"
+              onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
             </div>
           </div>
           
@@ -1187,11 +1193,13 @@ if ($user_role === 'Sales Agent') {
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Stock Quantity *</label>
-              <input type="number" class="form-control" id="stockQuantity" name="stock_quantity" min="0" required>
+              <input type="number" class="form-control" id="stockQuantity" name="stock_quantity" min="0" required
+              onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
             </div>
             <div class="form-group">
               <label class="form-label">Min Stock Alert *</label>
-              <input type="number" class="form-control" id="minStockAlert" name="min_stock_alert" min="0" required>
+              <input type="number" class="form-control" id="minStockAlert" name="min_stock_alert" min="0" required
+              onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
             </div>
           </div>
           
