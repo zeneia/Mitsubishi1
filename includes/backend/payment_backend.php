@@ -37,18 +37,19 @@ if (!$pdo) {
     exit();
 }
 
-$action = $_POST['action'] ?? '';
+$action = $_POST['action'] ?? $_GET['action'] ?? '';
 $user_id = $_SESSION['user_id'];
 $user_role = $_SESSION['user_role'] ?? '';
 
 // Debug: Log the received data
 error_log("Payment Backend Debug - Action: '" . $action . "', User ID: " . $user_id . ", User Role: " . $user_role);
 error_log("Payment Backend Debug - POST data: " . print_r($_POST, true));
+error_log("Payment Backend Debug - GET data: " . print_r($_GET, true));
 
 // Check if action is empty
 if (empty($action)) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'No action specified. Required actions: get_payment_stats, get_agent_payments, get_payment_details, process_payment']);
+    echo json_encode(['success' => false, 'message' => 'No action specified. Required actions: get_payment_stats, get_agent_payments, get_payment_details, process_payment, get_receipt']);
     exit();
 }
 
@@ -66,8 +67,11 @@ try {
         case 'process_payment':
             processPayment();
             break;
+        case 'get_receipt':
+            getReceipt();
+            break;
         default:
-            throw new Exception('Invalid action: "' . $action . '". Valid actions are: get_payment_stats, get_agent_payments, get_payment_details, process_payment');
+            throw new Exception('Invalid action: "' . $action . '". Valid actions are: get_payment_stats, get_agent_payments, get_payment_details, process_payment, get_receipt');
     }
 } catch (Exception $e) {
     http_response_code(400);
@@ -525,4 +529,97 @@ function createPaymentNotification($customer_id, $payment_number, $status, $amou
         error_log('Failed to create payment notification: ' . $e->getMessage());
     }
 }
-?>
+
+/**
+ * Get receipt image for a payment
+ * COPIED FROM transactions_backend.php - WORKING VERSION
+ */
+function getReceipt()
+{
+    $pdo = $GLOBALS['pdo'];
+
+    $payment_id = (int)($_GET['payment_id'] ?? 0);
+    if ($payment_id <= 0) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'payment_id is required']);
+        return;
+    }
+
+    $sql = "SELECT
+                ph.receipt_image,
+                ph.receipt_filename
+            FROM payment_history ph
+            WHERE ph.id = ?";
+
+    $params = [$payment_id];
+
+    // If Sales Agent, ensure the payment belongs to their order
+    if (($_SESSION['user_role'] ?? '') === 'Sales Agent' || ($_SESSION['user_role'] ?? '') === 'SalesAgent') {
+        $sql .= " AND EXISTS (SELECT 1 FROM orders o WHERE o.order_id = ph.order_id AND o.sales_agent_id = ?)";
+        $params[] = $_SESSION['user_id'];
+    }
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $receipt = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$receipt) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'error' => 'Payment not found']);
+        return;
+    }
+
+    // Check if receipt is stored as BLOB (older method)
+    if ($receipt['receipt_image']) {
+        // Output BLOB image directly
+        header_remove('Content-Type');
+        $filename = $receipt['receipt_filename'] ?: 'receipt.jpg';
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'pdf' => 'application/pdf'
+        ];
+        $mime = $mimeTypes[$ext] ?? 'application/octet-stream';
+
+        header('Content-Type: ' . $mime);
+        header('Content-Disposition: inline; filename="' . $filename . '"');
+        echo $receipt['receipt_image'];
+        exit;
+    }
+
+    // Check if receipt is stored as file (newer method)
+    if ($receipt['receipt_filename']) {
+        // Construct file path
+        $upload_dir = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'receipts' . DIRECTORY_SEPARATOR;
+        $file_path = $upload_dir . $receipt['receipt_filename'];
+
+        // Check if file exists
+        if (file_exists($file_path)) {
+            // Determine MIME type
+            $ext = strtolower(pathinfo($receipt['receipt_filename'], PATHINFO_EXTENSION));
+            $mimeTypes = [
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'pdf' => 'application/pdf'
+            ];
+            $mime = $mimeTypes[$ext] ?? 'application/octet-stream';
+
+            // Output file
+            header('Content-Type: ' . $mime);
+            header('Content-Disposition: inline; filename="' . basename($receipt['receipt_filename']) . '"');
+            header('Content-Length: ' . filesize($file_path));
+            readfile($file_path);
+            exit;
+        }
+    }
+
+    // No receipt found
+    http_response_code(404);
+    echo json_encode(['success' => false, 'error' => 'Receipt not found']);
+    return;
+}

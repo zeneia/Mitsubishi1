@@ -11,8 +11,8 @@ if (!headers_sent()) {
 
 include_once(dirname(dirname(__DIR__)) . '/includes/init.php');
 
-// Require Admin or Sales Agent access
-if (!isset($_SESSION['user_id']) || !in_array(($_SESSION['user_role'] ?? ''), ['Admin', 'Sales Agent'])) {
+// Require Admin or Sales Agent access (support both 'Sales Agent' and 'SalesAgent')
+if (!isset($_SESSION['user_id']) || !in_array(($_SESSION['user_role'] ?? ''), ['Admin', 'Sales Agent', 'SalesAgent'])) {
     http_response_code(403);
     echo json_encode(['success' => false, 'error' => 'Unauthorized access']);
     exit;
@@ -610,7 +610,8 @@ function getReceipt()
     $params = [$payment_id];
 
     // If Sales Agent, ensure the payment belongs to their order
-    if (($_SESSION['user_role'] ?? '') === 'Sales Agent') {
+    $role = $_SESSION['user_role'] ?? '';
+    if (in_array($role, ['Sales Agent', 'SalesAgent'])) {
         $sql .= " AND EXISTS (SELECT 1 FROM orders o WHERE o.order_id = ph.order_id AND o.sales_agent_id = ?)";
         $params[] = $_SESSION['user_id'];
     }

@@ -318,8 +318,8 @@ $agent_id = $_SESSION['user_id'] ?? null;
             border-color: #667eea;
         }
 
-        /* Payment Detail Modal */
-        .modal {
+        /* Payment Detail Modal (scoped to avoid conflicts) */
+        .pm-modal-overlay {
             display: none;
             position: fixed;
             z-index: 1000;
@@ -328,11 +328,17 @@ $agent_id = $_SESSION['user_id'] ?? null;
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
         }
 
-        .modal-content {
+        .pm-modal-overlay.active {
+            display: flex;
+        }
+
+        .pm-modal {
             background-color: white;
-            margin: 5% auto;
             padding: 0;
             border-radius: 15px;
             width: 90%;
@@ -341,7 +347,7 @@ $agent_id = $_SESSION['user_id'] ?? null;
             overflow-y: auto;
         }
 
-        .modal-header {
+        .pm-modal-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 20px 25px;
@@ -351,7 +357,7 @@ $agent_id = $_SESSION['user_id'] ?? null;
             align-items: center;
         }
 
-        .modal-body {
+        .pm-modal-body {
             padding: 25px;
         }
 
@@ -392,7 +398,7 @@ $agent_id = $_SESSION['user_id'] ?? null;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
-        .modal-actions {
+        .pm-modal-actions {
             display: flex;
             gap: 10px;
             justify-content: flex-end;
@@ -563,16 +569,16 @@ $agent_id = $_SESSION['user_id'] ?? null;
     </div>
 
     <!-- Payment Detail Modal -->
-    <div id="paymentDetailModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
+    <div id="paymentDetailModal" class="pm-modal-overlay">
+        <div class="pm-modal">
+            <div class="pm-modal-header">
                 <h2>Payment Details</h2>
                 <span class="close" onclick="closePaymentModal()">&times;</span>
             </div>
-            <div class="modal-body" id="paymentDetailContent">
+            <div class="pm-modal-body" id="paymentDetailContent">
                 <!-- Payment details will be loaded here -->
             </div>
-            <div class="modal-actions">
+            <div class="pm-modal-actions">
                 <button class="btn-filter btn-primary" id="approvePaymentBtn" onclick="approvePayment()" style="display: none;">
                     <i class="fas fa-check"></i> Approve Payment
                 </button>
@@ -781,7 +787,7 @@ $agent_id = $_SESSION['user_id'] ?? null;
                 success: function(response) {
                     if (response.success) {
                         displayPaymentDetails(response.data);
-                        $('#paymentDetailModal').show();
+                        $('#paymentDetailModal').addClass('active');
                     } else {
                         alert('Failed to load payment details: ' + (response.message || 'Unknown error'));
                         console.error('Backend error:', response.message);
@@ -808,13 +814,20 @@ $agent_id = $_SESSION['user_id'] ?? null;
 
         function displayPaymentDetails(payment) {
             const content = $('#paymentDetailContent');
-            
-            const receiptHtml = payment.receipt_image ? 
-                `<div class="receipt-preview">
+
+            // Check if receipt exists (either receipt_image or receipt_filename)
+            const hasReceipt = payment.receipt_image || payment.receipt_filename;
+
+            // Receipt will be loaded separately via AJAX
+            const receiptHtml = hasReceipt ?
+                `<div class="receipt-preview" id="receiptPreviewContainer">
                     <h4>Payment Receipt</h4>
-                    <img src="data:image/jpeg;base64,${payment.receipt_image}" alt="Payment Receipt">
-                </div>` : 
-                '<p><em>No receipt uploaded</em></p>';
+                    <div style="text-align: center; padding: 20px;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #667eea;"></i>
+                        <p>Loading receipt...</p>
+                    </div>
+                </div>` :
+                '<div class="receipt-preview"><p><em>No receipt uploaded</em></p></div>';
 
             content.html(`
                 <div class="payment-detail-grid">
@@ -896,10 +909,57 @@ $agent_id = $_SESSION['user_id'] ?? null;
                 $('#approvePaymentBtn').hide();
                 $('#rejectPaymentBtn').hide();
             }
+
+            // Load receipt image if it exists
+            if (hasReceipt) {
+                loadReceiptImage(payment.id);
+            }
+        }
+
+        async function loadReceiptImage(paymentId) {
+            const container = $('#receiptPreviewContainer');
+
+            try {
+                // Add cache-busting parameter to force fresh request
+                const timestamp = new Date().getTime();
+                const response = await fetch(`../../includes/backend/transactions_backend.php?action=get_receipt&payment_id=${paymentId}&_=${timestamp}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache'
+                    }
+                });
+
+                if (!response.ok) {
+                    // Get error details
+                    const errorText = await response.text();
+                    console.error('Receipt fetch error:', errorText);
+                    throw new Error('Receipt not found');
+                }
+
+                // Convert to blob and create object URL
+                const blob = await response.blob();
+                const imageUrl = URL.createObjectURL(blob);
+
+                // Display image
+                container.html(`
+                    <h4>Payment Receipt</h4>
+                    <img src="${imageUrl}" alt="Payment Receipt" style="max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);">
+                `);
+            } catch (err) {
+                console.error('Error loading receipt:', err);
+                container.html('<p><em>Error loading receipt</em></p>');
+            }
         }
 
         function closePaymentModal() {
-            $('#paymentDetailModal').hide();
+            // Clean up blob URL to prevent memory leaks
+            const receiptImg = $('#receiptPreviewContainer img');
+            if (receiptImg.length && receiptImg.attr('src') && receiptImg.attr('src').startsWith('blob:')) {
+                URL.revokeObjectURL(receiptImg.attr('src'));
+            }
+
+            $('#paymentDetailModal').removeClass('active');
             currentPaymentId = null;
         }
 
