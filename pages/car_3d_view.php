@@ -814,11 +814,12 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
                         src=""
                         camera-controls
                         touch-action="pan-y"
-                        auto-rotate
                         shadow-intensity="1"
                         camera-orbit="0deg 75deg 3.75m"
                         min-camera-orbit="auto auto 0.01m"
                         max-camera-orbit="auto auto 1000m"
+                        auto-rotate-delay="0"
+                        disable-zoom
                         style="display: none;">
                     </model-viewer>
 
@@ -1432,11 +1433,20 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
         function setupModelViewerControls(modelViewer) {
             if (modelControlsBound) return; // prevent duplicate listeners
             modelControlsBound = true;
+
+            // Store initial camera position for reset
+            const initialCameraOrbit = "0deg 75deg 3.75m";
+
             // Auto-rotate control
             document.getElementById('autoRotateBtn').addEventListener('click', function() {
                 isAutoRotating = !isAutoRotating;
-                modelViewer.autoRotate = isAutoRotating;
-                this.querySelector('span').textContent = isAutoRotating ? 'Stop' : 'Start';
+                if (isAutoRotating) {
+                    modelViewer.setAttribute('auto-rotate', '');
+                    this.querySelector('span').textContent = 'Stop';
+                } else {
+                    modelViewer.removeAttribute('auto-rotate');
+                    this.querySelector('span').textContent = 'Start';
+                }
             });
 
             // Manual rotation controls
@@ -1450,8 +1460,16 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
                 modelViewer.cameraOrbit = `${currentOrbit.theta + 0.5}rad ${currentOrbit.phi}rad ${currentOrbit.radius}m`;
             });
 
-            // Reset view
+            // Reset view to initial position
             document.getElementById('resetView').addEventListener('click', function() {
+                // Stop auto-rotate if active
+                if (isAutoRotating) {
+                    isAutoRotating = false;
+                    modelViewer.removeAttribute('auto-rotate');
+                    document.getElementById('autoRotateBtn').querySelector('span').textContent = 'Start';
+                }
+                // Reset to initial camera orbit
+                modelViewer.cameraOrbit = initialCameraOrbit;
                 modelViewer.resetTurntableRotation();
                 modelViewer.jumpCameraToGoal();
             });
@@ -1466,6 +1484,12 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
                 const currentOrbit = modelViewer.getCameraOrbit();
                 modelViewer.cameraOrbit = `${currentOrbit.theta}rad ${currentOrbit.phi}rad ${currentOrbit.radius * 1.2}m`;
             });
+
+            // Disable scroll wheel zoom - only allow button zoom
+            modelViewer.addEventListener('wheel', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }, { passive: false });
         }
 
         function setupCarouselControls() {
