@@ -514,7 +514,7 @@ $pms_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
       </div>
 
       <div class="filters-section">
-        <form method="GET" class="filter-row">
+        <form method="GET" class="filter-row" id="filterForm">
           <div class="filter-group">
             <label for="search">Search Requests</label>
             <input type="text" id="search" name="search" class="filter-input"
@@ -559,7 +559,6 @@ $pms_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <option value="month" <?php echo $date_filter === 'month' ? 'selected' : ''; ?>>This Month</option>
             </select>
           </div>
-          <button type="submit" class="filter-btn">Apply Filters</button>
         </form>
       </div>
 
@@ -1315,6 +1314,56 @@ $pms_requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
           this.value = this.value.replace(/\D/g, '');
         }, 0);
       });
+    }
+
+    // Real-time filtering functionality
+    let filterTimeout;
+    const filterForm = document.getElementById('filterForm');
+    const searchInput = document.getElementById('search');
+    const odometerFilterInput = document.getElementById('odometer');
+    const statusSelect = document.getElementById('status');
+    const serviceSelect = document.getElementById('service');
+    const dateSelect = document.getElementById('date');
+
+    // Function to apply filters
+    function applyFilters() {
+      // Clear any existing timeout
+      if (filterTimeout) {
+        clearTimeout(filterTimeout);
+      }
+
+      // Set a small delay for text inputs to avoid too many requests while typing
+      const delay = (event && event.target && (event.target.id === 'search' || event.target.id === 'odometer')) ? 500 : 0;
+
+      filterTimeout = setTimeout(() => {
+        // Build query string from form inputs
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams(formData);
+
+        // Reload page with new parameters
+        window.location.href = '?' + params.toString();
+      }, delay);
+    }
+
+    // Add event listeners for real-time filtering
+    if (searchInput) {
+      searchInput.addEventListener('input', applyFilters);
+    }
+
+    if (odometerFilterInput) {
+      odometerFilterInput.addEventListener('input', applyFilters);
+    }
+
+    if (statusSelect) {
+      statusSelect.addEventListener('change', applyFilters);
+    }
+
+    if (serviceSelect) {
+      serviceSelect.addEventListener('change', applyFilters);
+    }
+
+    if (dateSelect) {
+      dateSelect.addEventListener('change', applyFilters);
     }
   </script>
 

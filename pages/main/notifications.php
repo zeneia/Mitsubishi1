@@ -371,47 +371,193 @@ if (!in_array($_SESSION['user_role'], ['Customer', 'SalesAgent', 'Admin'])) {
 
   <script src="../../includes/js/common-scripts.js"></script>
   <script>
+    // Function to render notifications
+    function renderNotifications(notifications) {
+      const notificationList = document.getElementById('notification-list');
+
+      if (!notifications || notifications.length === 0) {
+        notificationList.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-light);">No notifications to display</div>';
+        return;
+      }
+
+      let html = '';
+      notifications.forEach(notif => {
+        const unread = notif.is_read ? '' : 'unread';
+        let icon = 'fas fa-bell';
+        let iconClass = '';
+
+        if (notif.type === 'order') {
+          icon = 'fas fa-shopping-cart';
+          iconClass = 'order';
+        } else if (notif.type === 'customer') {
+          icon = 'fas fa-user-plus';
+          iconClass = 'customer';
+        } else if (notif.type === 'system') {
+          icon = 'fas fa-cog';
+          iconClass = 'system';
+        } else if (notif.type === 'payment') {
+          icon = 'fas fa-credit-card';
+          iconClass = 'payment';
+        } else if (notif.type === 'testdrive') {
+          icon = 'fas fa-car';
+          iconClass = 'testdrive';
+        } else if (notif.type === 'loan_approval') {
+          icon = 'fas fa-file-invoice-dollar';
+          iconClass = 'loan-approval';
+        }
+
+        html += `<div class="notification-item ${unread}" data-id="${notif.id}" data-type="${notif.type}">
+          <div class="notification-content">
+            <div class="notification-icon ${iconClass}">
+              <i class="${icon}"></i>
+            </div>
+            <div class="notification-details">
+              <div class="notification-title">${escapeHtml(notif.title)}</div>
+              <div class="notification-message">${escapeHtml(notif.message)}</div>
+              <div class="notification-meta">
+                <div class="notification-time">
+                  <i class="fas fa-clock"></i> ${escapeHtml(notif.created_at)}
+                </div>
+                <div class="notification-actions-menu">
+                  <button class="action-icon btn-mark-read" title="Mark as read">
+                    <i class="fas fa-check"></i>
+                  </button>
+                  <button class="action-icon btn-delete" title="Delete">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      });
+
+      notificationList.innerHTML = html;
+
+      // Re-attach event listeners after rendering
+      attachNotificationEventListeners();
+    }
+
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Function to load notifications with filter
+    function loadNotifications(filter) {
+      fetch('../../includes/api/notification_action.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'action=get_notifications&filter=' + encodeURIComponent(filter)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          renderNotifications(data.notifications);
+        } else {
+          console.error('Failed to load notifications:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+
     // Filter tabs functionality
     document.querySelectorAll('.filter-tab').forEach(tab => {
       tab.addEventListener('click', function() {
         document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
         this.classList.add('active');
         const filter = this.textContent.toLowerCase();
-        window.location.search = '?filter=' + filter;
+        loadNotifications(filter);
       });
     });
 
-    // Mark as read functionality
-    document.querySelectorAll('.btn-mark-read').forEach(btn => {
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const item = this.closest('.notification-item');
-        const id = item.getAttribute('data-id');
-        fetch('../../includes/api/notification_action.php', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-          body: 'action=mark_read&id=' + encodeURIComponent(id)
-        }).then(() => {
-          item.classList.remove('unread');
-        });
-      });
-    });
+    // Function to get current active filter
+    function getCurrentFilter() {
+      const activeTab = document.querySelector('.filter-tab.active');
+      return activeTab ? activeTab.textContent.toLowerCase() : 'all';
+    }
 
-    // Delete notification
-    document.querySelectorAll('.btn-delete').forEach(btn => {
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const item = this.closest('.notification-item');
-        const id = item.getAttribute('data-id');
-        fetch('../../includes/api/notification_action.php', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-          body: 'action=delete&id=' + encodeURIComponent(id)
-        }).then(() => {
-          item.remove();
+    // Function to attach event listeners to notification items
+    function attachNotificationEventListeners() {
+      // Mark as read functionality
+      document.querySelectorAll('.btn-mark-read').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const item = this.closest('.notification-item');
+          const id = item.getAttribute('data-id');
+          fetch('../../includes/api/notification_action.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'action=mark_read&notification_id=' + encodeURIComponent(id)
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Reload the current filter
+              loadNotifications(getCurrentFilter());
+            } else {
+              console.error('Failed to mark as read:', data.message);
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
         });
       });
-    });
+
+      // Delete notification
+      document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const item = this.closest('.notification-item');
+          const id = item.getAttribute('data-id');
+          fetch('../../includes/api/notification_action.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'action=delete&notification_id=' + encodeURIComponent(id)
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Reload the current filter
+              loadNotifications(getCurrentFilter());
+            } else {
+              console.error('Failed to delete:', data.message);
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+        });
+      });
+
+      // Notification details modal logic
+      document.querySelectorAll('.notification-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const notifId = item.getAttribute('data-id');
+          const title = item.querySelector('.notification-title').textContent;
+          const message = item.querySelector('.notification-message').textContent;
+          const time = item.querySelector('.notification-time').textContent;
+          const type = item.querySelector('.notification-icon i').className.split(' ')[2] || 'System';
+          // Set modal fields
+          document.getElementById('modalNotificationTitle').textContent = title;
+          document.getElementById('modalNotificationMessage').textContent = message;
+          document.querySelector('.notification-time').textContent = time;
+          document.querySelector('.notification-type').textContent = type;
+          // Store notification id for action
+          document.getElementById('notificationModal').setAttribute('data-id', notifId);
+          // Show modal
+          window.openModal('notificationModal');
+        });
+      });
+    }
+
+    // Initial attachment of event listeners
+    attachNotificationEventListeners();
 
     // Mark all as read
     document.querySelector('.btn-mark-all').addEventListener('click', function() {
@@ -419,10 +565,18 @@ if (!in_array($_SESSION['user_role'], ['Customer', 'SalesAgent', 'Admin'])) {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: 'action=mark_all'
-      }).then(() => {
-        document.querySelectorAll('.notification-item.unread').forEach(item => {
-          item.classList.remove('unread');
-        });
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Reload the current filter
+          loadNotifications(getCurrentFilter());
+        } else {
+          console.error('Failed to mark all as read:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
       });
     });
 
@@ -433,51 +587,28 @@ if (!in_array($_SESSION['user_role'], ['Customer', 'SalesAgent', 'Admin'])) {
           method: 'POST',
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
           body: 'action=clear_all'
-        }).then(() => {
-          document.getElementById('notification-list').innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-light);">No notifications to display</div>';
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Reload the current filter
+            loadNotifications(getCurrentFilter());
+          } else {
+            console.error('Failed to clear all notifications:', data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
         });
       }
     });
-    // Add after existing JS for notification actions
-    // Notification details modal logic
-    document.querySelectorAll('.notification-item').forEach(item => {
-      item.addEventListener('click', function() {
-        const notifId = item.getAttribute('data-id');
-        const title = item.querySelector('.notification-title').textContent;
-        const message = item.querySelector('.notification-message').textContent;
-        const time = item.querySelector('.notification-time').textContent;
-        const type = item.querySelector('.notification-icon i').className.split(' ')[2] || 'System';
-        // Set modal fields
-        document.getElementById('modalNotificationTitle').textContent = title;
-        document.getElementById('modalNotificationMessage').textContent = message;
-        document.querySelector('.notification-time').textContent = time;
-        document.querySelector('.notification-type').textContent = type;
-        // Store notification id for action
-        document.getElementById('notificationModal').setAttribute('data-id', notifId);
-        // Show modal
-        window.openModal('notificationModal');
-      });
-    });
+
     // Modal close logic
     document.getElementById('modalCloseBtn').addEventListener('click', function() {
       document.getElementById('notificationModal').classList.remove('active');
     });
     document.getElementById('modalCancelBtn').addEventListener('click', function() {
       document.getElementById('notificationModal').classList.remove('active');
-    });
-    // Take Action button logic
-    document.querySelector('#notificationModal .btn-primary').addEventListener('click', function() {
-      const notifId = document.getElementById('notificationModal').getAttribute('data-id');
-      // Example: mark as read and close modal
-      fetch('../../includes/api/notification_action.php', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'action=mark_read&id=' + encodeURIComponent(notifId)
-      }).then(() => {
-        document.getElementById('notificationModal').classList.remove('active');
-        // Optionally update notification list
-        document.querySelector('.notification-item[data-id="' + notifId + '"]').classList.remove('unread');
-      });
     });
   </script>
 </body>

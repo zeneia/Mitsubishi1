@@ -58,7 +58,16 @@ try {
                 'message' => $result ? 'All notifications cleared' : 'Failed to clear all notifications'
             ];
             break;
-            
+
+        case 'get_notifications':
+            $filter = $_POST['filter'] ?? 'all';
+            $notifications = getNotifications($user_id, $user_role, $filter);
+            $response = [
+                'success' => true,
+                'notifications' => $notifications
+            ];
+            break;
+
         default:
             http_response_code(400);
             $response['message'] = 'Invalid action';

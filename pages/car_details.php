@@ -31,11 +31,25 @@ try {
 // Fetch user details for header (if logged in)
 $user = null;
 $displayName = 'Guest';
+$profile_image_html = '';
 if (isset($_SESSION['user_id'])) {
     $stmt = $connect->prepare("SELECT * FROM accounts WHERE Id = ?");
     $stmt->execute([$_SESSION['user_id']]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username'];
+
+    // Prepare profile image HTML
+    if (!empty($user['ProfileImage'])) {
+        $imageData = base64_encode($user['ProfileImage']);
+        $imageMimeType = 'image/jpeg';
+        $profile_image_html = '<img src="data:' . $imageMimeType . ';base64,' . $imageData . '" alt="User Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">';
+    } else {
+        // Show initial if no profile image
+        $profile_image_html = strtoupper(substr($displayName, 0, 1));
+    }
+} else {
+    // Guest user - show initial
+    $profile_image_html = strtoupper(substr($displayName, 0, 1));
 }
 
 // Process color options
@@ -691,7 +705,7 @@ $color_options = !empty($vehicle['color_options']) ? explode(',', $vehicle['colo
             </div>
             <div class="user-section">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <div class="user-avatar"><?php echo strtoupper(substr($displayName, 0, 1)); ?></div>
+                    <div class="user-avatar"><?php echo $profile_image_html; ?></div>
                     <div class="user-info">
                         <span class="welcome-label">Welcome</span>
                         <span class="user-name"><?php echo htmlspecialchars($displayName); ?></span>

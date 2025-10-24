@@ -279,7 +279,6 @@ if ($user_id && $user_role) {
     </div>
     <div class="modal-footer">
       <button class="btn-secondary" id="modalCancelBtn">Close</button>
-      <button class="btn-primary">Take Action</button>
     </div>
   </div>
 </div>

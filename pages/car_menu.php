@@ -23,6 +23,17 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username'];
 
+// Prepare profile image HTML
+$profile_image_html = '';
+if (!empty($user['ProfileImage'])) {
+    $imageData = base64_encode($user['ProfileImage']);
+    $imageMimeType = 'image/jpeg';
+    $profile_image_html = '<img src="data:' . $imageMimeType . ';base64,' . $imageData . '" alt="User Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">';
+} else {
+    // Show initial if no profile image
+    $profile_image_html = strtoupper(substr($displayName, 0, 1));
+}
+
 // Fetch all vehicles from database
 try {
     $stmt_vehicles = $connect->prepare("SELECT * FROM vehicles WHERE availability_status = 'available' ORDER BY model_name");
@@ -668,7 +679,7 @@ try {
         </div>
         <div class="user-section">
             <div class="user-avatar">
-                <?php echo strtoupper(substr($displayName, 0, 1)); ?>
+                <?php echo $profile_image_html; ?>
             </div>
             <span class="welcome-text">Welcome, <?php echo htmlspecialchars($displayName); ?>!</span>
             <button class="logout-btn" onclick="window.location.href='logout.php'">
