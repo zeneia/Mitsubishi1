@@ -937,14 +937,24 @@ function approveApplication($pdo)
 		// Commit transaction
 		$pdo->commit();
 
-		// Notify customer and admins
+		// Notify customer and admins (in-app notifications)
 		require_once dirname(__DIR__) . '/includes/api/notification_api.php';
-		createNotification($loanData['account_id'], null, 'Loan Application Approved & Order Created', 
-						  'Your loan application #' . $applicationId . ' has been approved and order #' . $orderNumber . ' has been created.', 
+		createNotification($loanData['account_id'], null, 'Loan Application Approved & Order Created',
+						  'Your loan application #' . $applicationId . ' has been approved and order #' . $orderNumber . ' has been created.',
 						  'loan', $applicationId);
-		createNotification(null, 'Admin', 'Loan Application Approved & Order Created', 
-						  'Loan application #' . $applicationId . ' has been approved and order #' . $orderNumber . ' has been created.', 
+		createNotification(null, 'Admin', 'Loan Application Approved & Order Created',
+						  'Loan application #' . $applicationId . ' has been approved and order #' . $orderNumber . ' has been created.',
 						  'loan', $applicationId);
+
+		// Send email and SMS notifications
+		try {
+			require_once dirname(__DIR__) . '/includes/services/NotificationService.php';
+			$notificationService = new NotificationService($pdo);
+			$notificationService->sendLoanApprovalNotification($applicationId, $orderNumber);
+		} catch (Exception $notifError) {
+			// Log error but don't fail the approval
+			error_log("Loan approval notification error: " . $notifError->getMessage());
+		}
 
 		ob_end_clean();
 		echo json_encode([
@@ -1137,14 +1147,24 @@ function approveApplicationEnhanced($pdo)
 		// Commit transaction
 		$pdo->commit();
 
-		// Notify customer and admins
+		// Notify customer and admins (in-app notifications)
 		require_once dirname(__DIR__) . '/includes/api/notification_api.php';
-		createNotification($loanData['account_id'], null, 'Loan Application Approved & Order Created', 
-					  'Your loan application #' . $applicationId . ' has been approved with validated financing terms and order #' . $orderNumber . ' has been created.', 
+		createNotification($loanData['account_id'], null, 'Loan Application Approved & Order Created',
+					  'Your loan application #' . $applicationId . ' has been approved with validated financing terms and order #' . $orderNumber . ' has been created.',
 					  'loan', $applicationId);
-		createNotification(null, 'Admin', 'Loan Application Approved & Order Created', 
-					  'Loan application #' . $applicationId . ' has been approved with enhanced validation and order #' . $orderNumber . ' has been created.', 
+		createNotification(null, 'Admin', 'Loan Application Approved & Order Created',
+					  'Loan application #' . $applicationId . ' has been approved with enhanced validation and order #' . $orderNumber . ' has been created.',
 					  'loan', $applicationId);
+
+		// Send email and SMS notifications
+		try {
+			require_once dirname(__DIR__) . '/includes/services/NotificationService.php';
+			$notificationService = new NotificationService($pdo);
+			$notificationService->sendLoanApprovalNotification($applicationId, $orderNumber);
+		} catch (Exception $notifError) {
+			// Log error but don't fail the approval
+			error_log("Loan approval notification error: " . $notifError->getMessage());
+		}
 
 		ob_end_clean();
 		echo json_encode([
@@ -1201,7 +1221,7 @@ function rejectApplication($pdo)
 	$success = $stmt->execute([$agentProfile['agent_profile_id'], $notes, $applicationId]);
 
 	if ($success) {
-		// Notify customer and admins
+		// Notify customer and admins (in-app notifications)
 		require_once dirname(__DIR__) . '/includes/api/notification_api.php';
 		$stmt = $pdo->prepare("SELECT la.customer_id FROM loan_applications la
 			INNER JOIN customer_information ci ON la.customer_id = ci.account_id
@@ -1210,6 +1230,17 @@ function rejectApplication($pdo)
 		$customerId = $stmt->fetchColumn();
 		createNotification($customerId, null, 'Loan Application Rejected', 'Your loan application #' . $applicationId . ' has been rejected.', 'loan', $applicationId);
 		createNotification(null, 'Admin', 'Loan Application Rejected', 'Loan application #' . $applicationId . ' has been rejected.', 'loan', $applicationId);
+
+		// Send email and SMS notifications
+		try {
+			require_once dirname(__DIR__) . '/includes/services/NotificationService.php';
+			$notificationService = new NotificationService($pdo);
+			$notificationService->sendLoanRejectionNotification($applicationId, $notes);
+		} catch (Exception $notifError) {
+			// Log error but don't fail the rejection
+			error_log("Loan rejection notification error: " . $notifError->getMessage());
+		}
+
 		ob_end_clean();
 		echo json_encode(['success' => true, 'message' => 'Application rejected successfully']);
 	} else {

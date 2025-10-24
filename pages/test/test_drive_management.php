@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 ");
 				$stmt->execute([$instructor, $notes, $gate_pass_number, $request_id]);
 
-				// --- Notification Logic ---
+				// --- Notification Logic (In-app) ---
 				require_once '../../includes/api/notification_api.php';
 				$stmt2 = $pdo->prepare("SELECT account_id, selected_date FROM test_drive_requests WHERE id = ?");
 				$stmt2->execute([$request_id]);
@@ -83,6 +83,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 				createNotification(null, 'Admin', 'Test Drive Approved', 'Test drive request (ID: ' . $request_id . ') has been approved.', 'test_drive', $request_id);
 				// --- End Notification Logic ---
 
+				// Send email and SMS notifications
+				try {
+					require_once '../../includes/services/NotificationService.php';
+					$notificationService = new NotificationService($pdo);
+					$notificationService->sendTestDriveApprovalNotification($request_id);
+				} catch (Exception $notifError) {
+					// Log error but don't fail the approval
+					error_log("Test drive approval notification error: " . $notifError->getMessage());
+				}
+
 				echo json_encode(['success' => true, 'message' => 'Request approved successfully']);
 				break;
 
@@ -91,12 +101,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 				$notes = $_POST['notes'] ?? '';
 
 				$stmt = $pdo->prepare("
-                    UPDATE test_drive_requests 
-                    SET status = 'Rejected', 
-                        notes = ? 
+                    UPDATE test_drive_requests
+                    SET status = 'Rejected',
+                        notes = ?
                     WHERE id = ?
                 ");
 				$stmt->execute([$notes, $request_id]);
+
+				// Send email and SMS notifications
+				try {
+					require_once '../../includes/services/NotificationService.php';
+					$notificationService = new NotificationService($pdo);
+					$notificationService->sendTestDriveRejectionNotification($request_id, $notes);
+				} catch (Exception $notifError) {
+					// Log error but don't fail the rejection
+					error_log("Test drive rejection notification error: " . $notifError->getMessage());
+				}
+
 				echo json_encode(['success' => true, 'message' => 'Request rejected']);
 				break;
 

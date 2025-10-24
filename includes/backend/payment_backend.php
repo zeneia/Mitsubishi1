@@ -371,13 +371,28 @@ function processPayment()
             updatePaymentSchedule($payment['order_id'], $payment['amount_paid'], $payment['payment_type']);
         }
         
-        // Create notification for customer
+        // Create notification for customer (in-app)
         $payment_number = $pdo->query("SELECT payment_number FROM payment_history WHERE id = $payment_id")->fetch()['payment_number'];
         $customer_id = $pdo->query("SELECT customer_id FROM payment_history WHERE id = $payment_id")->fetch()['customer_id'];
         createPaymentNotification($customer_id, $payment_number, $newStatus, $payment['amount_paid']);
-        
+
+        // Send email and SMS notifications
+        try {
+            require_once dirname(__DIR__) . '/services/NotificationService.php';
+            $notificationService = new NotificationService($pdo);
+
+            if ($process_action === 'approve') {
+                $notificationService->sendPaymentConfirmationNotification($payment_id);
+            } else {
+                $notificationService->sendPaymentRejectionNotification($payment_id, $rejection_reason);
+            }
+        } catch (Exception $notifError) {
+            // Log error but don't fail the payment processing
+            error_log("Payment notification error: " . $notifError->getMessage());
+        }
+
         $pdo->commit();
-        
+
         echo json_encode([
             'success' => true,
             'message' => 'Payment ' . $process_action . 'd successfully'

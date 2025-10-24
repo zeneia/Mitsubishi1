@@ -495,7 +495,7 @@ function approvePayment($connect, $payment_id, $user_id, $user_role) {
             }
         }
         
-        // Create notification for customer
+        // Create notification for customer (in-app)
         require_once dirname(__DIR__) . '/api/notification_api.php';
         createNotification(
             $payment['customer_id'],
@@ -505,9 +505,19 @@ function approvePayment($connect, $payment_id, $user_id, $user_role) {
             'payment',
             $payment_id
         );
-        
+
+        // Send email and SMS notifications
+        try {
+            require_once dirname(__DIR__) . '/services/NotificationService.php';
+            $notificationService = new NotificationService($connect);
+            $notificationService->sendPaymentConfirmationNotification($payment_id);
+        } catch (Exception $notifError) {
+            // Log error but don't fail the approval
+            error_log("Payment confirmation notification error: " . $notifError->getMessage());
+        }
+
         $connect->commit();
-        
+
         return [
             'success' => true,
             'message' => 'Payment approved successfully'
@@ -564,7 +574,7 @@ function rejectPayment($connect, $payment_id, $rejection_reason, $user_id, $user
                                     WHERE id = ?");
         $stmt->execute([$updated_notes, $user_id, $payment_id]);
         
-        // Create notification for customer
+        // Create notification for customer (in-app)
         require_once dirname(__DIR__) . '/api/notification_api.php';
         createNotification(
             $payment['customer_id'],
@@ -574,9 +584,19 @@ function rejectPayment($connect, $payment_id, $rejection_reason, $user_id, $user
             'payment',
             $payment_id
         );
-        
+
+        // Send email and SMS notifications
+        try {
+            require_once dirname(__DIR__) . '/services/NotificationService.php';
+            $notificationService = new NotificationService($connect);
+            $notificationService->sendPaymentRejectionNotification($payment_id, $rejection_reason);
+        } catch (Exception $notifError) {
+            // Log error but don't fail the rejection
+            error_log("Payment rejection notification error: " . $notifError->getMessage());
+        }
+
         $connect->commit();
-        
+
         return [
             'success' => true,
             'message' => 'Payment rejected successfully'
