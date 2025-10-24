@@ -907,7 +907,6 @@ if (!$pdo) {
                 <th>Growth Trend</th>
                 <th>Inventory Status</th>
                 <th>Avg. Price</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="performanceTableBody">
@@ -1719,9 +1718,7 @@ if (!$pdo) {
                 <button class="btn-small btn-view" title="View Details" onclick="viewModelDetails('${item.model_name}')">
                   <i class="fas fa-eye"></i>
                 </button>
-                <button class="btn-small btn-edit" title="Generate Report" onclick="generateModelReport('${item.model_name}')">
-                  <i class="fas fa-file-alt"></i>
-                </button>
+              
               </div>
             </td>
           </tr>
