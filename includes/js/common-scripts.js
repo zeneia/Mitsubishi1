@@ -1,29 +1,15 @@
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.querySelector('.sidebar-overlay');
-  
+
   sidebar.classList.toggle('active');
   overlay.classList.toggle('active');
 }
 
-// Dropdown toggling
-document.addEventListener('DOMContentLoaded', function() {
-  const notificationBtn = document.getElementById('notificationBtn');
-  const notificationDropdown = document.getElementById('notificationDropdown');
-  const profileBtn = document.getElementById('profileBtn');
-  const profileDropdown = document.getElementById('profileDropdown');
-
-  if (notificationBtn && notificationDropdown) {
-    notificationBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      notificationDropdown.style.display = notificationDropdown.style.display === 'block' ? 'none' : 'block';
-      if (profileDropdown) profileDropdown.style.display = 'none';
-    });
-
 // Notification System Functions
 function showNotification(message, type = 'info') {
   const container = document.getElementById('notification-container') || createNotificationContainer();
-  
+
   const notification = document.createElement('div');
   notification.className = `notification notification-${type}`;
   notification.innerHTML = `
@@ -32,12 +18,12 @@ function showNotification(message, type = 'info') {
       <button class="notification-close" onclick="closeNotification(this)">&times;</button>
     </div>
   `;
-  
+
   container.appendChild(notification);
-  
+
   // Trigger animation
   setTimeout(() => notification.classList.add('show'), 10);
-  
+
   // Auto-dismiss after 5 seconds
   setTimeout(() => {
     closeNotification(notification.querySelector('.notification-close'));
@@ -82,6 +68,36 @@ function createNotificationContainer() {
 window.alert = function(message) {
   showInfo(message);
 };
+
+// Dropdown toggling
+document.addEventListener('DOMContentLoaded', function() {
+  const notificationBtn = document.getElementById('notificationBtn');
+  const notificationDropdown = document.getElementById('notificationDropdown');
+  const profileBtn = document.getElementById('profileBtn');
+  const profileDropdown = document.getElementById('profileDropdown');
+
+  if (notificationBtn && notificationDropdown) {
+    notificationBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      notificationDropdown.style.display = notificationDropdown.style.display === 'block' ? 'none' : 'block';
+      if (profileDropdown) profileDropdown.style.display = 'none';
+    });
+  }
+
+  if (profileBtn && profileDropdown) {
+    profileBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block';
+      if (notificationDropdown) notificationDropdown.style.display = 'none';
+    });
+  }
+
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', function() {
+    if (notificationDropdown) notificationDropdown.style.display = 'none';
+    if (profileDropdown) profileDropdown.style.display = 'none';
+  });
+});
 
 // Phone Number Validation with Mutation Observer
 document.addEventListener("DOMContentLoaded", () => {

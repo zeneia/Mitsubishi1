@@ -214,30 +214,97 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
-      transition: var(--transition);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:active::before {
+      width: 300px;
+      height: 300px;
     }
 
     .btn-small {
-      padding: 5px 10px;
+      padding: 6px 12px;
       font-size: 11px;
     }
 
     .btn-primary {
       background: linear-gradient(135deg, var(--primary-red), #b91c3c);
       color: white;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #b91c3c, var(--primary-red));
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(220, 20, 60, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(220, 20, 60, 0.3);
     }
 
     .btn-outline {
-      background: transparent;
-      border: 1px solid var(--border-light);
+      background: white;
+      border: 1.5px solid #e0e0e0;
       color: var(--text-dark);
+    }
+
+    .btn-outline:hover {
+      background: #f8f9fa;
+      border-color: var(--primary-red);
+      color: var(--primary-red);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-outline:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      background: #f0f0f0;
     }
 
     .btn-secondary {
       background: #E60012;
       color: #ffffff;
+    }
+
+    .btn-secondary:hover {
+      background: #c00010;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(230, 0, 18, 0.4);
+    }
+
+    .btn-secondary:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(230, 0, 18, 0.3);
+    }
+
+    .btn i {
+      transition: transform 0.3s ease;
+    }
+
+    .btn:hover i {
+      transform: scale(1.1);
     }
 
     .action-area {
@@ -381,6 +448,184 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
+    }
+
+    /* Notification Styles */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      z-index: 10002;
+      min-width: 300px;
+      max-width: 500px;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .notification-success {
+      border-left: 4px solid #28a745;
+      color: #155724;
+    }
+
+    .notification-success i {
+      color: #28a745;
+    }
+
+    .notification-error {
+      border-left: 4px solid #dc3545;
+      color: #721c24;
+    }
+
+    .notification-error i {
+      color: #dc3545;
+    }
+
+    .notification-warning {
+      border-left: 4px solid #fd7e14;
+      color: #856404;
+    }
+
+    .notification-warning i {
+      color: #fd7e14;
+    }
+
+    .notification-info {
+      border-left: 4px solid #007bff;
+      color: #004085;
+    }
+
+    .notification-info i {
+      color: #007bff;
+    }
+
+    .notification-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #666;
+      margin-left: auto;
+      padding: 0.25rem;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .notification-close:hover {
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    /* Receipt Modal Styles */
+    .receipt-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 10001;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .receipt-modal-overlay.active {
+      display: flex;
+    }
+
+    .receipt-modal {
+      background: white;
+      border-radius: 10px;
+      padding: 30px;
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .receipt-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 15px;
+    }
+
+    .receipt-modal-header h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      color: var(--text-dark);
+    }
+
+    .receipt-modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-light);
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .receipt-modal-close:hover {
+      color: var(--text-dark);
+    }
+
+    .receipt-modal-body {
+      text-align: center;
+    }
+
+    .receipt-modal-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .receipt-loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-light);
+    }
+
+    .receipt-loading i {
+      font-size: 2rem;
+      margin-bottom: 15px;
+    }
+
+    .receipt-error {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-light);
+    }
+
+    .receipt-error i {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      color: #999;
     }
   </style>
 </head>
@@ -591,6 +836,29 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
     </div>
   </div>
 
+  <!-- Receipt Viewer Modal -->
+  <div class="receipt-modal-overlay" id="receiptModal">
+    <div class="receipt-modal">
+      <div class="receipt-modal-header">
+        <h3>Payment Receipt</h3>
+        <button class="receipt-modal-close" onclick="closeReceiptModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="receipt-modal-body">
+        <div class="receipt-loading" id="receiptLoading">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Loading receipt...</p>
+        </div>
+        <div class="receipt-error" id="receiptError" style="display: none;">
+          <i class="fas fa-file-image"></i>
+          <p>No receipt uploaded</p>
+        </div>
+        <img id="receiptImage" src="" alt="Payment Receipt" style="display: none;">
+      </div>
+    </div>
+  </div>
+
   <script src="../../includes/js/common-scripts.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -682,7 +950,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
           const paymentType = item.latest_payment_type || '-';
           const refNumber = item.latest_payment_reference || '-';
           const hasReceipt = item.receipt_filename && item.latest_payment_id;
-          
+
           return `
             <tr>
               <td>${item.transaction_id||''}</td>
@@ -694,14 +962,12 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
               <td>${refNumber}</td>
               <td>${item.agent_name||''}</td>
               <td class="table-actions">
-                ${hasReceipt ? `
-                  <button class="btn btn-small btn-outline" onclick="viewReceipt(${item.latest_payment_id})">
-                    <i class="fas fa-receipt"></i> View
-                  </button>
-                  <button class="btn btn-small btn-primary" onclick="viewAllReceipts(${item.order_id})">
-                    <i class="fas fa-list"></i> All
-                  </button>
-                ` : `<span style="color: var(--text-light);">No receipt</span>`}
+                <button class="btn btn-small btn-outline" onclick="viewReceipt(${item.latest_payment_id || 0})">
+                  <i class="fas fa-receipt"></i> View
+                </button>
+                <button class="btn btn-small btn-primary" onclick="viewAllReceipts(${item.order_id})">
+                  <i class="fas fa-list"></i> All
+                </button>
               </td>
             </tr>`;
         }).join('');
@@ -913,27 +1179,112 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
       };
 
       // Receipt viewing functions
-      window.viewReceipt = function(paymentId) {
-        if (!paymentId) {
-          alert('No receipt available');
+      window.viewReceipt = async function(paymentId) {
+        const modal = document.getElementById('receiptModal');
+        const loading = document.getElementById('receiptLoading');
+        const error = document.getElementById('receiptError');
+        const image = document.getElementById('receiptImage');
+
+        // Show modal
+        modal.classList.add('active');
+        loading.style.display = 'block';
+        error.style.display = 'none';
+        image.style.display = 'none';
+
+        if (!paymentId || paymentId === 0) {
+          // No receipt available
+          loading.style.display = 'none';
+          error.style.display = 'block';
           return;
         }
-        // Open receipt in new window
-        window.open(`${TXN_API}?action=get_receipt&payment_id=${paymentId}`, '_blank');
+
+        try {
+          // Fetch receipt
+          const response = await fetch(`${TXN_API}?action=get_receipt&payment_id=${paymentId}`);
+
+          if (!response.ok) {
+            throw new Error('Receipt not found');
+          }
+
+          // Convert to blob and create object URL
+          const blob = await response.blob();
+          const imageUrl = URL.createObjectURL(blob);
+
+          // Display image
+          image.src = imageUrl;
+          loading.style.display = 'none';
+          image.style.display = 'block';
+        } catch (err) {
+          console.error('Error loading receipt:', err);
+          loading.style.display = 'none';
+          error.style.display = 'block';
+        }
       };
+
+      window.closeReceiptModal = function() {
+        const modal = document.getElementById('receiptModal');
+        const image = document.getElementById('receiptImage');
+
+        modal.classList.remove('active');
+
+        // Clean up object URL to prevent memory leaks
+        if (image.src && image.src.startsWith('blob:')) {
+          URL.revokeObjectURL(image.src);
+        }
+        image.src = '';
+      };
+
+      // Notification System
+      function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+          <span>${message}</span>
+          <button onclick="this.parentElement.remove()" class="notification-close">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+
+        // Add to page
+        document.body.appendChild(notification);
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+          if (notification.parentElement) {
+            notification.remove();
+          }
+        }, 5000);
+      }
+
+      function showSuccess(message) {
+        showNotification(message, 'success');
+      }
+
+      function showError(message) {
+        showNotification(message, 'error');
+      }
+
+      function showWarning(message) {
+        showNotification(message, 'warning');
+      }
+
+      function showInfo(message) {
+        showNotification(message, 'info');
+      }
 
       window.viewAllReceipts = async function(orderId) {
         if (!orderId) {
-          alert('Invalid order');
+          showError('Invalid order');
           return;
         }
 
         try {
           const res = await fetch(`${TXN_API}?action=get_all_receipts&order_id=${orderId}`);
           const json = await res.json();
-          
+
           if (!json.success || !json.data || json.data.length === 0) {
-            alert('No receipts found for this order');
+            showWarning('No receipts found for this order');
             return;
           }
 
@@ -941,7 +1292,6 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
           let tableRows = receipts.map(r => {
             const date = r.payment_date ? new Date(r.payment_date).toLocaleDateString() : '-';
             const amount = `₱${Number(r.amount_paid||0).toLocaleString(undefined,{maximumFractionDigits:0})}`;
-            const hasReceipt = r.receipt_filename;
             return `
               <tr>
                 <td>${r.payment_number||''}</td>
@@ -950,11 +1300,9 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
                 <td>${amount}</td>
                 <td>${r.reference_number||'-'}</td>
                 <td>
-                  ${hasReceipt ? 
-                    `<button class="btn btn-small btn-outline" onclick="viewReceipt(${r.id})">
-                      <i class="fas fa-eye"></i> View
-                    </button>` : 
-                    '<span style="color: #999;">No receipt</span>'}
+                  <button class="btn btn-small btn-outline" onclick="viewReceipt(${r.id || 0})">
+                    <i class="fas fa-eye"></i> View
+                  </button>
                 </td>
               </tr>
             `;
@@ -976,7 +1324,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
             justify-content: center;
             padding: 1rem;
           `;
-          
+
           overlay.innerHTML = `
             <div style="background: white; border-radius: 0.625rem; padding: 1.875rem; max-width: 60rem; width: 100%; max-height: 90%; overflow-y: auto;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 0.0625rem solid #e5e7eb; padding-bottom: 0.625rem;">
@@ -1000,9 +1348,9 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
               </table>
             </div>
           `;
-          
+
           document.body.appendChild(overlay);
-          
+
           overlay.addEventListener('click', function(e) {
             if (e.target === overlay) {
               closeReceiptsOverlay();
@@ -1010,7 +1358,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
           });
         } catch (error) {
           console.error('Error loading receipts:', error);
-          alert('Failed to load receipts');
+          showError('Failed to load receipts');
         }
       };
 
@@ -1020,6 +1368,16 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
           overlay.remove();
         }
       };
+
+      // Close receipt modal when clicking outside
+      const receiptModal = document.getElementById('receiptModal');
+      if (receiptModal) {
+        receiptModal.addEventListener('click', function(e) {
+          if (e.target === receiptModal) {
+            closeReceiptModal();
+          }
+        });
+      }
     });
   </script>
 </body>

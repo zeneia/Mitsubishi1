@@ -601,14 +601,14 @@ function getReceipt()
         return;
     }
 
-    $sql = "SELECT 
+    $sql = "SELECT
                 ph.receipt_image,
                 ph.receipt_filename
             FROM payment_history ph
             WHERE ph.id = ?";
 
     $params = [$payment_id];
-    
+
     // If Sales Agent, ensure the payment belongs to their order
     if (($_SESSION['user_role'] ?? '') === 'Sales Agent') {
         $sql .= " AND EXISTS (SELECT 1 FROM orders o WHERE o.order_id = ph.order_id AND o.sales_agent_id = ?)";
@@ -619,27 +619,63 @@ function getReceipt()
     $stmt->execute($params);
     $receipt = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$receipt || !$receipt['receipt_image']) {
+    if (!$receipt) {
         http_response_code(404);
-        echo json_encode(['success' => false, 'error' => 'Receipt not found']);
+        echo json_encode(['success' => false, 'error' => 'Payment not found']);
         return;
     }
 
-    // Output image directly
-    header_remove('Content-Type');
-    $filename = $receipt['receipt_filename'] ?: 'receipt.jpg';
-    $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-    $mimeTypes = [
-        'jpg' => 'image/jpeg',
-        'jpeg' => 'image/jpeg',
-        'png' => 'image/png',
-        'gif' => 'image/gif',
-        'pdf' => 'application/pdf'
-    ];
-    $mime = $mimeTypes[$ext] ?? 'application/octet-stream';
-    
-    header('Content-Type: ' . $mime);
-    header('Content-Disposition: inline; filename="' . $filename . '"');
-    echo $receipt['receipt_image'];
-    exit;
+    // Check if receipt is stored as BLOB (older method)
+    if ($receipt['receipt_image']) {
+        // Output BLOB image directly
+        header_remove('Content-Type');
+        $filename = $receipt['receipt_filename'] ?: 'receipt.jpg';
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'pdf' => 'application/pdf'
+        ];
+        $mime = $mimeTypes[$ext] ?? 'application/octet-stream';
+
+        header('Content-Type: ' . $mime);
+        header('Content-Disposition: inline; filename="' . $filename . '"');
+        echo $receipt['receipt_image'];
+        exit;
+    }
+
+    // Check if receipt is stored as file (newer method)
+    if ($receipt['receipt_filename']) {
+        // Construct file path
+        $upload_dir = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'receipts' . DIRECTORY_SEPARATOR;
+        $file_path = $upload_dir . $receipt['receipt_filename'];
+
+        // Check if file exists
+        if (file_exists($file_path)) {
+            // Determine MIME type
+            $ext = strtolower(pathinfo($receipt['receipt_filename'], PATHINFO_EXTENSION));
+            $mimeTypes = [
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'pdf' => 'application/pdf'
+            ];
+            $mime = $mimeTypes[$ext] ?? 'application/octet-stream';
+
+            // Output file
+            header('Content-Type: ' . $mime);
+            header('Content-Disposition: inline; filename="' . basename($receipt['receipt_filename']) . '"');
+            header('Content-Length: ' . filesize($file_path));
+            readfile($file_path);
+            exit;
+        }
+    }
+
+    // No receipt found
+    http_response_code(404);
+    echo json_encode(['success' => false, 'error' => 'Receipt not found']);
+    return;
 }
