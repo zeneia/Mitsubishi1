@@ -735,7 +735,8 @@ $accountStats = getAccountStats($connect);
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Year Model <span style="color: red;">*</span></label>
-            <select class="form-select" name="year_model" required>
+            <select class="form-select" name="year_model" required
+            onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
               <option value="">Select year</option>
               <?php
               $currentYear = date('Y');
@@ -792,7 +793,8 @@ $accountStats = getAccountStats($connect);
           </div>
           <div class="form-group">
             <label class="form-label">Seating Capacity <span style="color: red;">*</span></label>
-            <select class="form-select" name="seating_capacity" required>
+            <select class="form-select" name="seating_capacity" required
+            onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();">
               <option value="">Select capacity</option>
               <option value="2">2 Seater</option>
               <option value="4">4 Seater</option>
@@ -815,11 +817,13 @@ $accountStats = getAccountStats($connect);
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Base Price (₱) <span style="color: red;">*</span></label>
-            <input type="number" class="form-input" name="base_price" placeholder="Enter base price" step="0.01" min="0" required>
+            <input type="number" class="form-input" name="base_price" placeholder="Enter base price" step="0.01" min="0" required
+            onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" >
           </div>
           <div class="form-group">
             <label class="form-label">Promotional Price (₱)</label>
-            <input type="number" class="form-input" name="promotional_price" placeholder="Enter promotional price" step="0.01" min="0">
+            <input type="number" class="form-input" name="promotional_price" placeholder="Enter promotional price" step="0.01" min="0"
+            onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();">
           </div>
         </div>
         <div class="form-row">
@@ -872,11 +876,13 @@ $accountStats = getAccountStats($connect);
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Stock Quantity <span style="color: red;">*</span></label>
-            <input type="number" class="form-input" name="stock_quantity" placeholder="Enter available stock" min="0" required>
+            <input type="number" class="form-input" name="stock_quantity" placeholder="Enter available stock" min="0" required
+            onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();">
           </div>
           <div class="form-group">
             <label class="form-label">Minimum Stock Alert</label>
-            <input type="number" class="form-input" name="min_stock_alert" placeholder="Alert when stock reaches" min="0">
+            <input type="number" class="form-input" name="min_stock_alert" placeholder="Alert when stock reaches" min="0"
+            onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />>
           </div>
         </div>
         <div class="form-row">

@@ -894,7 +894,9 @@ try {
                   <div class="form-group">
                     <label for="mobile_number">Mobile Number</label>
                     <input type="text" id="mobile_number" name="mobile_number" class="form-control" 
-                           placeholder="+63 9XX XXX XXXX">
+                           placeholder="+63 9XX XXX XXXX"
+                           oninput="this.value = this.value.replace(/[^0-9+]/g, '')"
+                           onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
                   </div>
                 </div>
 
@@ -935,7 +937,8 @@ try {
                   <div class="form-group">
                     <label for="monthly_income">Monthly Income</label>
                     <input type="number" id="monthly_income" name="monthly_income" class="form-control" 
-                           step="0.01" placeholder="₱0.00">
+                           step="0.01" placeholder="₱0.00"
+                           onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
                   </div>
                 </div>
 

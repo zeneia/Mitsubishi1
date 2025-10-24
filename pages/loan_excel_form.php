@@ -613,7 +613,10 @@ $interest_rates = [
 					</div>
 					<div class="form-group">
 						<label class="form-label">Mobile Number <span class="required">*</span></label>
-						<input type="tel" name="mobile_number" class="form-input" value="<?php echo htmlspecialchars($customer_info['mobile_number'] ?? ''); ?>" required>
+						<input type="tel" name="mobile_number" class="form-input" value="<?php echo htmlspecialchars($customer_info['mobile_number'] ?? ''); ?>" required
+						oninput="this.value = this.value.replace(/[^0-9+]/g, '')"
+						onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
+						</div>
 					</div>
 				</div>
 				<div class="form-row">
@@ -686,7 +689,8 @@ $interest_rates = [
 					</div>
 					<div class="form-group">
 						<label class="form-label">Years of Employment</label>
-						<input type="number" name="years_employed" class="form-input" min="0" step="0.5">
+						<input type="number" name="years_employed" class="form-input" min="0" step="0.5"
+						onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
 					</div>
 				</div>
 				<div class="form-row">
@@ -696,7 +700,8 @@ $interest_rates = [
 					</div>
 					<div class="form-group">
 						<label class="form-label">Other Income Sources</label>
-						<input type="number" name="other_income" class="form-input" min="0" step="0.01" placeholder="Additional income (optional)">
+						<input type="number" name="other_income" class="form-input" min="0" step="0.01" placeholder="Additional income (optional)"
+						onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
 					</div>
 				</div>
 				<div class="form-row">
@@ -706,7 +711,9 @@ $interest_rates = [
 					</div>
 					<div class="form-group">
 						<label class="form-label">Company Contact Number</label>
-						<input type="tel" name="company_contact" class="form-input">
+						<input type="tel" name="company_contact" class="form-input"
+						oninput="this.value = this.value.replace(/[^0-9+]/g, '')"
+						onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
 					</div>
 				</div>
 			</div>

@@ -640,7 +640,7 @@ $activeAgents = $customerOp->getActiveSalesAgents();
         <div class="filter-bar">
           <div class="search-input">
             <i class="fas fa-search"></i>
-            <input type="text" id="searchInput" placeholder="Search by name, username, email..." value="<?php echo htmlspecialchars($search_filter); ?>">
+            <input type="text" id="searchInput" placeholder="Search username" value="<?php echo htmlspecialchars($search_filter); ?>">
           </div>
           <select class="filter-select" id="roleFilter">
             <option value="all" <?php echo $role_filter === 'all' ? 'selected' : ''; ?>>All Roles</option>

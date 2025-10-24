@@ -393,7 +393,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
         <div class="filter-bar">
           <div class="search-input">
             <i class="fas fa-search"></i>
-            <input type="text" placeholder="Search clients or agents...">
+            <input type="text" placeholder="Search Email">
           </div>
           <div class="agent-autocomplete-wrapper">
             <div class="agent-input-container">

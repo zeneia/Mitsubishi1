@@ -398,7 +398,9 @@ $current_page = 'sms';
                          autocomplete="tel"
                          placeholder="+639171234567"
                          aria-describedby="recipientHelp recipientError"
-                         required />
+                         required 
+                         oninput="this.value = this.value.replace(/[^0-9+]/g,'')"
+                         onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();"/>
                   <div id="recipientHelp" class="help-text">Use E.164 format. Example: +639171234567 (max 15 digits).</div>
                   <div id="recipientError" class="error-text" aria-live="polite"></div>
                 </div>

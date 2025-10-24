@@ -727,12 +727,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <div class="form-group">
                             <label for="phone">Phone Number</label>
-                            <input type="tel" id="phone" name="phone" required placeholder="(555) 123-4567" 
-                                   value="<?php echo htmlspecialchars($user['mobile_number'] ?? ''); ?>">
+                            <input type="tel" id="phone" name="phone" required ="(555) 123-4567" 
+                                   value="<?php echo htmlspecialchars($user['mobile_number'] ?? ''); ?>"
+                                   oninput="this.value = this.value.replace(/[^0-9()+\-\s]/g, '')"
+                                   onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
                         </div>
                         <div class="form-group">
                             <label for="age">Age</label>
-                            <input type="number" id="age" name="age" min="18" max="100" required placeholder="18+">
+                            <input type="number" id="age" name="age" min="18" max="100" required placeholder="18+" onkeydown="if(['e','E','+','-','.'].includes(event.key)) event.preventDefault();"/>
                         </div>
                         <div class="form-group">
                             <label for="experience">Driving Experience</label>

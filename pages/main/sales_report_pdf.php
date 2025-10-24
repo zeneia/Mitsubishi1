@@ -379,7 +379,7 @@ try {
                 <div class="company-name">MITSUBISHI MOTORS</div>
             </div>
             <div class="tagline">Drive Your Ambition</div>
-            <div class="report-title">Comprehensive Sales Report & Analytics</div>
+            <div class="report-title">Comprehensive Sales Report</div>
             <div class="report-meta">Generated: <?php echo date('F d, Y h:i A'); ?></div>
             <div class="report-meta">Report Period: <?php echo htmlspecialchars($period_label); ?></div>
         </div>

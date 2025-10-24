@@ -884,11 +884,13 @@ try {
             <div class="form-row">
               <div class="form-group">
                 <label for="units_delivered">Units Delivered *</label>
-                <input type="number" id="units_delivered" name="units_delivered" class="form-control" min="1" required>
+                <input type="number" id="units_delivered" name="units_delivered" class="form-control" min="1" required
+                onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
               </div>
               <div class="form-group">
                 <label for="unit_price">Unit Price (₱) *</label>
-                <input type="number" id="unit_price" name="unit_price" class="form-control" step="0.01" required>
+                <input type="number" id="unit_price" name="unit_price" class="form-control" step="0.01" required
+                onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
               </div>
             </div>
             <div class="form-row">

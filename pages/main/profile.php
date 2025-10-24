@@ -768,9 +768,13 @@ if (!empty($user_data['ProfileImage'])) {
                     </div>
                     <div class="form-group">
                       <label class="form-label">Contact Number</label>
-                      <input type="tel" name="contact_number" class="form-input" 
-                             value="<?php echo htmlspecialchars($agent_data['contact_number'] ?? ''); ?>"
-                             placeholder="+63 XXX XXX XXXX">
+                      <input type="tel"
+                      name="contact_number"
+                      class="form-input"
+                      value="<?php echo htmlspecialchars($agent_data['contact_number'] ?? ''); ?>"
+                      placeholder="+63 XXX XXX XXXX"
+                      oninput="this.value = this.value.replace(/[^0-9+]/g, '')"
+                      onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
                     </div>
                     <!-- Agent Status dropdown removed as requested -->
                   </div>

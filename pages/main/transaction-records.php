@@ -236,8 +236,8 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
     }
 
     .btn-secondary {
-      background: var(--border-light);
-      color: var(--text-dark);
+      background: #E60012;
+      color: #ffffff;
     }
 
     .action-area {

@@ -521,7 +521,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="form-group">
                                 <label class="form-label required">Phone Number</label>
                                 <input type="tel" name="phone_number" class="form-input" 
-                                       value="<?php echo htmlspecialchars($_POST['phone_number'] ?? ''); ?>" required>
+                                       value="<?php echo htmlspecialchars($_POST['phone_number'] ?? ''); ?>" required
+                                       oninput="this.value = this.value.replace(/[^0-9+]/g, '')"
+                                       onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();">
                             </div>
                         </div>
                     </div>
