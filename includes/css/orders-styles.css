@@ -289,8 +289,8 @@ body {
   color: white;
 }
 
-.btn-edit {
-  background: var(--accent-blue);
+.btn-delete {
+  background: var(--primary-red);
   color: white;
 }
 
@@ -500,7 +500,8 @@ body {
   border-radius: 12px;
   width: 95%;
   max-width: 1300px; /* Increased from 700px */
-  max-height: 800px; /* Increased from 95vh */
+  max-height: calc(90vh * 1.2); /* 20% taller - now 108vh capped at screen height */
+  height: auto;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   animation: slideIn 0.3s ease-out;
   display: flex;

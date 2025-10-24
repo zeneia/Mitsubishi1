@@ -182,7 +182,7 @@ try {
         </button>
       </div>
       <form id="orderForm">
-        <div class="modal-body" style="max-height: 90vh; ">
+        <div class="modal-body">
           <input type="hidden" id="orderID" name="orderID">
           <div class="form-section">
             <h3>Customer Information</h3>
@@ -1211,12 +1211,72 @@ try {
       });
     }
 
-    // Edit order function
-    function editOrder(orderID) {
-      document.getElementById('modalTitle').textContent = 'Edit Order';
-      document.getElementById('submitBtnText').textContent = 'Update Order';
-      document.getElementById('orderID').value = orderID;
-      openOrderModal();
+    // Delete order function
+    function deleteOrder(orderID) {
+      Swal.fire({
+        title: 'Delete Order?',
+        text: "This action cannot be undone. Are you sure you want to delete this order?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d60000',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete it',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Show loading state
+          Swal.fire({
+            title: 'Deleting...',
+            text: 'Please wait while we delete the order',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: () => {
+              Swal.showLoading();
+            }
+          });
+
+          // Use fetch instead of jQuery AJAX
+          const formData = new FormData();
+          formData.append('action', 'delete_order');
+          formData.append('order_id', orderID);
+
+          fetch('../../includes/backend/sales_orders_backend.php', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.json())
+          .then(response => {
+            if (response.success) {
+              Swal.fire({
+                title: 'Deleted!',
+                text: 'Order has been deleted successfully.',
+                icon: 'success',
+                confirmButtonColor: '#d60000'
+              }).then(() => {
+                loadOrders();
+                loadOrderStatistics();
+              });
+            } else {
+              Swal.fire({
+                title: 'Error',
+                text: response.message || 'Failed to delete order',
+                icon: 'error',
+                confirmButtonColor: '#d60000'
+              });
+            }
+          })
+          .catch(error => {
+            console.error('Delete error:', error);
+            Swal.fire({
+              title: 'Error',
+              text: 'Failed to delete order. Please try again.',
+              icon: 'error',
+              confirmButtonColor: '#d60000'
+            });
+          });
+        }
+      });
     }
 
     // Initialize dropdown options
@@ -1354,7 +1414,7 @@ try {
             <td>
               <div class="order-actions-enhanced">
                 <button class="btn-small btn-view" title="View Details" onclick="viewOrderDetails('${order.order_id}')"><i class="fas fa-eye"></i></button>
-                <button class="btn-small btn-edit" title="Edit Order" onclick="editOrder('${order.order_id}')"><i class="fas fa-edit"></i></button>
+                <button class="btn-small btn-delete" title="Delete Order" onclick="deleteOrder('${order.order_id}')"><i class="fas fa-trash"></i></button>
               </div>
             </td>
           </tr>
@@ -1474,11 +1534,11 @@ try {
         });
       });
 
-      document.querySelectorAll('.btn-edit').forEach(btn => {
+      document.querySelectorAll('.btn-delete').forEach(btn => {
         btn.addEventListener('click', function() {
           const row = this.closest('tr');
           const orderID = row.querySelector('.order-id').textContent;
-          editOrder(orderID);
+          deleteOrder(orderID);
         });
       });
 

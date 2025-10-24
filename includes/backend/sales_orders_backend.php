@@ -21,6 +21,9 @@ switch ($action) {
     case 'get_order_details':
         getOrderDetails();
         break;
+    case 'delete_order':
+        deleteOrder();
+        break;
     default:
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'Invalid action']);
@@ -276,6 +279,63 @@ function getOrderDetails()
         echo json_encode([
             'success' => false,
             'error' => 'Failed to fetch order details: ' . $e->getMessage()
+        ]);
+    }
+}
+
+function deleteOrder()
+{
+    global $connect;
+
+    $order_id = $_POST['order_id'] ?? null;
+
+    if (!$order_id) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Order ID required']);
+        return;
+    }
+
+    try {
+        // First verify that the order belongs to the current sales agent
+        $checkStmt = $connect->prepare("SELECT order_id FROM orders WHERE order_id = ? AND sales_agent_id = ?");
+        $checkStmt->execute([$order_id, $_SESSION['user_id']]);
+        $order = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$order) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'message' => 'Order not found or you do not have permission to delete this order']);
+            return;
+        }
+
+        // Begin transaction
+        $connect->beginTransaction();
+
+        // Delete related payment history records first (if any)
+        $deletePaymentsStmt = $connect->prepare("DELETE FROM payment_history WHERE order_id = ?");
+        $deletePaymentsStmt->execute([$order_id]);
+
+        // Delete the order
+        $deleteOrderStmt = $connect->prepare("DELETE FROM orders WHERE order_id = ?");
+        $deleteOrderStmt->execute([$order_id]);
+
+        // Commit transaction
+        $connect->commit();
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Order deleted successfully'
+        ]);
+
+    } catch (Exception $e) {
+        // Rollback transaction on error
+        if ($connect->inTransaction()) {
+            $connect->rollBack();
+        }
+
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Failed to delete order: ' . $e->getMessage()
         ]);
     }
 }
