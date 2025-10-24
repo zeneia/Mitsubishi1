@@ -914,10 +914,20 @@ $color_options = !empty($vehicle['color_options']) ? explode(',', $vehicle['colo
                             <i class="fas fa-calculator"></i>
                             <span>Get Quote</span>
                         </a>
-                        <a href="#" class="action-btn" onclick="bookTestDrive(<?php echo $vehicle['id']; ?>)">
-                            <i class="fas fa-car"></i>
-                            <span>Test Drive</span>
-                        </a>
+                        <?php
+                        $isInStock = isset($vehicle['stock_quantity']) && $vehicle['stock_quantity'] > 0;
+                        if ($isInStock):
+                        ?>
+                            <a href="#" class="action-btn" onclick="bookTestDrive(<?php echo $vehicle['id']; ?>)">
+                                <i class="fas fa-car"></i>
+                                <span>Test Drive</span>
+                            </a>
+                        <?php else: ?>
+                            <a href="#" class="action-btn" style="opacity: 0.5; cursor: not-allowed;" onclick="event.preventDefault(); alert('Sorry, this vehicle is currently out of stock and not available for test drives.');">
+                                <i class="fas fa-car"></i>
+                                <span>Test Drive (Out of Stock)</span>
+                            </a>
+                        <?php endif; ?>
                         <a href="#" class="action-btn" onclick="inquireVehicle(<?php echo $vehicle['id']; ?>)">
                             <i class="fas fa-question-circle"></i>
                             <span>Inquiry</span>

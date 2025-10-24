@@ -19,9 +19,9 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
 
 // Fetch available vehicles from database
 try {
-    $vehicle_stmt = $connect->prepare("SELECT id, model_name, variant, category, seating_capacity, fuel_type, availability_status 
-                                      FROM vehicles 
-                                      WHERE availability_status = 'available' AND stock_quantity > 0 
+    $vehicle_stmt = $connect->prepare("SELECT id, model_name, variant, category, seating_capacity, fuel_type, availability_status, stock_quantity
+                                      FROM vehicles
+                                      WHERE availability_status = 'available' AND stock_quantity > 0
                                       ORDER BY model_name ASC");
     $vehicle_stmt->execute();
     $available_vehicles = $vehicle_stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -32,15 +32,35 @@ try {
 
 // Validate selected vehicle parameter
 $selected_vehicle_id = isset($_GET['vehicle_id']) ? (int)$_GET['vehicle_id'] : null;
+$selected_vehicle = null;
+
 if ($selected_vehicle_id) {
+    // First check if vehicle exists in available vehicles
     $vehicle_exists = false;
     foreach ($available_vehicles as $vehicle) {
-        if ($vehicle['id'] === $selected_vehicle_id) {
+        if ((int)$vehicle['id'] === $selected_vehicle_id) {
             $vehicle_exists = true;
+            $selected_vehicle = $vehicle;
             break;
         }
     }
+
+    // If not found in available vehicles, check if it exists but doesn't meet criteria
     if (!$vehicle_exists) {
+        try {
+            $check_stmt = $connect->prepare("SELECT id, model_name, variant, availability_status, stock_quantity FROM vehicles WHERE id = ?");
+            $check_stmt->execute([$selected_vehicle_id]);
+            $vehicle_check = $check_stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($vehicle_check) {
+                // Vehicle exists but doesn't meet availability criteria
+                error_log("Vehicle ID {$selected_vehicle_id} exists but status='{$vehicle_check['availability_status']}', stock={$vehicle_check['stock_quantity']}");
+            } else {
+                error_log("Vehicle ID {$selected_vehicle_id} does not exist in database");
+            }
+        } catch (PDOException $e) {
+            error_log("Error checking vehicle: " . $e->getMessage());
+        }
         $selected_vehicle_id = null;
     }
 }
@@ -643,30 +663,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         Selected Vehicle
                     </div>
                     <div class="selected-vehicle-display">
-                        <?php 
-                        if ($selected_vehicle_id) {
-                            // Find the selected vehicle details
-                            $selected_vehicle = null;
-                            foreach ($available_vehicles as $vehicle) {
-                                if ($vehicle['id'] === $selected_vehicle_id) {
-                                    $selected_vehicle = $vehicle;
-                                    break;
-                                }
+                        <?php
+                        if ($selected_vehicle_id && $selected_vehicle) {
+                            echo '<div class="vehicle-display">';
+                            echo '<h3>' . htmlspecialchars($selected_vehicle['model_name']) . '</h3>';
+                            if (!empty($selected_vehicle['variant'])) {
+                                echo '<p class="vehicle-variant">' . htmlspecialchars($selected_vehicle['variant']) . '</p>';
                             }
-                            
-                            if ($selected_vehicle) {
-                                echo '<div class="vehicle-display">';
-                                echo '<h3>' . htmlspecialchars($selected_vehicle['model_name']) . '</h3>';
-                                if (!empty($selected_vehicle['variant'])) {
-                                    echo '<p class="vehicle-variant">' . htmlspecialchars($selected_vehicle['variant']) . '</p>';
-                                }
-                                echo '<input type="hidden" name="vehicle" value="' . $selected_vehicle_id . '">';
-                                echo '</div>';
-                            } else {
-                                echo '<div class="error-message"><i class="fas fa-exclamation-triangle"></i> Invalid vehicle selection. Please go back and select a valid vehicle.</div>';
-                            }
+                            echo '<input type="hidden" name="vehicle" value="' . $selected_vehicle_id . '">';
+                            echo '</div>';
                         } else {
-                            echo '<div class="error-message"><i class="fas fa-exclamation-triangle"></i> No vehicle selected. Please go back and select a vehicle for your test drive.</div>';
+                            // Show more helpful error message
+                            echo '<div class="error-message">';
+                            echo '<i class="fas fa-exclamation-triangle"></i> ';
+                            if (isset($_GET['vehicle_id'])) {
+                                echo 'Sorry, the selected vehicle is currently out of stock or unavailable for test drives. ';
+                                echo 'Please <a href="car_menu.php" style="color: #ffd700; text-decoration: underline;">browse our available vehicles</a> and select another one.';
+                            } else {
+                                echo 'No vehicle selected. Please <a href="car_menu.php" style="color: #ffd700; text-decoration: underline;">browse our vehicles</a> and select one for your test drive.';
+                            }
+                            echo '</div>';
                         }
                         ?>
                     </div>
