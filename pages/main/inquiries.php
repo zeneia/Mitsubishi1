@@ -331,6 +331,148 @@ $stats = getInquiryStats($pdo);
       font-size: 1.1rem;
       font-weight: 600;
     }
+
+    /* Enhanced filter styles */
+    .filter-input:focus,
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--primary-red);
+      box-shadow: 0 0 0 3px rgba(214, 0, 0, 0.1);
+    }
+
+    .filter-input.has-value,
+    .filter-select.has-value {
+      border-color: var(--primary-red);
+      background-color: #fff5f5;
+    }
+
+    .filter-btn {
+      transition: all 0.3s ease;
+    }
+
+    .filter-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .filter-btn:active {
+      transform: translateY(0);
+    }
+
+    #clearFiltersBtn:hover {
+      background: #4b5563 !important;
+    }
+
+    /* No results message animation */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #noResultsRow {
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* Filter active indicator */
+    .section-title i.fa-filter {
+      color: var(--primary-red);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+    }
+
+    /* Searchable Dropdown Styles */
+    .searchable-dropdown-container {
+      position: relative;
+    }
+
+    .searchable-input {
+      width: 100%;
+      font-size: 14px;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: white;
+    }
+
+    .searchable-input:focus {
+      outline: none;
+      border-color: var(--primary-red);
+      box-shadow: 0 0 0 2px rgba(214, 0, 0, 0.1);
+    }
+
+    .account-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .dropdown-item {
+      padding: 10px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background-color 0.2s;
+    }
+
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .dropdown-item:hover,
+    .dropdown-item.selected {
+      background-color: #f8f9fa;
+    }
+
+    .account-name {
+      font-weight: 600;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .account-email {
+      color: #666;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .dropdown-loading,
+    .dropdown-no-results,
+    .dropdown-error {
+      padding: 12px;
+      text-align: center;
+      color: #666;
+      font-size: 13px;
+    }
+
+    .dropdown-error {
+      color: #d60000;
+    }
+
+    .dropdown-no-results {
+      color: #999;
+    }
   </style>
 </head>
 <body>
@@ -441,7 +583,11 @@ $stats = getInquiryStats($pdo);
               <option value="general">General Inquiry</option>
             </select>
           </div>
-          <button class="filter-btn">Apply Filters</button>
+          <div class="filter-group" style="display: flex; align-items: flex-end;">
+            <button class="filter-btn" id="clearFiltersBtn" style="background: #6b7280;">
+              <i class="fas fa-times"></i> Clear Filters
+            </button>
+          </div>
         </div>
       </div>
 
@@ -658,11 +804,15 @@ $stats = getInquiryStats($pdo);
                 <input type="tel" id="add_phone" name="phone_number" class="form-control" required>
               </div>
               <div class="form-group">
-                <label for="add_account_id">Link to Account (Optional)</label>
-                <select id="add_account_id" name="account_id" class="form-control">
-                  <option value="">Select existing account (optional)</option>
-                  <!-- Options will be loaded dynamically -->
-                </select>
+                <label for="add_account_search">Link to Account (Optional)</label>
+                <div class="searchable-dropdown-container">
+                  <input type="text" id="add_account_search" class="form-control searchable-input"
+                         placeholder="Type to search customer accounts..." autocomplete="off">
+                  <input type="hidden" id="add_account_id" name="account_id">
+                  <div id="accountDropdown" class="account-dropdown" style="display: none;">
+                    <div class="dropdown-loading">Loading accounts...</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1085,10 +1235,13 @@ $stats = getInquiryStats($pdo);
       // Load vehicle models and accounts
       loadVehicleModels();
       loadAccounts();
-      
+
+      // Setup account search functionality
+      setupAccountSearch();
+
       // Clear form
       document.getElementById('addInquiryForm').reset();
-      
+
       // Show modal
       document.getElementById('addInquiryModal').classList.add('active');
     }
@@ -1096,6 +1249,10 @@ $stats = getInquiryStats($pdo);
     function closeAddInquiryModal() {
       document.getElementById('addInquiryModal').classList.remove('active');
       document.getElementById('addInquiryForm').reset();
+      // Clear account search
+      document.getElementById('add_account_search').value = '';
+      document.getElementById('add_account_id').value = '';
+      hideAccountDropdown();
     }
 
     function loadVehicleModels() {
@@ -1121,40 +1278,209 @@ $stats = getInquiryStats($pdo);
         });
     }
 
+    // Account search variables
+    let customerAccounts = [];
+    let selectedAccountIndex = -1;
+
     function loadAccounts() {
+      console.log('Loading accounts from inquiry_actions.php...');
       fetch('inquiry_actions.php?action=get_accounts')
-        .then(response => response.json())
-        .then(data => {
-          const select = document.getElementById('add_account_id');
-          select.innerHTML = '<option value="">Select existing account (optional)</option>';
-          
-          if (data.success && data.accounts) {
-            data.accounts.forEach(account => {
-              const option = document.createElement('option');
-              option.value = account.Id;
-              option.textContent = `${account.FirstName} ${account.LastName} (${account.Username})`;
-              select.appendChild(option);
-            });
+        .then(response => {
+          console.log('Response status:', response.status);
+          return response.text();
+        })
+        .then(text => {
+          console.log('Raw response:', text);
+          try {
+            const data = JSON.parse(text);
+            console.log('Parsed data:', data);
+
+            if (data.success && data.accounts) {
+              customerAccounts = data.accounts;
+              console.log('Loaded accounts:', customerAccounts.length);
+              const accountDropdown = document.getElementById('accountDropdown');
+              accountDropdown.innerHTML = '<div class="dropdown-loading">Accounts loaded. Start typing to search...</div>';
+            } else {
+              customerAccounts = [];
+              console.log('No accounts found or error:', data.message);
+              const accountDropdown = document.getElementById('accountDropdown');
+              accountDropdown.innerHTML = '<div class="dropdown-no-results">No customer accounts found</div>';
+            }
+          } catch (e) {
+            console.error('JSON parse error:', e);
+            console.error('Response text:', text);
+            customerAccounts = [];
+            const accountDropdown = document.getElementById('accountDropdown');
+            accountDropdown.innerHTML = '<div class="dropdown-error">Failed to parse response</div>';
           }
         })
         .catch(error => {
           console.error('Error loading accounts:', error);
+          customerAccounts = [];
+          const accountDropdown = document.getElementById('accountDropdown');
+          accountDropdown.innerHTML = '<div class="dropdown-error">Failed to load accounts</div>';
         });
+    }
+
+    function filterAndShowAccounts(searchTerm) {
+      const accountDropdown = document.getElementById('accountDropdown');
+
+      if (!searchTerm) {
+        // Show all accounts when search term is empty
+        if (customerAccounts.length > 0) {
+          accountDropdown.innerHTML = customerAccounts.map(account =>
+            `<div class="dropdown-item" data-id="${account.Id}" data-name="${account.FirstName} ${account.LastName}">
+              <div class="account-name">${account.FirstName} ${account.LastName}</div>
+              <div class="account-email">${account.Email || account.Username}</div>
+            </div>`
+          ).join('');
+
+          // Add click handlers to dropdown items
+          accountDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', function() {
+              selectAccount(this);
+            });
+          });
+
+          showAccountDropdown();
+        } else {
+          accountDropdown.innerHTML = '<div class="dropdown-no-results">No accounts available</div>';
+          showAccountDropdown();
+        }
+        return;
+      }
+
+      // Filter accounts based on search term
+      const filteredAccounts = customerAccounts.filter(account => {
+        const fullName = `${account.FirstName} ${account.LastName}`.toLowerCase();
+        const email = (account.Email || '').toLowerCase();
+        const username = (account.Username || '').toLowerCase();
+        return fullName.includes(searchTerm) || email.includes(searchTerm) || username.includes(searchTerm);
+      });
+
+      if (filteredAccounts.length > 0) {
+        accountDropdown.innerHTML = filteredAccounts.map(account =>
+          `<div class="dropdown-item" data-id="${account.Id}" data-name="${account.FirstName} ${account.LastName}">
+            <div class="account-name">${account.FirstName} ${account.LastName}</div>
+            <div class="account-email">${account.Email || account.Username}</div>
+          </div>`
+        ).join('');
+
+        // Add click handlers to dropdown items
+        accountDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+          item.addEventListener('click', function() {
+            selectAccount(this);
+          });
+        });
+
+        showAccountDropdown();
+      } else {
+        accountDropdown.innerHTML = '<div class="dropdown-no-results">No accounts found</div>';
+        showAccountDropdown();
+      }
+    }
+
+    function selectAccount(item) {
+      const accountId = item.getAttribute('data-id');
+      const accountName = item.getAttribute('data-name');
+
+      console.log('Selected account:', accountId, accountName);
+      document.getElementById('add_account_search').value = accountName;
+      document.getElementById('add_account_id').value = accountId;
+      console.log('Hidden field value set to:', document.getElementById('add_account_id').value);
+      hideAccountDropdown();
+    }
+
+    function showAccountDropdown() {
+      document.getElementById('accountDropdown').style.display = 'block';
+    }
+
+    function hideAccountDropdown() {
+      document.getElementById('accountDropdown').style.display = 'none';
+    }
+
+    // Setup account search event listeners
+    function setupAccountSearch() {
+      const accountSearchInput = document.getElementById('add_account_search');
+      const accountDropdown = document.getElementById('accountDropdown');
+
+      if (accountSearchInput) {
+        // Show dropdown on focus
+        accountSearchInput.addEventListener('focus', function() {
+          if (customerAccounts.length > 0) {
+            filterAndShowAccounts(this.value.toLowerCase());
+          }
+        });
+
+        // Filter accounts as user types
+        accountSearchInput.addEventListener('input', function() {
+          const searchTerm = this.value.toLowerCase();
+          filterAndShowAccounts(searchTerm);
+          selectedAccountIndex = -1;
+
+          // Clear hidden field if input is cleared
+          if (!this.value) {
+            document.getElementById('add_account_id').value = '';
+          }
+        });
+
+        // Handle keyboard navigation
+        accountSearchInput.addEventListener('keydown', function(e) {
+          const items = accountDropdown.querySelectorAll('.dropdown-item');
+
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            selectedAccountIndex = Math.min(selectedAccountIndex + 1, items.length - 1);
+            updateSelectedItem(items);
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            selectedAccountIndex = Math.max(selectedAccountIndex - 1, 0);
+            updateSelectedItem(items);
+          } else if (e.key === 'Enter' && selectedAccountIndex >= 0) {
+            e.preventDefault();
+            items[selectedAccountIndex].click();
+          } else if (e.key === 'Escape') {
+            hideAccountDropdown();
+          }
+        });
+
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!accountSearchInput.contains(e.target) && !accountDropdown.contains(e.target)) {
+            hideAccountDropdown();
+          }
+        });
+      }
+    }
+
+    function updateSelectedItem(items) {
+      items.forEach((item, index) => {
+        if (index === selectedAccountIndex) {
+          item.classList.add('selected');
+          item.scrollIntoView({ block: 'nearest' });
+        } else {
+          item.classList.remove('selected');
+        }
+      });
     }
 
     function handleAddInquirySubmit() {
       const form = document.getElementById('addInquiryForm');
       const formData = new FormData(form);
-      
+
       // Add action parameter
       formData.append('action', 'add_inquiry');
-      
+
+      // Log the account_id being submitted
+      const accountId = formData.get('account_id');
+      console.log('Submitting inquiry with account_id:', accountId);
+
       // Validate required fields
       const fullName = formData.get('full_name');
       const email = formData.get('email');
       const phoneNumber = formData.get('phone_number');
       const vehicleModel = formData.get('vehicle_model');
-      
+
       if (!fullName || !email || !phoneNumber || !vehicleModel) {
         Swal.fire({
           title: 'Error!',
@@ -1164,13 +1490,13 @@ $stats = getInquiryStats($pdo);
         });
         return;
       }
-      
+
       // Show loading state
       const submitBtn = form.querySelector('button[type="submit"]');
       const originalText = submitBtn.innerHTML;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
       submitBtn.disabled = true;
-      
+
       // Send to inquiry_actions.php
       fetch('inquiry_actions.php', {
         method: 'POST',
@@ -1212,9 +1538,12 @@ $stats = getInquiryStats($pdo);
     // Initialize page
     document.addEventListener('DOMContentLoaded', function() {
       // Add New Inquiry button event listener
-      document.getElementById('addNewInquiryBtn').addEventListener('click', function() {
-        openAddInquiryModal();
-      });
+      const addNewInquiryBtn = document.getElementById('addNewInquiryBtn');
+      if (addNewInquiryBtn) {
+        addNewInquiryBtn.addEventListener('click', function() {
+          openAddInquiryModal();
+        });
+      }
 
       // Add New Inquiry form submission
       document.getElementById('addInquiryForm').addEventListener('submit', function(e) {
@@ -1228,89 +1557,169 @@ $stats = getInquiryStats($pdo);
         handleResponseSubmit();
       });
 
-      // Filter functionality
+      // Enhanced Filter functionality with real-time updates
       let filterTimeout;
-      function setupFilter(elementId) {
-        document.getElementById(elementId).addEventListener('change', function() {
-          clearTimeout(filterTimeout);
-          filterTimeout = setTimeout(applyFilters, 300);
+
+      // Function to apply all filters
+      function applyFilters() {
+        const searchInput = document.getElementById('inquiry-search');
+        const modelSelect = document.getElementById('vehicle-model-filter');
+        const dateSelect = document.getElementById('date-range-filter');
+        const typeSelect = document.getElementById('inquiry-type-filter');
+
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const modelFilter = modelSelect.value;
+        const dateFilter = dateSelect.value;
+        const typeFilter = typeSelect.value;
+
+        // Add visual feedback for active filters
+        searchInput.classList.toggle('has-value', searchTerm !== '');
+        modelSelect.classList.toggle('has-value', modelFilter !== 'all');
+        dateSelect.classList.toggle('has-value', dateFilter !== 'all');
+        typeSelect.classList.toggle('has-value', typeFilter !== 'all');
+
+        const rows = document.querySelectorAll('#inquiriesTableBody tr');
+        let visibleCount = 0;
+
+        rows.forEach((row, index) => {
+          try {
+            // Get the inquiry data from the original data array
+            const inquiry = inquiriesData[index];
+            if (!inquiry) {
+              row.style.display = 'none';
+              return;
+            }
+
+            // Extract text content for searching
+            const customerName = (inquiry.FullName || '').toLowerCase();
+            const customerEmail = (inquiry.Email || '').toLowerCase();
+            const customerPhone = (inquiry.PhoneNumber || '').toLowerCase();
+            const vehicleModel = (inquiry.VehicleModel || '').toLowerCase();
+            const vehicleVariant = (inquiry.VehicleVariant || '').toLowerCase();
+            const comments = (inquiry.Comments || '').toLowerCase();
+
+            // Search filter - check multiple fields
+            const matchesSearch = !searchTerm ||
+              customerName.includes(searchTerm) ||
+              customerEmail.includes(searchTerm) ||
+              customerPhone.includes(searchTerm) ||
+              vehicleModel.includes(searchTerm) ||
+              vehicleVariant.includes(searchTerm) ||
+              comments.includes(searchTerm);
+
+            // Vehicle model filter
+            const matchesModel = modelFilter === 'all' ||
+              inquiry.VehicleModel === modelFilter;
+
+            // Inquiry type filter
+            let matchesType = true;
+            if (typeFilter !== 'all') {
+              if (typeFilter === 'financing') {
+                matchesType = inquiry.FinancingRequired && inquiry.FinancingRequired.trim() !== '';
+              } else if (typeFilter === 'trade-in') {
+                matchesType = inquiry.TradeInVehicleDetails && inquiry.TradeInVehicleDetails.trim() !== '';
+              } else if (typeFilter === 'general') {
+                matchesType = (!inquiry.FinancingRequired || inquiry.FinancingRequired.trim() === '') &&
+                             (!inquiry.TradeInVehicleDetails || inquiry.TradeInVehicleDetails.trim() === '');
+              }
+            }
+
+            // Date range filter
+            let matchesDate = true;
+            if (dateFilter !== 'all') {
+              const inquiryDate = new Date(inquiry.InquiryDate);
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+
+              switch (dateFilter) {
+                case 'today':
+                  const todayEnd = new Date(today);
+                  todayEnd.setHours(23, 59, 59, 999);
+                  matchesDate = inquiryDate >= today && inquiryDate <= todayEnd;
+                  break;
+                case 'week':
+                  const weekStart = new Date(today);
+                  weekStart.setDate(today.getDate() - today.getDay());
+                  matchesDate = inquiryDate >= weekStart;
+                  break;
+                case 'month':
+                  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+                  matchesDate = inquiryDate >= monthStart;
+                  break;
+              }
+            }
+
+            // Show or hide row based on all filters
+            if (matchesSearch && matchesModel && matchesType && matchesDate) {
+              row.style.display = '';
+              visibleCount++;
+            } else {
+              row.style.display = 'none';
+            }
+          } catch (error) {
+            console.error('Error filtering row:', error);
+            row.style.display = '';
+          }
         });
+
+        // Update section title with filter status
+        const sectionTitle = document.getElementById('sectionTitle');
+        if (visibleCount === inquiriesData.length) {
+          sectionTitle.innerHTML = '<i class="fas fa-list"></i> All Vehicle Inquiries';
+        } else {
+          sectionTitle.innerHTML = `<i class="fas fa-filter"></i> Filtered Inquiries <span style="color: var(--primary-red);">(${visibleCount} of ${inquiriesData.length})</span>`;
+        }
+
+        // Show/hide "no results" message
+        showNoResultsMessage(visibleCount);
       }
 
-      setupFilter('vehicle-model-filter');
-      setupFilter('date-range-filter');
-      setupFilter('inquiry-type-filter');
+      // Function to show "no results" message
+      function showNoResultsMessage(visibleCount) {
+        let noResultsRow = document.getElementById('noResultsRow');
 
-      // Search functionality
+        if (visibleCount === 0) {
+          if (!noResultsRow) {
+            noResultsRow = document.createElement('tr');
+            noResultsRow.id = 'noResultsRow';
+            noResultsRow.innerHTML = `
+              <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-light);">
+                <i class="fas fa-search" style="font-size: 48px; margin-bottom: 15px; opacity: 0.3;"></i>
+                <p style="font-size: 16px; margin: 0;">No inquiries found matching your filters.</p>
+                <p style="font-size: 14px; margin-top: 10px;">Try adjusting your search criteria.</p>
+              </td>
+            `;
+            document.getElementById('inquiriesTableBody').appendChild(noResultsRow);
+          }
+          noResultsRow.style.display = '';
+        } else {
+          if (noResultsRow) {
+            noResultsRow.style.display = 'none';
+          }
+        }
+      }
+
+      // Function to clear all filters
+      function clearAllFilters() {
+        document.getElementById('inquiry-search').value = '';
+        document.getElementById('vehicle-model-filter').value = 'all';
+        document.getElementById('date-range-filter').value = 'all';
+        document.getElementById('inquiry-type-filter').value = 'all';
+        applyFilters();
+      }
+
+      // Setup real-time filtering for all filter inputs
       document.getElementById('inquiry-search').addEventListener('input', function() {
         clearTimeout(filterTimeout);
         filterTimeout = setTimeout(applyFilters, 300);
       });
 
-      function applyFilters() {
-        const searchTerm = document.getElementById('inquiry-search').value.toLowerCase();
-        const modelFilter = document.getElementById('vehicle-model-filter').value;
-        const dateFilter = document.getElementById('date-range-filter').value;
-        const typeFilter = document.getElementById('inquiry-type-filter').value;
+      document.getElementById('vehicle-model-filter').addEventListener('change', applyFilters);
+      document.getElementById('date-range-filter').addEventListener('change', applyFilters);
+      document.getElementById('inquiry-type-filter').addEventListener('change', applyFilters);
 
-        const rows = document.querySelectorAll('#inquiriesTableBody tr');
-        let visibleCount = 0;
-
-        rows.forEach(row => {
-          const customerName = row.querySelector('.customer-name').textContent.toLowerCase();
-          const customerEmail = row.querySelector('.customer-contact').textContent.toLowerCase();
-          const vehicleModel = row.querySelector('.vehicle-model').textContent.toLowerCase();
-          const inquiryType = row.querySelector('.inquiry-type-badge').textContent.toLowerCase();
-          const inquiryDate = new Date(row.cells[0].querySelector('.inquiry-date').textContent);
-
-          const matchesSearch = !searchTerm || 
-            customerName.includes(searchTerm) || 
-            customerEmail.includes(searchTerm) || 
-            vehicleModel.includes(searchTerm);
-
-          const matchesModel = modelFilter === 'all' || 
-            vehicleModel.includes(modelFilter.toLowerCase());
-
-          const matchesType = typeFilter === 'all' || 
-            inquiryType.includes(typeFilter);
-
-          let matchesDate = true;
-          if (dateFilter !== 'all') {
-            const today = new Date();
-            const todayStart = new Date(today.setHours(0, 0, 0, 0));
-            
-            switch (dateFilter) {
-              case 'today':
-                matchesDate = inquiryDate >= todayStart;
-                break;
-              case 'week':
-                const weekStart = new Date(today.setDate(today.getDate() - today.getDay()));
-                matchesDate = inquiryDate >= weekStart;
-                break;
-              case 'month':
-                const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-                matchesDate = inquiryDate >= monthStart;
-                break;
-            }
-          }
-
-          if (matchesSearch && matchesModel && matchesType && matchesDate) {
-            row.style.display = '';
-            visibleCount++;
-          } else {
-            row.style.display = 'none';
-          }
-        });
-
-        // Update section title
-        document.getElementById('sectionTitle').textContent = 
-          visibleCount === inquiriesData.length ? 
-          'All Vehicle Inquiries' : 
-          `Filtered Inquiries (${visibleCount} of ${inquiriesData.length})`;
-      }
-
-      // Apply filters button
-      document.querySelector('.filter-btn').addEventListener('click', applyFilters);
+      // Clear filters button
+      document.getElementById('clearFiltersBtn').addEventListener('click', clearAllFilters);
     });
   </script>
 </body>

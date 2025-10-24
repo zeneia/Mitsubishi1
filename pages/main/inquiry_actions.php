@@ -439,23 +439,82 @@ function logAdminAction($pdo, $adminId, $actionType, $targetId, $description) {
 
 function handleGetAccounts($pdo) {
     try {
-        $stmt = $pdo->prepare("
-            SELECT Id, Username, FirstName, LastName, Email, Status
-            FROM accounts 
-            WHERE Status = 'Active' 
-            ORDER BY FirstName, LastName
-        ");
+        error_log("handleGetAccounts: Starting to fetch customer accounts");
+
+        $userRole = $_SESSION['user_role'] ?? '';
+        $userId = $_SESSION['user_id'] ?? null;
+
+        error_log("handleGetAccounts: User role = $userRole, User ID = $userId");
+
+        // Build query based on user role
+        if ($userRole === 'SalesAgent') {
+            // For Sales Agents: Only show customers assigned to them
+            $stmt = $pdo->prepare("
+                SELECT
+                    a.Id,
+                    a.Username,
+                    a.FirstName,
+                    a.LastName,
+                    a.Email,
+                    COALESCE(a.Status, 'N/A') as Status,
+                    ci.agent_id
+                FROM accounts a
+                INNER JOIN customer_information ci ON a.Id = ci.account_id
+                WHERE a.Role = 'Customer'
+                AND ci.agent_id = :agent_id
+                AND (a.Status IN ('Active', 'Approved') OR a.Status IS NULL)
+                AND (a.IsDisabled IS NULL OR a.IsDisabled = 0)
+                ORDER BY a.FirstName, a.LastName
+            ");
+            $stmt->bindParam(':agent_id', $userId, PDO::PARAM_INT);
+        } else {
+            // For Admins: Show all customers
+            $stmt = $pdo->prepare("
+                SELECT
+                    a.Id,
+                    a.Username,
+                    a.FirstName,
+                    a.LastName,
+                    a.Email,
+                    COALESCE(a.Status, 'N/A') as Status
+                FROM accounts a
+                WHERE a.Role = 'Customer'
+                AND (a.Status IN ('Active', 'Approved') OR a.Status IS NULL)
+                AND (a.IsDisabled IS NULL OR a.IsDisabled = 0)
+                ORDER BY a.FirstName, a.LastName
+            ");
+        }
+
         $stmt->execute();
         $accounts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
+        error_log("handleGetAccounts: Found " . count($accounts) . " customer accounts for role $userRole");
+        if (count($accounts) > 0) {
+            error_log("handleGetAccounts: First account: " . print_r($accounts[0], true));
+        }
+
+        // Clean up the response - ensure all fields are present
+        $cleanedAccounts = array_map(function($account) {
+            return [
+                'Id' => $account['Id'],
+                'Username' => $account['Username'] ?? '',
+                'FirstName' => $account['FirstName'] ?? '',
+                'LastName' => $account['LastName'] ?? '',
+                'Email' => $account['Email'] ?? '',
+                'Status' => $account['Status'] ?? 'N/A'
+            ];
+        }, $accounts);
+
         echo json_encode([
             'success' => true,
-            'accounts' => $accounts
+            'accounts' => $cleanedAccounts,
+            'count' => count($cleanedAccounts)
         ]);
     } catch (PDOException $e) {
         error_log("Get accounts error: " . $e->getMessage());
+        error_log("Get accounts error trace: " . $e->getTraceAsString());
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Failed to fetch accounts']);
+        echo json_encode(['success' => false, 'message' => 'Failed to fetch accounts: ' . $e->getMessage()]);
     }
 }
 ?>
