@@ -87,8 +87,26 @@ class PMSHandler {
 
             // Apply filters
             if (!empty($filters['customer_search'])) {
-                $whereConditions[] = "(c.firstname LIKE :search OR c.lastname LIKE :search OR p.plate_number LIKE :search)";
-                $params['search'] = '%' . $filters['customer_search'] . '%';
+                // Trim and clean the search input to handle pasted text with hidden characters
+                $searchTerm = trim($filters['customer_search']);
+                // Remove any line breaks, tabs, and extra whitespace
+                $searchTerm = preg_replace('/\s+/', ' ', $searchTerm);
+
+                // Split search term into words for multi-word search
+                $searchWords = explode(' ', $searchTerm);
+                $searchConditions = [];
+
+                foreach ($searchWords as $index => $word) {
+                    if (!empty(trim($word))) {
+                        $paramKey = 'search_' . $index;
+                        $searchConditions[] = "(c.firstname LIKE :{$paramKey} OR c.lastname LIKE :{$paramKey} OR p.plate_number LIKE :{$paramKey} OR p.model LIKE :{$paramKey} OR CONCAT(c.firstname, ' ', c.lastname) LIKE :{$paramKey})";
+                        $params[$paramKey] = '%' . trim($word) . '%';
+                    }
+                }
+
+                if (!empty($searchConditions)) {
+                    $whereConditions[] = '(' . implode(' AND ', $searchConditions) . ')';
+                }
             }
 
             // Odometer range filter (e.g., 20000 filters 20000-25000)

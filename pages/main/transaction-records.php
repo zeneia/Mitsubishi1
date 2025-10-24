@@ -808,14 +808,12 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
               <th>Customer Name</th>
               <th>Vehicle Name</th>
               <th>Amount</th>
-              <th>Type of Payment</th>
-              <th>Reference Number</th>
               <th>Agent Name</th>
               <th>View Receipt</th>
             </tr>
           </thead>
           <tbody id="pending-tbody">
-            <tr><td colspan="9" style="text-align:center;color:var(--text-light);">Loading...</td></tr>
+            <tr><td colspan="7" style="text-align:center;color:var(--text-light);">Loading...</td></tr>
           </tbody>
         </table>
         
@@ -958,8 +956,6 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
               <td>${item.client_name||'N/A'}</td>
               <td>${vm}</td>
               <td>${price}</td>
-              <td>${paymentType}</td>
-              <td>${refNumber}</td>
               <td>${item.agent_name||''}</td>
               <td class="table-actions">
                 <button class="btn btn-small btn-outline" onclick="viewReceipt(${item.latest_payment_id || 0})">

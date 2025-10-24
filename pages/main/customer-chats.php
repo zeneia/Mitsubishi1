@@ -1526,6 +1526,26 @@ if (isset($_GET['conversation_id'])) {
       });
     });
 
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        const chatItems = document.querySelectorAll('.chat-item');
+
+        chatItems.forEach(item => {
+          const chatName = item.querySelector('.chat-name')?.textContent.toLowerCase() || '';
+          const lastMessage = item.querySelector('.chat-preview')?.textContent.toLowerCase() || '';
+
+          if (chatName.includes(searchTerm) || lastMessage.includes(searchTerm)) {
+            item.style.display = '';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      });
+    }
+
     // Load messages on page load
     if (currentConversationId) {
       loadMessages(currentConversationId);

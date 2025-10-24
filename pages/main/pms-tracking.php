@@ -635,15 +635,19 @@ $customers = $pmsHandler->getCustomers();
     }
 
     function applyFilters() {
+      // Trim and clean search input to handle pasted text with hidden characters
+      const searchValue = document.getElementById('client-search').value;
+      const cleanedSearch = searchValue.trim().replace(/\s+/g, ' ');
+
       const filters = {
-        customer_search: document.getElementById('client-search').value,
+        customer_search: cleanedSearch,
         odometer_filter: document.getElementById('odometer-filter').value,
         completion_period: document.getElementById('completion-period').value,
         status: document.getElementById('status-filter').value
       };
-      
+
       const params = new URLSearchParams(filters);
-      
+
       fetch(`../../api/pms_api.php?action=get_pms_records&${params}`)
         .then(response => response.json())
         .then(data => {
@@ -1008,6 +1012,15 @@ $customers = $pmsHandler->getCustomers();
 
       searchInput.addEventListener('input', function() {
         debouncedSearch();
+      });
+
+      // Clean pasted text to remove hidden characters
+      searchInput.addEventListener('paste', function(e) {
+        setTimeout(() => {
+          // Trim and remove extra whitespace from pasted content
+          this.value = this.value.trim().replace(/\s+/g, ' ');
+          debouncedSearch();
+        }, 0);
       });
 
       // Also trigger filter when other dropdowns change
