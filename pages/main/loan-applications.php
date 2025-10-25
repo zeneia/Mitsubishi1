@@ -489,12 +489,12 @@ if (!$pdo) {
                 <i class="fas fa-eye"></i>
               </button>
               ${app.status === 'Pending' || app.status === 'Under Review' ? `
-                <button class="btn btn-small btn-success" onclick="approveApplicationEnhanced(${app.id})" title="Approve with Validation">
+                <!--<button class="btn btn-small btn-success" onclick="approveApplicationEnhanced(${app.id})" title="Approve with Validation">
                   <i class="fas fa-check-double"></i>
                 </button>
                 <button class="btn btn-small btn-danger" onclick="rejectApplication(${app.id})" title="Reject">
                   <i class="fas fa-times"></i>
-                </button>
+                </button>-->
               ` : ''}
               ${app.status === 'Pending' ? `
                 <button class="btn btn-small btn-warning" onclick="markUnderReview(${app.id})" title="Mark Under Review">

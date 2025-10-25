@@ -251,8 +251,8 @@ if (!$customerProfile) {
         }
 
         .status-completed {
-            background: rgba(76, 175, 80, 0.2);
-            color: #4caf50;
+            background: #4caf50;
+            color: #ffffff;
         }
 
         .status-cancelled {
@@ -751,13 +751,13 @@ if (!$customerProfile) {
         }
 
         .status-pending {
-            background: rgba(255, 193, 7, 0.2);
-            color: #ffc107;
+            background: #ffc107;
+            color: #ffffff;
         }
 
         .status-confirmed {
-            background: rgba(40, 167, 69, 0.2);
-            color: #28a745;
+            background: #28a745;
+            color: #FFFFFF;
         }
 
         .status-paid {

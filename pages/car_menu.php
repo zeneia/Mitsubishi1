@@ -259,6 +259,7 @@ try {
             align-items: center;
             justify-content: space-between;
             min-height: 550px;
+            height: 550px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             /* Added user-select: none to prevent text highlighting during swipe */
             -webkit-user-select: none;
@@ -286,6 +287,7 @@ try {
         }
 
         .car-details {
+            flex: 1;
             line-height: 1.7;
             color: #333333;
             font-weight: 400;
@@ -783,8 +785,11 @@ try {
                                 <p class="car-details">
                                     <?php echo !empty($vehicle['key_features']) ? htmlspecialchars(substr($vehicle['key_features'], 0, 150)) . '...' : 'Premium vehicle with advanced features and exceptional performance.'; ?>
                                 </p>
+
+                            </div>
+                            <div class="action-buttons">
                                 <?php if ($vehicle['base_price']): ?>
-                                    <p style="color: #E60012; font-size: 1.2rem; font-weight: bold; margin-top: 10px;">
+                                    <p style="color: #E60012; font-size: 1.2rem; font-weight: bold; margin-bottom: 10px;">
                                         <?php if ($vehicle['promotional_price'] && $vehicle['promotional_price'] < $vehicle['base_price']): ?>
                                             ₱<?php echo number_format($vehicle['promotional_price'], 2); ?>
                                             <span style="color: #ff6b6b; text-decoration: line-through; font-size: 0.9rem; margin-left: 10px;">₱<?php echo number_format($vehicle['base_price'], 2); ?></span>
@@ -793,8 +798,6 @@ try {
                                         <?php endif; ?>
                                     </p>
                                 <?php endif; ?>
-                            </div>
-                            <div class="action-buttons">
                                 <a href="car_details.php?id=<?php echo $vehicle['id']; ?>" class="action-btn"><i class="fas fa-info-circle"></i> View More</a>
                             </div>
                         </div>

@@ -468,7 +468,7 @@ function getInquiryResponses($connect, $inquiryId) {
             text-align: center;
         }
         .btn-primary { 
-            background: linear-gradient(45deg, #ffd700, #ffed4e); 
+            background: linear-gradient(45deg, #ffd700); 
             color: #1a1a1a; 
         }
         .btn-primary:hover { 
@@ -929,7 +929,7 @@ function getInquiryResponses($connect, $inquiryId) {
                                 
                                 <div class="action-buttons">
                                     <button type="button" class="btn btn-secondary" onclick="toggleLoanDetails(<?php echo $loan['id']; ?>, this)">
-                                        <i class="fas fa-eye"></i> View Details
+                                        <i style = "color: #ffffff" class="fas fa-eye"></i> View Details
                                     </button>
                                 </div>
 
@@ -1093,7 +1093,7 @@ function getInquiryResponses($connect, $inquiryId) {
                                                 <i class="fas fa-print"></i> Print Gatepass
                                             </a>
                                             <a href="test_drive_success.php?request_id=<?php echo $test_drive['id']; ?>" class="btn btn-secondary">
-                                                <i class="fas fa-eye"></i> View Details
+                                                <i style = "color: #ffffff" class="fas fa-eye"></i> View Details
                                             </a>
                                         <?php else: ?>
                                             <span class="btn btn-secondary" style="opacity: 0.7; cursor: not-allowed;" title="Gatepass will be generated after approval">
@@ -1101,8 +1101,8 @@ function getInquiryResponses($connect, $inquiryId) {
                                             </span>
                                         <?php endif; ?>
                                     <?php elseif ($test_drive['test_drive_status'] === 'Pending'): ?>
-                                        <span class="btn btn-warning" style="opacity: 0.9; cursor: default;">
-                                            <i class="fas fa-clock"></i> Under Review
+                                        <span style ="background: #FF8C00;" class="btn btn-warning" style="opacity: 0.9; cursor: default;">
+                                            <i style = "color: #ffffff" class="fas fa-clock"></i> Under Review
                                         </span>
                                     <?php elseif ($test_drive['test_drive_status'] === 'Rejected'): ?>
                                         <?php
@@ -1110,7 +1110,7 @@ function getInquiryResponses($connect, $inquiryId) {
                                         $isCancelledByCustomer = !empty($test_drive['notes']) && strpos($test_drive['notes'], '[CUSTOMER_CANCELLED]') !== false;
                                         ?>
                                         <span class="btn btn-danger" style="opacity: 0.9; cursor: default;">
-                                            <i class="fas fa-times-circle"></i> <?php echo $isCancelledByCustomer ? 'Request Cancelled' : 'Request Rejected'; ?>
+                                            <i style = "color: #ffffff" class="fas fa-times-circle"></i> <?php echo $isCancelledByCustomer ? 'Request Cancelled' : 'Request Rejected'; ?>
                                         </span>
                                     <?php elseif ($test_drive['test_drive_status'] === 'Completed'): ?>
                                         <span class="btn btn-success" style="opacity: 0.9; cursor: default;">
@@ -1121,7 +1121,7 @@ function getInquiryResponses($connect, $inquiryId) {
                                     <?php if (strtotime($test_drive['scheduled_date'] . ' ' . $test_drive['scheduled_time']) > time() && 
                                               in_array($test_drive['test_drive_status'], ['Pending', 'Approved'])): ?>
                                         <button class="btn btn-danger" onclick="cancelTestDrive(<?php echo $test_drive['id']; ?>)">
-                                            <i class="fas fa-times"></i> Cancel
+                                            <i style = "color: #ffffff" class="fas fa-times"></i> Cancel
                                         </button>
                                     <?php endif; ?>
                                 </div>

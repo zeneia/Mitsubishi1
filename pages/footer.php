@@ -159,9 +159,9 @@ if (!function_exists('getSetting')) {
             echo '<a href="' . htmlspecialchars($facebook) . '" title="Facebook" target="_blank" rel="noopener">📘</a>';
         }
         ?>
-        <a href="#" title="Instagram">📷</a>
+        <!--<a href="#" title="Instagram">📷</a>
         <a href="#" title="Twitter">🐦</a>
-        <a href="#" title="YouTube">📺</a>
+        <a href="#" title="YouTube">📺</a>-->
       </div>
     </div>
 
