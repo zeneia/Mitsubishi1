@@ -200,7 +200,7 @@ try {
 
         .brand-text {
             font-size: 1.4rem;
-            font-weight: 700;
+            font-weight: 800;
             background: linear-gradient(45deg, #ffd700, #ffed4e);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;

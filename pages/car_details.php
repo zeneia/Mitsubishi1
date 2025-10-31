@@ -533,7 +533,13 @@ $color_options = !empty($vehicle['color_options']) ? explode(',', $vehicle['colo
 
             .user-section {
                 width: 100%;
-                justify-content: space-between;
+                justify-content: center;
+            }
+
+            .back-btn{
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+
             }
 
             .main-container {

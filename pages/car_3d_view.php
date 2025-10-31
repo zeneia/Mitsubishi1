@@ -642,9 +642,11 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
             }
 
             .controls-panel {
+                transform: scale(0.85);
+                transform-origin: bottom center;
                 flex-wrap: wrap;
                 gap: 0.75rem;
-                padding: 0.875rem 1rem;
+                padding: 0.5rem 0.75rem;
                 bottom: 1rem;
                 left: 1rem;
                 right: 1rem;
@@ -652,9 +654,12 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
             }
 
             .control-group {
+                padding: 0 0.25rem;
+                gap: 0.4rem;
+
                 flex-wrap: wrap;
                 justify-content: center;
-                padding: 0 0.5rem;
+                padding: 0 0.25rem;
             }
             
             .control-group::after {
@@ -665,7 +670,7 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
                 order: -1;
                 width: 100%;
                 justify-content: center;
-                padding-bottom: 0.75rem;
+                padding-bottom: 0.5rem;
                 margin-bottom: 0.5rem;
                 border-bottom: 1px solid rgba(0, 0, 0, 0.08);
             }
