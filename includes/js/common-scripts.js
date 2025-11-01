@@ -23,6 +23,7 @@ function toggleSidebar(forceOpen) {
   document.body.classList.toggle('sidebar-open', shouldOpen && window.innerWidth <= SIDEBAR_BREAKPOINT);
 
   if (toggleButton) {
+    toggleButton.classList.toggle('menu-toggle--hidden', shouldOpen && window.innerWidth <= SIDEBAR_BREAKPOINT);
     toggleButton.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
   }
 }
@@ -87,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     menuToggle.setAttribute('aria-controls', 'sidebar');
     menuToggle.setAttribute('aria-expanded', document.body.classList.contains('sidebar-open') ? 'true' : 'false');
+    menuToggle.classList.toggle('menu-toggle--hidden', document.body.classList.contains('sidebar-open') && window.innerWidth <= SIDEBAR_BREAKPOINT);
   }
 
   updateResponsiveTables();

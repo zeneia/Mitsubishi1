@@ -74,6 +74,12 @@ body, html {
   transition: var(--transition);
 }
 
+.menu-toggle.menu-toggle--hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .menu-toggle:hover {
   background: #b91c3c;
   transform: scale(1.05);
