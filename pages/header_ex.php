@@ -1,6 +1,9 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 include_once(dirname(__DIR__) . '/includes/database/db_conn.php');
+
 
 
 // Check if user is logged in and is a customer
@@ -125,8 +128,9 @@ try {
 
         .brand-text {
             font-size: 1.5rem;
-            font-weight: 600;
+            font-weight: 700;
             color: #FFCE1B;
+            letter-spacing: -0.02em;
         }
 
 
@@ -151,8 +155,8 @@ try {
         }
 
         .welcome-text {
-            margin-right: 1rem;
             font-size: 1rem;
+            font-weight: 500;
             color: #FFFFFF;
         }
 
@@ -163,13 +167,13 @@ try {
             padding: 0.75rem 1.5rem;
             border-radius: 10px;
             cursor: pointer;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            box-shadow: #000 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .logout-btn:hover {
@@ -202,43 +206,125 @@ try {
 /* Mobile (max-width: 768px) */
 @media (max-width: 768px) {
   .header-container {
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row; /* keep items in one line */
+    padding: 0.75rem 1rem;
+    flex-wrap: wrap; /* allow wrapping if needed */
   }
 
   .logo-section {
-    width: 100%;
-    justify-content: center;
-    margin-bottom: 0.75rem;
-  }
-
-  .user-section {
-    width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
+    display: flex;
+    align-items: center;
     gap: 0.5rem;
   }
 
+  .logo {
+    height: 40px;
+    width: auto;
+  }
+
   .brand-text {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
+  }
+
+  .user-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: flex-end;
   }
 
   .welcome-text {
     font-size: 0.9rem;
+    text-align: right;
   }
 
   .logout-btn {
     font-size: 0.9rem;
     padding: 0.4rem 0.9rem;
   }
-
-  .logo {
-    height: 40px;
-    margin-right: 0.5rem;
-  }
 }
+
+
+     @media (max-width: 575px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .header-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .img .logo{
+                width: 100%;
+                height: 50%;
+            }
+            .brand-text{
+                font-size: 1.2rem;
+            }
+
+            .user-section {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .main-container {
+                padding: 1rem;
+            }
+            
+            
+            .back-btn{
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+
+            }
+
+            .card-header {
+                padding: 1.5rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .vehicle-title {
+                font-size: 1.5rem;
+            }
+
+            .card-body {
+                grid-template-columns: 1fr;
+            }
+
+            .image-section,
+            .info-section,
+            .features-section,
+            .actions-section {
+                padding: 1.5rem;
+            }
+
+            .action-grid {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(6, 1fr);
+                gap: 0.75rem;
+            }
+
+            .action-btn {
+                padding: 1rem;
+                font-size: 0.875rem;
+                min-height: 70px;
+            }
+
+            .action-btn i {
+                font-size: 1.25rem;
+            }
+
+            .specs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
 
 /* Small Phones (max-width: 480px) */
 @media (max-width: 480px) {

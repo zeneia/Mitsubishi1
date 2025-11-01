@@ -1,6 +1,7 @@
 <?php
 session_start();
 include_once(dirname(__DIR__) . '/includes/database/db_conn.php');
+include_once(dirname(__DIR__) . '/pages/header_ex.php');
 
 // Check if user is logged in and is a customer
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'Customer') {
@@ -319,15 +320,7 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
 </head>
 
 <body>
-	<header class="header">
-		<div class="logo-section">
-			<img src="../includes/images/mitsubishi_logo.png" alt="Mitsubishi Logo" class="logo">
-			<div class="brand-text">MITSUBISHI MOTORS</div>
-		</div>
-		<div class="user-section">
-			<span style="color: #E60012;">Welcome, <?php echo htmlspecialchars($displayName); ?>!</span>
-		</div>
-	</header>
+
 
 	<div class="container">
 		<div class="page-header">

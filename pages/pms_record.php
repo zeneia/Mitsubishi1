@@ -1,6 +1,7 @@
 <?php
 session_start();
 include_once(dirname(__DIR__) . '/includes/init.php');
+include_once(dirname(__DIR__) . '/pages/header_ex.php');
 
 // Check if user is logged in and is a customer
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'Customer') {
@@ -140,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .logo-section { display: flex; align-items: center; gap: 20px; }
         .logo { width: 60px; height: auto; filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3)); }
         .brand-text { font-size: 1.4rem; font-weight: 700; background: linear-gradient(45deg, #ffd700, #ffed4e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .user-section { display: flex; align-items: center; gap: 20px; }
+        .user-section { display: flex; align-items: center; gap: 5px; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(45deg, #ffd700, #ffed4e); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #b80000; font-size: 1.2rem; }
         .welcome-text { font-size: 1rem; font-weight: 500; }
         .logout-btn { background: linear-gradient(45deg, #d60000, #b30000); color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(214, 0, 0, 0.3); }
@@ -396,19 +397,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="logo-section">
-            <img src="../includes/images/mitsubishi_logo.png" alt="Mitsubishi Logo" class="logo">
-            <div class="brand-text">MITSUBISHI MOTORS</div>
-        </div>
-        <div class="user-section">
-            <div class="user-avatar"><?php echo strtoupper(substr($displayName, 0, 1)); ?></div>
-            <span class="welcome-text">Welcome, <?php echo htmlspecialchars($displayName); ?>!</span>
-            <button class="logout-btn" onclick="window.location.href='logout.php'">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
-        </div>
-    </header>
+
 
     <div class="container">
         <a href="<?php echo $selected_vehicle_id ? 'car_details.php?id=' . $selected_vehicle_id : 'car_menu.php'; ?>" class="back-btn">

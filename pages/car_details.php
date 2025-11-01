@@ -103,7 +103,7 @@ $color_options = !empty($vehicle['color_options']) ? explode(',', $vehicle['colo
 
         /* Modern Header Design */
         .header {
-            background: var(--bg-primary);
+            background: #000000;
             padding: 1.5rem 2rem;
             box-shadow: var(--shadow-sm);
             position: sticky;
@@ -141,7 +141,7 @@ $color_options = !empty($vehicle['color_options']) ? explode(',', $vehicle['colo
         .brand-text {
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--primary-color);
+            color: #FFCE1B;
             letter-spacing: -0.02em;
         }
 
@@ -178,14 +178,14 @@ $color_options = !empty($vehicle['color_options']) ? explode(',', $vehicle['colo
 
         .welcome-label {
             font-size: 0.875rem;
-            color: var(--text-secondary);
+            color: #ffffff;
             font-weight: 500;
         }
 
         .user-name {
             font-size: 1rem;
             font-weight: 600;
-            color: var(--text-primary);
+            color: #ffffff;
         }
 
         .welcome-text {

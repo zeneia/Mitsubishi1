@@ -1,6 +1,7 @@
 <?php
 session_start();
 include_once(dirname(__DIR__) . '/includes/database/db_conn.php');
+include_once(dirname(__DIR__) . '/pages/header_ex.php');
 
 // Check if user is logged in and is a customer
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'Customer') {
@@ -89,113 +90,6 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
         }
 
         /* Modern Header Design */
-        .header {
-            background: var(--bg-primary);
-            padding: 1.5rem 2rem;
-            box-shadow: var(--shadow-sm);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid var(--border-color);
-            width: 100%;
-            left: 0;
-            right: 0;
-        }
-
-        .header-container {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .logo {
-            width: 48px;
-            height: auto;
-            transition: var(--transition);
-        }
-
-        .logo:hover {
-            transform: scale(1.05);
-        }
-
-        .brand-text {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            letter-spacing: -0.02em;
-        }
-
-        .user-section {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .user-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            color: white;
-            font-size: 1.1rem;
-            box-shadow: var(--shadow-md);
-            transition: var(--transition);
-        }
-
-        .user-avatar:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .user-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .welcome-label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .user-name {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .logout-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            font-size: 0.875rem;
-            font-weight: 600;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .logout-btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
 
         /* Main Container */
         .main-container {
@@ -604,10 +498,7 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .header {
-                padding: 1rem;
-                width: 100%;
-            }
+
 
             .header-container {
                 flex-direction: column;
@@ -617,7 +508,7 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
 
             .user-section {
                 width: 100%;
-                justify-content: space-between;
+                justify-content: center;
             }
 
             .main-container {
@@ -768,25 +659,7 @@ $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username
 </head>
 
 <body>
-    <header class="header">
-        <div class="header-container">
-            <div class="logo-section">
-                <img src="../includes/images/mitsubishi_logo.png" alt="Mitsubishi Logo" class="logo">
-                <div class="brand-text">MITSUBISHI MOTORS</div>
-            </div>
-            <div class="user-section">
-                <div class="user-avatar"><?php echo strtoupper(substr($displayName, 0, 1)); ?></div>
-                <div class="user-info">
-                    <span class="welcome-label">Welcome</span>
-                    <span class="user-name"><?php echo htmlspecialchars($displayName); ?></span>
-                </div>
-                <button class="logout-btn" onclick="window.location.href='logout.php'">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </button>
-            </div>
-        </div>
-    </header>
+
 
     <main class="main-container">
         <nav class="nav-section">
