@@ -354,7 +354,7 @@ foreach ($new_inquiries as $inquiry) {
     </div>
 
     <div class="table-container">
-      <table class="data-table">
+      <table class="data-table responsive-table">
         <thead>
           <tr>
             <th>Request ID</th>
@@ -403,7 +403,7 @@ foreach ($new_inquiries as $inquiry) {
 
   <div class="tab-content" id="testDrive-approved">
     <div class="table-container">
-      <table class="data-table">
+      <table class="data-table responsive-table">
         <thead>
           <tr>
             <th>Request ID</th>
@@ -451,7 +451,7 @@ foreach ($new_inquiries as $inquiry) {
 
   <div class="tab-content" id="testDrive-completed">
     <div class="table-container">
-      <table class="data-table">
+      <table class="data-table responsive-table">
         <thead>
           <tr>
             <th>Request ID</th>
@@ -498,7 +498,7 @@ foreach ($new_inquiries as $inquiry) {
 
   <div class="tab-content" id="testDrive-noshow">
     <div class="table-container">
-      <table class="data-table">
+      <table class="data-table responsive-table">
         <thead>
           <tr>
             <th>Request ID</th>
@@ -566,7 +566,7 @@ foreach ($new_inquiries as $inquiry) {
 
   <div class="tab-content" id="testDrive-rejected">
     <div class="table-container">
-      <table class="data-table">
+      <table class="data-table responsive-table">
         <thead>
           <tr>
             <th>Request ID</th>
@@ -640,7 +640,8 @@ foreach ($new_inquiries as $inquiry) {
       </div>
     </div>
 
-    <table class="data-table">
+    <div class="table-container">
+      <table class="data-table responsive-table">
       <thead>
         <tr>
           <th>Payment ID</th>
@@ -658,7 +659,8 @@ foreach ($new_inquiries as $inquiry) {
           <td colspan="8" class="text-center">Loading pending payments...</td>
         </tr>
       </tbody>
-    </table>
+      </table>
+    </div>
   </div>
 
   <div class="tab-content" id="payment-verified">
@@ -673,7 +675,8 @@ foreach ($new_inquiries as $inquiry) {
       </div>
     </div>
 
-    <table class="data-table">
+    <div class="table-container">
+      <table class="data-table responsive-table">
       <thead>
         <tr>
           <th>Payment ID</th>
@@ -690,7 +693,8 @@ foreach ($new_inquiries as $inquiry) {
           <td colspan="7" class="text-center">Loading verified payments...</td>
         </tr>
       </tbody>
-    </table>
+      </table>
+    </div>
   </div>
 
   <div class="tab-content" id="payment-customers">
@@ -709,7 +713,8 @@ foreach ($new_inquiries as $inquiry) {
       </div>
     </div>
 
-    <table class="data-table">
+    <div class="table-container">
+      <table class="data-table responsive-table">
       <thead>
         <tr>
           <th>Order #</th>
@@ -726,7 +731,8 @@ foreach ($new_inquiries as $inquiry) {
           <td colspan="7" class="text-center">Loading loan customers...</td>
         </tr>
       </tbody>
-    </table>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -764,7 +770,7 @@ foreach ($new_inquiries as $inquiry) {
     </div>
 
     <div class="table-container">
-      <table class="data-table">
+      <table class="data-table responsive-table">
         <thead>
           <tr>
             <th>Order #</th>
@@ -804,7 +810,7 @@ foreach ($new_inquiries as $inquiry) {
     </div>
 
     <div class="table-container">
-      <table class="data-table">
+      <table class="data-table responsive-table">
         <thead>
           <tr>
             <th>Order #</th>
@@ -844,7 +850,7 @@ foreach ($new_inquiries as $inquiry) {
     </div>
 
     <div class="table-container">
-      <table class="data-table">
+      <table class="data-table responsive-table">
         <thead>
           <tr>
             <th>Payment Ref</th>
@@ -903,7 +909,7 @@ foreach ($new_inquiries as $inquiry) {
     </div>
 
     <div class="table-container">
-      <table class="data-table">
+      <table class="data-table responsive-table">
         <thead>
           <tr>
             <th>ID</th>
@@ -962,7 +968,7 @@ foreach ($new_inquiries as $inquiry) {
 
   <div class="tab-content" id="inquiry-recent">
     <div class="table-container">
-      <table class="data-table">
+      <table class="data-table responsive-table">
         <thead>
           <tr>
             <th>ID</th>
@@ -1016,7 +1022,7 @@ foreach ($new_inquiries as $inquiry) {
 
   <div class="tab-content" id="inquiry-all">
     <div class="table-container">
-      <table class="data-table">
+      <table class="data-table responsive-table">
         <thead>
           <tr>
             <th>ID</th>

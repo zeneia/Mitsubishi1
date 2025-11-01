@@ -450,7 +450,8 @@ $accountStats = getAccountStats($connect);
       </div>
     </div>
 
-    <table class="data-table">
+    <div class="table-container">
+      <table class="data-table responsive-table">
       <thead>
         <tr>
           <th>Account ID</th>
@@ -503,7 +504,8 @@ $accountStats = getAccountStats($connect);
           </tr>
         <?php endif; ?>
       </tbody>
-    </table>
+      </table>
+    </div>
   </div>
 
   <!-- Approved Accounts Tab -->
@@ -527,7 +529,8 @@ $accountStats = getAccountStats($connect);
       </div>
     </div>
 
-    <table class="data-table">
+    <div class="table-container">
+      <table class="data-table responsive-table">
       <thead>
         <tr>
           <th>Customer ID</th>
@@ -572,7 +575,8 @@ $accountStats = getAccountStats($connect);
           </tr>
         <?php endif; ?>
       </tbody>
-    </table>
+      </table>
+    </div>
   </div>
 
   <!-- Rejected Accounts Tab -->
@@ -594,7 +598,8 @@ $accountStats = getAccountStats($connect);
       </div>
     </div>
 
-    <table class="data-table">
+    <div class="table-container">
+      <table class="data-table responsive-table">
       <thead>
         <tr>
           <th>Account ID</th>
@@ -647,7 +652,8 @@ $accountStats = getAccountStats($connect);
           </tr>
         <?php endif; ?>
       </tbody>
-    </table>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -679,7 +685,8 @@ $accountStats = getAccountStats($connect);
       </div>
     </div>
 
-    <table class="data-table">
+    <div class="table-container">
+      <table class="data-table responsive-table">
       <thead>
         <tr>
           <th>Payment ID</th>
@@ -698,7 +705,8 @@ $accountStats = getAccountStats($connect);
           <td colspan="9" class="text-center">Loading pending payments...</td>
         </tr>
       </tbody>
-    </table>
+      </table>
+    </div>
   </div>
 
   <div class="tab-content" id="transaction-verified">
@@ -713,7 +721,8 @@ $accountStats = getAccountStats($connect);
       </div>
     </div>
 
-    <table class="data-table">
+    <div class="table-container">
+      <table class="data-table responsive-table">
       <thead>
         <tr>
           <th>Payment ID</th>
@@ -731,7 +740,8 @@ $accountStats = getAccountStats($connect);
           <td colspan="8" class="text-center">Loading verified payments...</td>
         </tr>
       </tbody>
-    </table>
+      </table>
+    </div>
   </div>
 
   <div class="tab-content" id="transaction-customers">
@@ -750,7 +760,8 @@ $accountStats = getAccountStats($connect);
       </div>
     </div>
 
-    <table class="data-table">
+    <div class="table-container">
+      <table class="data-table responsive-table">
       <thead>
         <tr>
           <th>Order #</th>
@@ -768,7 +779,8 @@ $accountStats = getAccountStats($connect);
           <td colspan="8" class="text-center">Loading loan customers...</td>
         </tr>
       </tbody>
-    </table>
+      </table>
+    </div>
   </div>
 </div>
 

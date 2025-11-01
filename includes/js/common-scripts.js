@@ -1,10 +1,113 @@
-function toggleSidebar() {
+const SIDEBAR_BREAKPOINT = 991;
+const RESPONSIVE_TABLE_SELECTOR = '.responsive-table';
+
+function toggleSidebar(forceOpen) {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.querySelector('.sidebar-overlay');
+  const toggleButton = document.querySelector('.menu-toggle');
 
-  sidebar.classList.toggle('active');
-  overlay.classList.toggle('active');
+  if (!sidebar || !overlay) {
+    return;
+  }
+
+  let shouldOpen;
+
+  if (typeof forceOpen === 'boolean') {
+    shouldOpen = forceOpen;
+  } else {
+    shouldOpen = !sidebar.classList.contains('active');
+  }
+
+  sidebar.classList.toggle('active', shouldOpen);
+  overlay.classList.toggle('active', shouldOpen);
+  document.body.classList.toggle('sidebar-open', shouldOpen && window.innerWidth <= SIDEBAR_BREAKPOINT);
+
+  if (toggleButton) {
+    toggleButton.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+  }
 }
+
+function debounce(fn, delay = 150) {
+  let timeoutId;
+  return (...args) => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    timeoutId = setTimeout(() => {
+      fn.apply(null, args);
+    }, delay);
+  };
+}
+
+function updateResponsiveTables() {
+  const tables = document.querySelectorAll(RESPONSIVE_TABLE_SELECTOR);
+
+  tables.forEach(table => {
+    const headerCells = Array.from(table.querySelectorAll('thead th'));
+
+    if (!headerCells.length) {
+      return;
+    }
+
+    const labels = headerCells.map(cell => cell.textContent.trim());
+
+    table.querySelectorAll('tbody tr').forEach(row => {
+      Array.from(row.children).forEach((cell, index) => {
+        if (cell.tagName.toLowerCase() !== 'td') {
+          return;
+        }
+
+        const label = labels[index] || cell.getAttribute('data-label');
+
+        if (label) {
+          cell.setAttribute('data-label', label);
+        }
+      });
+    });
+  });
+}
+
+const handleViewportChange = debounce(() => {
+  if (window.innerWidth > SIDEBAR_BREAKPOINT && document.body.classList.contains('sidebar-open')) {
+    toggleSidebar(false);
+  }
+
+  updateResponsiveTables();
+}, 180);
+
+window.addEventListener('resize', handleViewportChange);
+window.addEventListener('orientationchange', handleViewportChange);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const menuToggle = document.querySelector('.menu-toggle');
+
+  if (menuToggle) {
+    if (!menuToggle.hasAttribute('aria-label')) {
+      menuToggle.setAttribute('aria-label', 'Toggle navigation menu');
+    }
+    menuToggle.setAttribute('aria-controls', 'sidebar');
+    menuToggle.setAttribute('aria-expanded', document.body.classList.contains('sidebar-open') ? 'true' : 'false');
+  }
+
+  updateResponsiveTables();
+
+  const menuItems = document.querySelectorAll('.menu-item');
+  menuItems.forEach(item => {
+    item.addEventListener('click', () => {
+      if (window.innerWidth <= SIDEBAR_BREAKPOINT && document.body.classList.contains('sidebar-open')) {
+        toggleSidebar(false);
+      }
+    });
+  });
+
+  handleViewportChange();
+});
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && window.innerWidth <= SIDEBAR_BREAKPOINT && document.body.classList.contains('sidebar-open')) {
+    toggleSidebar(false);
+  }
+});
 
 // Notification System Functions
 function showNotification(message, type = 'info') {
@@ -250,11 +353,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-// Close sidebar when clicking on menu items on mobile
-document.querySelectorAll('.menu-item').forEach(item => {
-  item.addEventListener('click', () => {
-    if (window.innerWidth <= 575) {
-      toggleSidebar();
-    }
-  });
-});

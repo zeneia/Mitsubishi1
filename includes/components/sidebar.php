@@ -77,7 +77,7 @@ $user_role = isset($_SESSION['user_role']) ? $_SESSION['user_role'] : 'SalesAgen
   }
 
   /* Handle different screen sizes */
-  @media (min-width: 768px) {
+  @media (min-width: 992px) {
     body {
       padding-left: 280px; /* Offset body content for fixed sidebar */
     }
@@ -88,7 +88,7 @@ $user_role = isset($_SESSION['user_role']) ? $_SESSION['user_role'] : 'SalesAgen
   }
 
   /* Handle mobile view */
-  @media (max-width: 767px) {
+  @media (max-width: 991px) {
     .sidebar {
       transform: translateX(-100%);
       transition: transform 0.3s ease;
@@ -98,15 +98,17 @@ $user_role = isset($_SESSION['user_role']) ? $_SESSION['user_role'] : 'SalesAgen
       transform: translateX(0);
     }
     
-    body {
-      padding-left: 0;
-    }
-
     /* Hide scrollbar on mobile for cleaner look */
     .sidebar::-webkit-scrollbar,
     .menu::-webkit-scrollbar {
       width: 0px;
       background: transparent;
+    }
+  }
+
+  @media (max-width: 991px) {
+    body {
+      padding-left: 0;
     }
   }
 </style>
