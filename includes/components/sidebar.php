@@ -84,14 +84,20 @@ $user_role = isset($_SESSION['user_role']) ? $_SESSION['user_role'] : 'SalesAgen
     
     .sidebar {
       box-shadow: 2px 0 5px rgba(0,0,0,0.1); /* Add shadow for visual separation */
+      transform: translateX(0) !important; /* Always visible on desktop */
     }
   }
 
   /* Handle mobile view */
   @media (max-width: 991px) {
+    body {
+      padding-left: 0 !important; /* No padding on mobile */
+    }
+    
     .sidebar {
       transform: translateX(-100%);
       transition: transform 0.3s ease;
+      z-index: 1000; /* Above topbar when open */
     }
     
     .sidebar.active {
@@ -103,12 +109,6 @@ $user_role = isset($_SESSION['user_role']) ? $_SESSION['user_role'] : 'SalesAgen
     .menu::-webkit-scrollbar {
       width: 0px;
       background: transparent;
-    }
-  }
-
-  @media (max-width: 991px) {
-    body {
-      padding-left: 0;
     }
   }
 </style>

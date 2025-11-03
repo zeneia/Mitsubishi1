@@ -663,7 +663,7 @@ body, html {
   }
 
   .menu-toggle {
-    display: flex;
+    display: flex !important; /* Force display on mobile/tablet */
     align-items: center;
     justify-content: center;
     gap: 6px;
@@ -672,6 +672,8 @@ body, html {
     z-index: 1; /* Lower since it's inside topbar */
     padding: 10px 12px;
     font-size: 16px;
+    visibility: visible !important; /* Ensure it's visible */
+    opacity: 1 !important; /* Ensure it's not transparent */
   }
   
   /* Adjust topbar padding to accommodate hamburger button */
@@ -863,7 +865,13 @@ body, html {
   }
 }
 
-/* Large Devices (992px to 1199px) */
+/* Large Devices (992px to 1199px) - Hide hamburger on desktop */
+@media (min-width: 992px) {
+  .menu-toggle {
+    display: none !important; /* Always hide on desktop */
+  }
+}
+
 @media (min-width: 992px) and (max-width: 1199px) {
   .topbar {
     padding: 0 30px;
