@@ -733,21 +733,140 @@ if ($user_role === 'Sales Agent') {
 
     /* Responsive Design */
     @media (max-width: 575px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      
+      .vehicle-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px;
+      }
+      
       .info-cards {
         grid-template-columns: 1fr;
       }
+      
       .filter-bar {
         flex-direction: column;
         align-items: stretch;
       }
+      
       .action-area {
         flex-direction: column;
+      }
+      
+      .search-input {
+        min-width: auto;
+        width: 100%;
+      }
+      
+      .form-row {
+        grid-template-columns: 1fr !important;
+      }
+      
+      .modal {
+        width: 95%;
+        max-width: 100%;
+      }
+      
+      .page-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start !important;
+      }
+      
+      .add-btn {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .data-table {
+        font-size: 12px;
+      }
+      
+      .data-table th,
+      .data-table td {
+        padding: 8px 5px;
+      }
+      
+      .vehicle-card {
+        padding: 15px;
+      }
+      
+      .vehicle-header {
+        height: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      
+      .stock-level {
+        width: 100%;
+      }
+      
+      .stock-bar {
+        flex: 1;
       }
     }
 
     @media (min-width: 576px) and (max-width: 767px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .vehicle-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px;
+      }
+      
       .info-cards {
         grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      
+      .modal {
+        width: 90%;
+        max-width: 550px;
+      }
+    }
+    
+    @media (min-width: 768px) and (max-width: 991px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .vehicle-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+      
+      .info-cards {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .form-row {
+        grid-template-columns: 1fr 1fr;
+      }
+      
+      .modal {
+        width: 85%;
+        max-width: 700px;
+      }
+    }
+    
+    @media (min-width: 992px) and (max-width: 1399px) {
+      .vehicle-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (min-width: 1400px) {
+      .vehicle-grid {
+        grid-template-columns: repeat(3, 1fr);
       }
     }
 
