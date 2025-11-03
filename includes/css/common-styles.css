@@ -220,9 +220,8 @@ body, html {
   background: var(--primary-light);
   height: auto;
   min-height: 100vh;
+  min-width: 0; /* prevent flex child overflow */
   overflow-x: hidden;
-  width: 100%;
-  max-width: 100%;
 }
 
 .topbar {
@@ -330,7 +329,7 @@ body, html {
   overflow-x: hidden;
   background: var(--primary-light);
   padding-bottom: 20px;
-  width: 100%;
+  min-width: 0; /* allow content to shrink within flex */
   box-sizing: border-box;
 }
 
