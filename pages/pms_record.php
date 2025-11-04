@@ -140,15 +140,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .header { background: #000000; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 215, 0, 0.2); position: relative; z-index: 10; }
         .logo-section { display: flex; align-items: center; gap: 20px; }
         .logo { width: 60px; height: auto; filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3)); }
-        .brand-text { font-size: 1.4rem; font-weight: 700; background: linear-gradient(45deg, #ffd700, #ffed4e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .brand-text { font-size: 1.4rem; font-weight: 700; background: #ffffff; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .user-section { display: flex; align-items: center; gap: 5px; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(45deg, #ffd700, #ffed4e); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #b80000; font-size: 1.2rem; }
         .welcome-text { font-size: 1rem; font-weight: 500; }
         .logout-btn { background: linear-gradient(45deg, #d60000, #b30000); color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(214, 0, 0, 0.3); }
         .logout-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(214, 0, 0, 0.5); }
         .container { max-width: 800px; margin: 0 auto; padding: 30px 20px; position: relative; z-index: 5; }
-        .back-btn { display: inline-block; margin-bottom: 20px; background: #E60012; color: #ffffff; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; font-size: 0.9rem; }
-        .back-btn:hover { background: #ffd700; color: #1a1a1a; }
+        .back-btn { display: inline-block; margin-bottom: 20px; background: #808080; color: #ffffff; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; font-size: 0.9rem; }
+        .back-btn:hover { background: #E60012; color: #ffffff; }
 
         .pms-card {
             background: rgba(255, 255, 255, 0.05);
@@ -235,7 +235,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .form-input:focus, .form-select:focus, .form-textarea:focus {
             outline: none;
-            border-color: #ffd700;
+            border-color: #808080;
             box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
         }
 

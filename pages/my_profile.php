@@ -165,6 +165,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="../includes/css/profile-styles.css?v=<?php echo file_exists(dirname(__DIR__) . '/includes/css/profile-styles.css') ? filemtime(dirname(__DIR__) . '/includes/css/profile-styles.css') : time(); ?>" rel="stylesheet">
 </head>
+<style>
+.id-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.id-image {
+  max-width: 600px; /* limit width */
+  max-height: 350px; /* limit height */
+  width: auto;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  object-fit: contain;
+}
+</style>
 <body>
     <header class="header">
         <div class="logo-section">
@@ -391,11 +409,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
             <!-- Terms and Conditions Link -->
-            <div class="terms-link">
-                <h3>Terms and Conditions</h3>
-                <p>Review our platform policies and user agreement</p>
-                <button type="button" class="view-terms-btn" onclick="openTermsModal()">
-                    <i class="fas fa-file-contract"></i> View Terms & Conditions
+            <div style = 'background: #808080;' class="terms-link">
+                <h3 style = "color: #ffffff;">Terms and Conditions</h3>
+                <p style = "color: #ffffff;">Review our platform policies and user agreement</p>
+                <button style = "color: #ffffff; background: #E60012;" type="button" class="view-terms-btn" onclick="openTermsModal()">
+                    <i class="fas fa-file-contract" style = "color: #ffffff;" ></i> View Terms & Conditions
                 </button>
                 <div style="margin-top: 15px;">
                     <label style="display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 0.95rem;">

@@ -1,6 +1,8 @@
 <?php
 session_start();
 include_once(dirname(__DIR__) . '/includes/database/db_conn.php');
+include_once(dirname(__DIR__) . '/pages/header_ex.php');
+
 
 // Check if user is logged in and is a customer
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'Customer') {
@@ -261,7 +263,7 @@ $instructor_agent = 'Reo Remos';
 
         /* Define back/print specific variants */
         .print-btn { background: linear-gradient(45deg, #4caf50, #2e7d32); color: #fff; }
-        .back-btn  { background: transparent; color: #ffd700; border: 2px solid #ffd700; }
+        .back-btn  { background: transparent; color: #000000; border: 2px solid #808080; }
 
         @media (max-width: 768px) {
             .gate-pass-info {
