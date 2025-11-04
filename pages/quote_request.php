@@ -241,7 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .page-title {
             font-size: 2.5rem;
             font-weight: 800;
-            color: #ffd700;
+            color: #FFFFFF;
             margin-bottom: 10px;
         }
 
@@ -338,8 +338,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .submit-btn {
-            background: linear-gradient(45deg, #ffd700, #ffed4e);
-            color: #1a1a1a;
+            background: #E60012;
+            color: #FFFFFF;
             border: none;
             padding: 15px 40px;
             border-radius: 10px;

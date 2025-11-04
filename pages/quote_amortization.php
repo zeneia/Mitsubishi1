@@ -132,7 +132,7 @@ $due_date = date('d/m/Y', strtotime($quote['RequestedAt'] . ' + 30 days'));
         body { background: #ffffff; min-height: 100vh; color: white; }
         .header { background: #000000; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 215, 0, 0.2); }
         .logo { width: 60px; height: auto; filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3)); }
-        .brand-text { font-size: 1.4rem; font-weight: 700; background: linear-gradient(45deg, #ffd700, #ffed4e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .brand-text { font-size: 1.4rem; font-weight: 700; background: #FFFFFF; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .container { max-width: 1000px; margin: 0 auto; padding: 30px 20px; }
         .back-btn { display: inline-block; margin-bottom: 20px; background: #E60012; color: #ffffff; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; font-size: 0.9rem; }
         .back-btn:hover { background: #ffd700; color: #1a1a1a; }
@@ -160,9 +160,9 @@ $due_date = date('d/m/Y', strtotime($quote['RequestedAt'] . ' + 30 days'));
         tbody tr:hover { background: #f0f0f0; }
 
         .actions { margin-top: 16px; display: grid; grid-template-columns: repeat(2, minmax(180px, 240px)); gap: 10px; }
-        .action-btn { background: linear-gradient(45deg, #ffd700, #ffed4e); color: #1a1a1a; border: none; padding: 12px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; text-decoration: none; text-align: center; }
-        .action-btn.secondary { background: transparent; color: #ffd700; border: 2px solid #ffd700; }
-        .action-btn.secondary:hover { background: #ffd700; color: #1a1a1a; }
+        .action-btn { background: #E60012; color: #FFFFFF; border: none; padding: 12px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; text-decoration: none; text-align: center; }
+        .action-btn.secondary { background: transparent; color: #000000; border: 2px solid #808080; }
+        .action-btn.secondary:hover { background: #E60012; color: #FFFFFF; }
 
         @media (max-width: 767px) {
             .info-grid { grid-template-columns: 1fr; }

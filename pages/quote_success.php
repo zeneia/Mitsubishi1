@@ -65,7 +65,7 @@ $quote_number = 'MQAV-' . date('Ymd', strtotime($quote['RequestedAt'])) . '-' . 
         .container { max-width: 800px; margin: 0 auto; padding: 30px 20px; position: relative; z-index: 5; }
 
         .success-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: hsla(0, 0%, 100%, 0.96);
             border-radius: 16px;
             overflow: hidden;
             backdrop-filter: blur(20px);
@@ -75,7 +75,7 @@ $quote_number = 'MQAV-' . date('Ymd', strtotime($quote['RequestedAt'])) . '-' . 
         }
 
         .success-header {
-            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1));
+            background: linear-gradient(135deg, rgba(76, 175, 79, 1), rgba(76, 175, 79, 1));
             padding: 40px 30px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -110,8 +110,8 @@ $quote_number = 'MQAV-' . date('Ymd', strtotime($quote['RequestedAt'])) . '-' . 
         }
 
         .quote-number {
-            background: linear-gradient(45deg, #ffd700, #ffed4e);
-            color: #1a1a1a;
+            background: #E60012;
+            color: #FFFFFF;
             padding: 15px 25px;
             border-radius: 10px;
             font-weight: 700;
@@ -128,10 +128,10 @@ $quote_number = 'MQAV-' . date('Ymd', strtotime($quote['RequestedAt'])) . '-' . 
         }
 
         .info-item {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(156, 156, 156, 0.36);
             padding: 20px;
             border-radius: 10px;
-            border-left: 4px solid #ffd700;
+            border-left: 4px solid #818181ff;
         }
 
         .info-label {
@@ -194,7 +194,7 @@ $quote_number = 'MQAV-' . date('Ymd', strtotime($quote['RequestedAt'])) . '-' . 
         }
 
         .payment-value {
-            color: white;
+            color: #000000d3;
             font-size: 1.1rem;
             font-weight: 600;
         }
@@ -205,15 +205,15 @@ $quote_number = 'MQAV-' . date('Ymd', strtotime($quote['RequestedAt'])) . '-' . 
         }
 
         .next-steps {
-            background: rgba(255, 215, 0, 0.1);
+            background: rgba(123, 255, 0, 0.1);
             padding: 25px;
             border-radius: 10px;
             margin-bottom: 30px;
-            border-left: 4px solid #ffd700;
+            border-left: 4px solid #31850bff;
         }
 
         .next-steps h3 {
-            color: #ffd700;
+            color: #E60012;
             margin-bottom: 15px;
             font-size: 1.3rem;
         }
@@ -225,7 +225,7 @@ $quote_number = 'MQAV-' . date('Ymd', strtotime($quote['RequestedAt'])) . '-' . 
 
         .next-steps li {
             padding: 8px 0;
-            color: rgba(255, 255, 255, 0.9);
+            color: #000000;
             position: relative;
             padding-left: 25px;
         }
@@ -245,8 +245,8 @@ $quote_number = 'MQAV-' . date('Ymd', strtotime($quote['RequestedAt'])) . '-' . 
         }
 
         .action-btn {
-            background: linear-gradient(45deg, #ffd700, #ffed4e);
-            color: #1a1a1a;
+            background: #E60012;
+            color: #FFFFFF;
             border: none;
             padding: 15px 25px;
             border-radius: 10px;
@@ -268,13 +268,13 @@ $quote_number = 'MQAV-' . date('Ymd', strtotime($quote['RequestedAt'])) . '-' . 
 
         .action-btn.secondary {
             background: transparent;
-            color: #ffd700;
-            border: 2px solid #ffd700;
+            color: #000000;
+            border: 2px solid #808080;
         }
 
         .action-btn.secondary:hover {
-            background: #ffd700;
-            color: #1a1a1a;
+            background: #E60012;
+            color: #FFFFFF;
         }
 
         @media (max-width: 575px) {

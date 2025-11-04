@@ -84,9 +84,9 @@ $due_date = date('d/m/Y', strtotime($quote['RequestedAt'] . ' + 30 days'));
         .header { background: rgba(0, 0, 0, 0.4); padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 215, 0, 0.2); position: relative; z-index: 10; }
         .logo-section { display: flex; align-items: center; gap: 20px; }
         .logo { width: 60px; height: auto; filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3)); }
-        .brand-text { font-size: 1.4rem; font-weight: 700; background: linear-gradient(45deg, #ffd700, #ffed4e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .brand-text { font-size: 1.4rem; font-weight: 700; background: #FFFFFF; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .user-section { display: flex; align-items: center; gap: 20px; }
-        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(45deg, #ffd700, #ffed4e); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #b80000; font-size: 1.2rem; }
+        <!--.user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(45deg, #ffd700, #ffed4e); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #b80000; font-size: 1.2rem; }-->
         .welcome-text { font-size: 1rem; font-weight: 500; }
         .logout-btn { background: linear-gradient(45deg, #d60000, #b30000); color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(214, 0, 0, 0.3); }
         .logout-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(214, 0, 0, 0.5); }
@@ -317,8 +317,8 @@ $due_date = date('d/m/Y', strtotime($quote['RequestedAt'] . ' + 30 days'));
         }
 
         .action-btn {
-            background: linear-gradient(45deg, #ffd700, #ffed4e);
-            color: #1a1a1a;
+            background: #E60012;
+            color: #FFFFFF;
             border: none;
             padding: 12px 20px;
             border-radius: 8px;
@@ -340,13 +340,13 @@ $due_date = date('d/m/Y', strtotime($quote['RequestedAt'] . ' + 30 days'));
 
         .action-btn.secondary {
             background: transparent;
-            color: #ffd700;
-            border: 2px solid #ffd700;
+            color: #FFFFFF;
+            border: 2px solid #808080;
         }
 
         .action-btn.secondary:hover {
-            background: #ffd700;
-            color: #1a1a1a;
+            background: #E60012;
+            color: #FFFFFF;
         }
 
         @media print {
@@ -470,7 +470,7 @@ $due_date = date('d/m/Y', strtotime($quote['RequestedAt'] . ' + 30 days'));
             <div class="brand-text">MITSUBISHI MOTORS</div>
         </div>
         <div class="user-section">
-            <div class="user-avatar"><?php echo strtoupper(substr($displayName, 0, 1)); ?></div>
+            <!--<div class="user-avatar"><?php echo strtoupper(substr($displayName, 0, 1)); ?></div>-->
             <span class="welcome-text">Welcome, <?php echo htmlspecialchars($displayName); ?>!</span>
             <button class="logout-btn" onclick="window.location.href='logout.php'"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>

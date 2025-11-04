@@ -244,7 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 <button class="btn btn-small btn-view" onclick="viewAccountInfo('<?php echo $account['Role']; ?>', <?php echo $account['Id']; ?>)" title="View Details">
                   <i class="fas fa-eye"></i>
                 </button>
-                <button class="btn btn-small btn-outline" onclick="editAccount(<?php echo $account['Id']; ?>)">Edit</button>
+                <!--<button class="btn btn-small btn-outline" onclick="editAccount(<?php echo $account['Id']; ?>)">Edit</button>-->
                 <?php if ($isDisabled): ?>
                   <button class="btn btn-small btn-primary" onclick="toggleDisable(<?php echo $account['Id']; ?>, false)">Enable</button>
                 <?php else: ?>
@@ -290,9 +290,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 <button class="btn btn-small btn-view" onclick="viewCustomerInfo(<?php echo (int)$row['AccountId']; ?>)" title="View Customer Details">
                   <i class="fas fa-eye"></i>
                 </button>
-                <button class="btn btn-small btn-outline" onclick="viewSalesAgentInfo(<?php echo !empty($row['agent_id']) && intval($row['agent_id']) > 0 ? (int)$row['agent_id'] : 'null'; ?>)" title="View Assigned Agent">
+                <!--<button class="btn btn-small btn-outline" onclick="viewSalesAgentInfo(<?php echo !empty($row['agent_id']) && intval($row['agent_id']) > 0 ? (int)$row['agent_id'] : 'null'; ?>)" title="View Assigned Agent">
                   Agent
-                </button>
+                </button>-->
                 <button class="btn btn-small btn-primary" onclick="openReassignModal(<?php echo (int)$row['AccountId']; ?>, <?php echo !empty($row['agent_id']) && intval($row['agent_id']) > 0 ? (int)$row['agent_id'] : 'null'; ?>)" title="Reassign to Sales Agent">
                   Reassign
                 </button>
@@ -604,9 +604,9 @@ $activeAgents = $customerOp->getActiveSalesAgents();
                 <button class="btn btn-small btn-view" onclick="viewCustomerInfo(<?php echo (int)$row['AccountId']; ?>)" title="View Customer Details">
                   <i class="fas fa-eye"></i>
                 </button>
-                <button class="btn btn-small btn-outline" onclick="viewSalesAgentInfo(<?php echo !empty($row['agent_id']) && intval($row['agent_id']) > 0 ? (int)$row['agent_id'] : 'null'; ?>)" title="View Assigned Agent">
+                <!--<button class="btn btn-small btn-outline" onclick="viewSalesAgentInfo(<?php echo !empty($row['agent_id']) && intval($row['agent_id']) > 0 ? (int)$row['agent_id'] : 'null'; ?>)" title="View Assigned Agent">
                   Agent
-                </button>
+                </button>-->
                 <button class="btn btn-small btn-primary" onclick="openReassignModal(<?php echo (int)$row['AccountId']; ?>, <?php echo !empty($row['agent_id']) && intval($row['agent_id']) > 0 ? (int)$row['agent_id'] : 'null'; ?>)" title="Reassign to Sales Agent">
                   Reassign
                 </button>
@@ -698,7 +698,7 @@ $activeAgents = $customerOp->getActiveSalesAgents();
                 <button class="btn btn-small btn-view" onclick="viewAccountInfo('<?php echo $account['Role']; ?>', <?php echo $account['Id']; ?>)" title="View Details">
                   <i class="fas fa-eye"></i>
                 </button>
-                <button class="btn btn-small btn-outline" onclick="editAccount(<?php echo $account['Id']; ?>)">Edit</button>
+                <!--<button class="btn btn-small btn-outline" onclick="editAccount(<?php echo $account['Id']; ?>)">Edit</button>-->
                 <?php if ($isDisabled): ?>
                   <button class="btn btn-small btn-primary" onclick="toggleDisable(<?php echo $account['Id']; ?>, false)">Enable</button>
                 <?php else: ?>

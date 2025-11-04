@@ -129,7 +129,7 @@ try {
         .brand-text {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #FFCE1B;
+            color: #FFFFFF;
             letter-spacing: -0.02em;
         }
 
