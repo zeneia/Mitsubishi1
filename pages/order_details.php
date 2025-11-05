@@ -90,7 +90,7 @@ if (!$customerProfile) {
         .brand-text {
             font-size: 1.4rem;
             font-weight: 700;
-            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            background: #ffffff;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -332,8 +332,8 @@ if (!$customerProfile) {
         }
 
         .btn-primary {
-            background: linear-gradient(45deg, #ffd700, #ffed4e);
-            color: #1a1a1a;
+            background: #E60012;
+            color: #ffffff;
         }
 
         .btn-secondary {
@@ -1034,9 +1034,9 @@ if (!$customerProfile) {
                 console.log('📭 No orders found, showing empty state');
                 container.innerHTML = `
                     <div class="no-orders">
-                        <i class="fas fa-shopping-cart" style="font-size: 3rem; margin-bottom: 20px; color: #ffd700;"></i>
-                        <h3 style="color: #ffd700; margin-bottom: 15px;">No Orders Found</h3>
-                        <p>You haven't placed any orders yet. Visit our car menu to explore available vehicles.</p>
+                        <i class="fas fa-shopping-cart" style="font-size: 3rem; margin-bottom: 20px; color: #ffffff;"></i>
+                        <h3 style="color: #E60012; margin-bottom: 15px;">No Orders Found</h3>
+                        <p style = "color: #ffffff;">You haven't placed any orders yet. Visit our car menu to explore available vehicles.</p>
                         <a href="car_menu.php" class="btn btn-primary" style="margin-top: 20px;">
                             <i class="fas fa-car"></i> Browse Cars
                         </a>

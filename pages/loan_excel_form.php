@@ -215,7 +215,7 @@ $interest_rates = [
 			color: #ffd700;
 			margin-bottom: 20px;
 			font-size: 1.4rem;
-			border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+			border-bottom: 2px solid rgba(255, 255, 254, 0.3);
 			padding-bottom: 10px;
 		}
 
@@ -240,7 +240,7 @@ $interest_rates = [
 
 		.form-input, .form-select, .form-textarea {
 			background: rgba(179, 169, 169, 0.1);
-			border: 1px solid rgba(255, 215, 0, 0.3);
+			border: 1px solid rgba(255, 255, 255, 0.3);
 			border-radius: 8px;
 			padding: 12px 15px;
 			color: white;
@@ -263,7 +263,7 @@ $interest_rates = [
 		.form-input:focus, .form-select:focus, .form-textarea:focus {
 			outline: none;
 			border-color: #ffd700;
-			box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+			box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 			background: rgba(223, 196, 196, 0.15);
 		}
 
@@ -299,7 +299,7 @@ $interest_rates = [
 		}
 
 		.form-file::-webkit-file-upload-button:hover {
-			background: linear-gradient(135deg, #e6c200, #e6d445);
+			background: linear-gradient(135deg, #a12222ff, #e6d445);
 			transform: translateY(-1px);
 			box-shadow: 0 3px 10px rgba(255, 215, 0, 0.3);
 		}

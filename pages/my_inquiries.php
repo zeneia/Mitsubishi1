@@ -498,7 +498,7 @@ function getInquiryResponses($connect, $inquiryId) {
         }
         .btn-danger:hover { 
             transform: translateY(-2px); 
-            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3); 
+            box-shadow: 0 4px 15px rgba(255, 254, 254, 0.3); 
         }
         .btn:disabled,
         .btn[disabled] {
