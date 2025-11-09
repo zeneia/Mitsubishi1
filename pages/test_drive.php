@@ -65,8 +65,15 @@ if ($selected_vehicle_id) {
     }
 }
 
+// Preserve form data for repopulation on error
+$form_data = [];
+$error_field = null; // Track which field has the error
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Store submitted data for repopulation
+    $form_data = $_POST;
+
     try {
         // Validate required fields
         $required_fields = ['vehicle', 'preferredDate', 'preferredTime', 'licenseNumber', 'phone', 'age', 'experience'];
@@ -75,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception("Please fill in all required fields.");
             }
         }
-        
+
         // Handle driver's license file upload
         $license_data = null;
         if (isset($_FILES['licenseImage']) && $_FILES['licenseImage']['error'] === UPLOAD_ERR_OK) {
@@ -83,13 +90,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             throw new Exception("Please upload your driver's license image.");
         }
-        
+
         // Check for date and time conflicts
         $conflict_check = $connect->prepare("SELECT COUNT(*) FROM test_drive_requests WHERE selected_date = ? AND selected_time_slot = ? AND status IN ('Pending', 'Approved')");
         $conflict_check->execute([$_POST['preferredDate'], $_POST['preferredTime']]);
         $existing_bookings = $conflict_check->fetchColumn();
-        
+
         if ($existing_bookings > 0) {
+            $error_field = 'datetime'; // Mark date/time fields as having error
             throw new Exception("Sorry, the selected date and time slot is already booked. Please choose a different time slot.");
         }
         
@@ -579,6 +587,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             gap: 10px;
         }
 
+        /* Error field highlighting */
+        .error-field {
+            border-color: #ff4444 !important;
+            box-shadow: 0 0 10px rgba(255, 68, 68, 0.3) !important;
+            background: rgba(255, 68, 68, 0.05) !important;
+        }
+
+        .error-field:focus {
+            border-color: #ff4444 !important;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.5) !important;
+        }
+
         /* Custom scrollbar styling for better UX */
         ::-webkit-scrollbar {
             width: 8px;
@@ -702,24 +722,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="preferredDate">Preferred Date</label>
-                            <input type="date" id="preferredDate" name="preferredDate" required>
+                            <input type="date" id="preferredDate" name="preferredDate" required
+                                   value="<?php echo htmlspecialchars($form_data['preferredDate'] ?? ''); ?>"
+                                   class="<?php echo ($error_field === 'datetime') ? 'error-field' : ''; ?>">
                         </div>
                         <div class="form-group">
                             <label for="preferredTime">Preferred Time</label>
                             <div class="select-wrapper">
-                                <select id="preferredTime" name="preferredTime" required>
+                                <select id="preferredTime" name="preferredTime" required
+                                        class="<?php echo ($error_field === 'datetime') ? 'error-field' : ''; ?>">
                                     <option value="">Select time</option>
-                                    <option value="09:00">9:00 AM</option>
-                                    <option value="10:00">10:00 AM</option>
-                                    <option value="11:00">11:00 AM</option>
-                                    <option value="14:00">2:00 PM</option>
-                                    <option value="15:00">3:00 PM</option>
-                                    <option value="16:00">4:00 PM</option>
+                                    <option value="09:00" <?php echo (isset($form_data['preferredTime']) && $form_data['preferredTime'] === '09:00') ? 'selected' : ''; ?>>9:00 AM</option>
+                                    <option value="10:00" <?php echo (isset($form_data['preferredTime']) && $form_data['preferredTime'] === '10:00') ? 'selected' : ''; ?>>10:00 AM</option>
+                                    <option value="11:00" <?php echo (isset($form_data['preferredTime']) && $form_data['preferredTime'] === '11:00') ? 'selected' : ''; ?>>11:00 AM</option>
+                                    <option value="14:00" <?php echo (isset($form_data['preferredTime']) && $form_data['preferredTime'] === '14:00') ? 'selected' : ''; ?>>2:00 PM</option>
+                                    <option value="15:00" <?php echo (isset($form_data['preferredTime']) && $form_data['preferredTime'] === '15:00') ? 'selected' : ''; ?>>3:00 PM</option>
+                                    <option value="16:00" <?php echo (isset($form_data['preferredTime']) && $form_data['preferredTime'] === '16:00') ? 'selected' : ''; ?>>4:00 PM</option>
                                 </select>
                                 <i class="fas fa-chevron-down dropdown-icon"></i>
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="duration">Test Drive Duration</label>
                             <input type="text" id="duration" name="duration" value="30 minutes" readonly>
@@ -735,7 +758,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="licenseNumber">Driver's License Number</label>
-                            <input type="text" id="licenseNumber" name="licenseNumber" required placeholder="Enter license number">
+                            <input type="text" id="licenseNumber" name="licenseNumber" required placeholder="Enter license number"
+                                   value="<?php echo htmlspecialchars($form_data['licenseNumber'] ?? ''); ?>">
                         </div>
                         <div class="form-group">
                             <label for="licenseImage">Driver's License Image</label>
@@ -749,23 +773,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <div class="form-group">
                             <label for="phone">Phone Number</label>
-                            <input type="tel" id="phone" name="phone" required ="(555) 123-4567" 
-                                   value="<?php echo htmlspecialchars($user['mobile_number'] ?? ''); ?>"
+                            <input type="tel" id="phone" name="phone" required placeholder="(555) 123-4567"
+                                   value="<?php echo htmlspecialchars($form_data['phone'] ?? $user['mobile_number'] ?? ''); ?>"
                                    oninput="this.value = this.value.replace(/[^0-9()+\-\s]/g, '')"
                                    onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
                         </div>
                         <div class="form-group">
                             <label for="age">Age</label>
-                            <input type="number" id="age" name="age" min="18" max="100" required placeholder="18+" onkeydown="if(['e','E','+','-','.'].includes(event.key)) event.preventDefault();"/>
+                            <input type="number" id="age" name="age" min="18" max="100" required placeholder="18+"
+                                   value="<?php echo htmlspecialchars($form_data['age'] ?? ''); ?>"
+                                   onkeydown="if(['e','E','+','-','.'].includes(event.key)) event.preventDefault();"/>
                         </div>
                         <div class="form-group">
                             <label for="experience">Driving Experience</label>
                             <div class="select-wrapper">
                                 <select id="experience" name="experience" required>
                                     <option value="">Select experience</option>
-                                    <option value="1-3">1-3 years</option>
-                                    <option value="4-10">4-10 years</option>
-                                    <option value="10+">10+ years</option>
+                                    <option value="1-3" <?php echo (isset($form_data['experience']) && $form_data['experience'] === '1-3') ? 'selected' : ''; ?>>1-3 years</option>
+                                    <option value="4-10" <?php echo (isset($form_data['experience']) && $form_data['experience'] === '4-10') ? 'selected' : ''; ?>>4-10 years</option>
+                                    <option value="10+" <?php echo (isset($form_data['experience']) && $form_data['experience'] === '10+') ? 'selected' : ''; ?>>10+ years</option>
                                 </select>
                                 <i class="fas fa-chevron-down dropdown-icon"></i>
                             </div>
@@ -776,7 +802,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="form-section">
                     <div class="form-group">
                         <label for="specialRequests">Special Requests or Questions</label>
-                        <textarea id="specialRequests" name="specialRequests" rows="4" placeholder="Any specific features you'd like to test or questions about the vehicle..."></textarea>
+                        <textarea id="specialRequests" name="specialRequests" rows="4" placeholder="Any specific features you'd like to test or questions about the vehicle..."><?php echo htmlspecialchars($form_data['specialRequests'] ?? ''); ?></textarea>
                     </div>
                 </div>
 
@@ -794,6 +820,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.getElementById('preferredDate').min = tomorrow.toISOString().split('T')[0];
 
         // Vehicle is pre-selected from URL parameter, no selection needed
+
+        // Scroll to error field on page load if there's an error
+        <?php if ($error_field === 'datetime'): ?>
+        window.addEventListener('DOMContentLoaded', function() {
+            const errorField = document.getElementById('preferredDate');
+            if (errorField) {
+                errorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Add a slight delay before focusing to ensure smooth scroll completes
+                setTimeout(() => {
+                    errorField.focus();
+                }, 500);
+            }
+        });
+        <?php endif; ?>
 
         // Enhanced form validation with better UX
         document.getElementById('testDriveForm').addEventListener('submit', function(e) {
