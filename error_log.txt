@@ -61,3 +61,24 @@
 #0 C:\xampp\htdocs\Mitsubishi1\includes\backend\transactions_backend.php(149): PDOStatement->execute(Array)
 #1 C:\xampp\htdocs\Mitsubishi1\includes\backend\transactions_backend.php(33): getTransactions()
 #2 {main}
+[06-Nov-2025 17:34:27 Europe/Berlin] EnvLoader: .env file not found at: C:\xampp\htdocs\Mitsubishi1/.env
+[06-Nov-2025 17:34:27 Europe/Berlin] EnvLoader: .env file not found at: C:\xampp\htdocs\Mitsubishi1/.env
+[07-Nov-2025 00:34:27 Asia/Manila] Transaction Backend Error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'mitsubishi.payment_history' doesn't exist
+#0 C:\xampp\htdocs\Mitsubishi1\includes\backend\transactions_backend.php(289): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\Mitsubishi1\includes\backend\transactions_backend.php(36): getStats()
+#2 {main}
+[06-Nov-2025 17:34:27 Europe/Berlin] EnvLoader: .env file not found at: C:\xampp\htdocs\Mitsubishi1/.env
+[07-Nov-2025 00:34:27 Asia/Manila] Transaction Backend Error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'mitsubishi.payment_history' doesn't exist
+#0 C:\xampp\htdocs\Mitsubishi1\includes\backend\transactions_backend.php(149): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\Mitsubishi1\includes\backend\transactions_backend.php(33): getTransactions()
+#2 {main}
+[06-Nov-2025 17:34:27 Europe/Berlin] EnvLoader: .env file not found at: C:\xampp\htdocs\Mitsubishi1/.env
+[07-Nov-2025 00:34:27 Asia/Manila] Transaction Backend Error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'mitsubishi.payment_history' doesn't exist
+#0 C:\xampp\htdocs\Mitsubishi1\includes\backend\transactions_backend.php(289): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\Mitsubishi1\includes\backend\transactions_backend.php(36): getStats()
+#2 {main}
+[06-Nov-2025 17:34:27 Europe/Berlin] EnvLoader: .env file not found at: C:\xampp\htdocs\Mitsubishi1/.env
+[07-Nov-2025 00:34:27 Asia/Manila] Transaction Backend Error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'mitsubishi.payment_history' doesn't exist
+#0 C:\xampp\htdocs\Mitsubishi1\includes\backend\transactions_backend.php(149): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\Mitsubishi1\includes\backend\transactions_backend.php(33): getTransactions()
+#2 {main}

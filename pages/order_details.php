@@ -332,14 +332,14 @@ if (!$customerProfile) {
         }
 
         .btn-primary {
-            background: #E60012;
+            background: #9b1e28ff;
             color: #ffffff;
         }
 
         .btn-secondary {
             background: rgba(255, 255, 255, 0.1);
             color: #ffd700;
-            border: 1px solid rgba(255, 215, 0, 0.3);
+            border: 1px solid rgba(104, 104, 104, 0.3);
         }
 
         .btn:hover {
