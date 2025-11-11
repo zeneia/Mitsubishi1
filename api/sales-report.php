@@ -68,6 +68,9 @@ try {
         case 'inventory':
             echo json_encode(getInventoryData($pdo));
             break;
+        case 'yearly-comparison':
+            echo json_encode(getYearlyComparison($pdo, $year));
+            break;
         default:
             http_response_code(400);
             echo json_encode(['error' => 'Invalid action']);
@@ -357,5 +360,97 @@ function calculateGrowth($current, $previous) {
         return $current > 0 ? 100 : 0;
     }
     return round((($current - $previous) / $previous) * 100, 1);
+}
+
+/**
+ * Get yearly comparison data - compares current year with previous year
+ */
+function getYearlyComparison($pdo, $year) {
+    $current_year = intval($year);
+    $previous_year = $current_year - 1;
+
+    // Get monthly data for current year
+    $stmt = $pdo->prepare("
+        SELECT
+            MONTH(o.created_at) as month,
+            MONTHNAME(o.created_at) as month_name,
+            SUM(CASE WHEN o.order_status = 'Completed' THEN o.total_price ELSE 0 END) as revenue,
+            COUNT(CASE WHEN o.order_status = 'Completed' THEN o.order_id END) as units_sold
+        FROM orders o
+        WHERE YEAR(o.created_at) = ?
+        GROUP BY MONTH(o.created_at), MONTHNAME(o.created_at)
+        ORDER BY MONTH(o.created_at)
+    ");
+
+    // Get current year data
+    $stmt->execute([$current_year]);
+    $current_year_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Get previous year data
+    $stmt->execute([$previous_year]);
+    $previous_year_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Initialize all 12 months with zero values
+    $months = [];
+    for ($i = 1; $i <= 12; $i++) {
+        $months[$i] = [
+            'month' => $i,
+            'month_name' => date('F', mktime(0, 0, 0, $i, 1)),
+            'current_year' => $current_year,
+            'previous_year' => $previous_year,
+            'current_revenue' => 0,
+            'previous_revenue' => 0,
+            'current_units' => 0,
+            'previous_units' => 0,
+            'revenue_growth' => 0,
+            'units_growth' => 0
+        ];
+    }
+
+    // Fill in current year data
+    foreach ($current_year_data as $row) {
+        $month = intval($row['month']);
+        $months[$month]['current_revenue'] = floatval($row['revenue']);
+        $months[$month]['current_units'] = intval($row['units_sold']);
+    }
+
+    // Fill in previous year data
+    foreach ($previous_year_data as $row) {
+        $month = intval($row['month']);
+        $months[$month]['previous_revenue'] = floatval($row['revenue']);
+        $months[$month]['previous_units'] = intval($row['units_sold']);
+    }
+
+    // Calculate growth percentages
+    foreach ($months as &$month_data) {
+        $month_data['revenue_growth'] = calculateGrowth(
+            $month_data['current_revenue'],
+            $month_data['previous_revenue']
+        );
+        $month_data['units_growth'] = calculateGrowth(
+            $month_data['current_units'],
+            $month_data['previous_units']
+        );
+    }
+
+    // Calculate yearly totals
+    $current_total_revenue = array_sum(array_column($months, 'current_revenue'));
+    $previous_total_revenue = array_sum(array_column($months, 'previous_revenue'));
+    $current_total_units = array_sum(array_column($months, 'current_units'));
+    $previous_total_units = array_sum(array_column($months, 'previous_units'));
+
+    return [
+        'months' => array_values($months),
+        'summary' => [
+            'current_year' => $current_year,
+            'previous_year' => $previous_year,
+            'current_total_revenue' => $current_total_revenue,
+            'previous_total_revenue' => $previous_total_revenue,
+            'current_total_units' => $current_total_units,
+            'previous_total_units' => $previous_total_units,
+            'total_revenue_growth' => calculateGrowth($current_total_revenue, $previous_total_revenue),
+            'total_units_growth' => calculateGrowth($current_total_units, $previous_total_units)
+        ]
+    ];
 }
 ?>

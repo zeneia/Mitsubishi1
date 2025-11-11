@@ -3,4 +3,9 @@ Modified Files:
 
 1. pages/test_drive.php
 2. pages/test_drive_pdf.php
+3. pages/quote_request.php
+4. pages/quote_amortization.php
+5. api/sales-report.php
+6. pages/main/sales-report.php
+7. includes/components/sales_agent_dashboard.php
 

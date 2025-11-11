@@ -367,6 +367,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-left: 4px solid #f44336;
         }
 
+        .input-error {
+            border-color: #f44336 !important;
+            box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2) !important;
+        }
+
+        .error-text {
+            color: #f44336;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-text.show {
+            display: block;
+        }
+
         @media (max-width: 575px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -619,10 +635,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="down_payment">Down Payment (₱)</label>
-                                <input type="number" id="down_payment" name="down_payment" min="0" step="0.01" 
+                                <input type="number" id="down_payment" name="down_payment" min="0" step="0.01"
                                        placeholder="Enter down payment amount"
                                        onkeydown="if(['e','E','+','-'].includes(event.key)) event.preventDefault();" />
-                                <small style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">Minimum recommended: ₱<?php echo number_format(($vehicle['promotional_price'] > 0 && $vehicle['promotional_price'] < $vehicle['base_price'] ? $vehicle['promotional_price'] : $vehicle['base_price']) * 0.2, 2); ?></small>
+                                <small style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">Minimum required: ₱<?php
+                                    $min_dp_percent = isset($vehicle['min_downpayment_percentage']) && $vehicle['min_downpayment_percentage'] > 0
+                                        ? (float)$vehicle['min_downpayment_percentage']
+                                        : 20.0;
+                                    $vehicle_price = ($vehicle['promotional_price'] > 0 && $vehicle['promotional_price'] < $vehicle['base_price'] ? $vehicle['promotional_price'] : $vehicle['base_price']);
+                                    $min_dp_amount = $vehicle_price * ($min_dp_percent / 100);
+                                    echo number_format($min_dp_amount, 2);
+                                ?> (<?php echo number_format($min_dp_percent, 0); ?>%)</small>
+                                <div id="downPaymentError" class="error-text"></div>
                             </div>
                             <div class="form-group">
                                 <label for="financing_term">Financing Term</label>
@@ -696,7 +720,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 form.addEventListener('submit', function(e) {
                     console.log('QUOTE DEBUG: Form submission intercepted');
                     console.log('QUOTE DEBUG: Form data about to be submitted');
-                    
+
+                    // Validate downpayment before submission
+                    const downPayment = parseFloat(downPaymentInput.value) || 0;
+                    if (downPayment > 0 && !validateDownPayment()) {
+                        e.preventDefault();
+                        alert(`Please enter a valid down payment. Minimum required is ₱${minDownPaymentAmount.toLocaleString('en-US', {minimumFractionDigits: 2})} (${minDownPaymentPercent}% of vehicle price)`);
+                        downPaymentInput.focus();
+                        return false;
+                    }
+
                     // Log all form values
                     const formData = new FormData(form);
                     for (let [key, value] of formData.entries()) {
@@ -707,12 +740,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <?php if ($vehicle): ?>
             const vehiclePrice = <?php echo $vehicle['promotional_price'] > 0 && $vehicle['promotional_price'] < $vehicle['base_price'] ? $vehicle['promotional_price'] : $vehicle['base_price']; ?>;
+            const minDownPaymentPercent = <?php echo $min_dp_percent; ?>;
+            const minDownPaymentAmount = <?php echo $min_dp_amount; ?>;
             <?php endif; ?>
-            
+
+            // Real-time downpayment validation
+            function validateDownPayment() {
+                const downPayment = parseFloat(downPaymentInput.value) || 0;
+                const errorElement = document.getElementById('downPaymentError');
+
+                if (downPayment > 0 && downPayment < minDownPaymentAmount) {
+                    // Show error
+                    downPaymentInput.classList.add('input-error');
+                    errorElement.textContent = `Down payment must be at least ₱${minDownPaymentAmount.toLocaleString('en-US', {minimumFractionDigits: 2})} (${minDownPaymentPercent}% of vehicle price)`;
+                    errorElement.classList.add('show');
+                    return false;
+                } else {
+                    // Clear error
+                    downPaymentInput.classList.remove('input-error');
+                    errorElement.classList.remove('show');
+                    errorElement.textContent = '';
+                    return true;
+                }
+            }
+
             async function calculatePayment() {
                  const downPayment = parseFloat(downPaymentInput.value) || 0;
                  const term = parseInt(financingTermSelect.value) || 0;
-                 
+
+                 // Validate downpayment first
+                 validateDownPayment();
+
                  if (downPayment > 0 && term > 0 && vehiclePrice > downPayment) {
                      try {
                          // Use centralized payment calculator API
