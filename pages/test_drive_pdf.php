@@ -17,19 +17,33 @@ if (!$request_id) {
 }
 
 try {
-    // Fetch test drive request details
+    // Fetch test drive request details with approver information
     $stmt = $connect->prepare("
-        SELECT tdr.*, v.model_name, v.variant, v.year_model
-        FROM test_drive_requests tdr 
-        LEFT JOIN vehicles v ON tdr.vehicle_id = v.id 
+        SELECT tdr.*,
+               v.model_name,
+               v.variant,
+               v.year_model,
+               CONCAT(approver.FirstName, ' ', approver.LastName) as approved_by_name
+        FROM test_drive_requests tdr
+        LEFT JOIN vehicles v ON tdr.vehicle_id = v.id
+        LEFT JOIN customer_information ci ON tdr.account_id = ci.account_id
+        LEFT JOIN accounts approver ON ci.agent_id = approver.Id
         WHERE tdr.id = ? AND tdr.account_id = ?
     ");
     $stmt->execute([$request_id, $_SESSION['user_id']]);
     $request = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     if (!$request) {
         header("Location: customer.php");
         exit;
+    }
+
+    // Extract license number from notes if available
+    $license_number = 'N/A';
+    if (!empty($request['notes'])) {
+        if (preg_match('/License Number:\s*(.+?)(?:\n|$)/i', $request['notes'], $matches)) {
+            $license_number = trim($matches[1]);
+        }
     }
 } catch (PDOException $e) {
     error_log("Database error: " . $e->getMessage());
@@ -192,32 +206,40 @@ header('Content-Type: text/html');
                     <div class="info-value"><?php echo htmlspecialchars($request['gate_pass_number']); ?></div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Contact No:</div>
-                    <div class="info-value"><?php echo htmlspecialchars($request['mobile_number']); ?></div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Model:</div>
-                    <div class="info-value"><?php echo htmlspecialchars($request['model_name'] . ' ' . ($request['year_model'] ? $request['year_model'] : '')); ?></div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Selected Time:</div>
-                    <div class="info-value"><?php echo htmlspecialchars($request['selected_time_slot']); ?></div>
-                </div>
-                <div class="info-item">
                     <div class="info-label">Customer Name:</div>
                     <div class="info-value"><?php echo htmlspecialchars($request['customer_name']); ?></div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Selected Date:</div>
+                    <div class="info-label">License Number:</div>
+                    <div class="info-value"><?php echo htmlspecialchars($license_number); ?></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Contact No:</div>
+                    <div class="info-value"><?php echo htmlspecialchars($request['mobile_number']); ?></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Vehicle:</div>
+                    <div class="info-value"><?php echo htmlspecialchars($request['model_name'] . ' ' . ($request['variant'] ? $request['variant'] : '') . ' ' . ($request['year_model'] ? $request['year_model'] : '')); ?></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Schedule Date:</div>
                     <div class="info-value"><?php echo date('M j, Y - D', strtotime($request['selected_date'])); ?></div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Instructor Agent:</div>
-                    <div class="info-value"><?php echo htmlspecialchars($request['instructor_agent']); ?></div>
+                    <div class="info-label">Time:</div>
+                    <div class="info-value"><?php echo htmlspecialchars($request['selected_time_slot']); ?></div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Department:</div>
-                    <div class="info-value">Mitsubishi San Pablo</div>
+                    <div class="info-label">Location:</div>
+                    <div class="info-value"><?php echo htmlspecialchars($request['test_drive_location'] ?: 'Showroom'); ?></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Instructor:</div>
+                    <div class="info-value"><?php echo htmlspecialchars($request['instructor_agent'] ?: 'To be assigned'); ?></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Approved By:</div>
+                    <div class="info-value"><?php echo htmlspecialchars($request['approved_by_name'] ?: 'Pending Approval'); ?></div>
                 </div>
             </div>
             
