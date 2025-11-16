@@ -23,11 +23,13 @@ try {
                v.model_name,
                v.variant,
                v.year_model,
-               CONCAT(approver.FirstName, ' ', approver.LastName) as approved_by_name
+               CONCAT(approver.FirstName, ' ', approver.LastName) as approved_by_name,
+               CONCAT(agent.FirstName, ' ', agent.LastName) as agent_name
         FROM test_drive_requests tdr
         LEFT JOIN vehicles v ON tdr.vehicle_id = v.id
+        LEFT JOIN accounts approver ON tdr.approved_by = approver.Id
         LEFT JOIN customer_information ci ON tdr.account_id = ci.account_id
-        LEFT JOIN accounts approver ON ci.agent_id = approver.Id
+        LEFT JOIN accounts agent ON ci.agent_id = agent.Id
         WHERE tdr.id = ? AND tdr.account_id = ?
     ");
     $stmt->execute([$request_id, $_SESSION['user_id']]);
@@ -45,6 +47,10 @@ try {
             $license_number = trim($matches[1]);
         }
     }
+
+    // Determine who approved (use approved_by if available, otherwise use agent)
+    $approver_name = !empty($request['approved_by_name']) ? $request['approved_by_name'] :
+                     (!empty($request['agent_name']) ? $request['agent_name'] : 'Pending Approval');
 } catch (PDOException $e) {
     error_log("Database error: " . $e->getMessage());
     header("Location: customer.php");
@@ -239,7 +245,7 @@ header('Content-Type: text/html');
                 </div>
                 <div class="info-item">
                     <div class="info-label">Approved By:</div>
-                    <div class="info-value"><?php echo htmlspecialchars($request['approved_by_name'] ?: 'Pending Approval'); ?></div>
+                    <div class="info-value"><?php echo htmlspecialchars($approver_name); ?></div>
                 </div>
             </div>
             

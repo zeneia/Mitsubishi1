@@ -61,16 +61,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 				$gate_pass_number = 'MAG-' . strtoupper(substr(md5(time() . $request_id), 0, 8));
 
 				$stmt = $pdo->prepare("
-                    UPDATE test_drive_requests 
-                    SET status = 'Approved', 
-                        approved_at = NOW(), 
-                        instructor_agent = ?, 
+                    UPDATE test_drive_requests
+                    SET status = 'Approved',
+                        approved_at = NOW(),
+                        approved_by = ?,
+                        instructor_agent = ?,
                         notes = ?,
                         gate_pass_number = ?,
                         gatepass_generated_at = NOW()
                     WHERE id = ?
                 ");
-				$stmt->execute([$instructor, $notes, $gate_pass_number, $request_id]);
+				$stmt->execute([$_SESSION['user_id'], $instructor, $notes, $gate_pass_number, $request_id]);
 
 				// --- Notification Logic (In-app) ---
 				require_once '../../includes/api/notification_api.php';

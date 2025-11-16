@@ -6,6 +6,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 require_once dirname(dirname(__DIR__)) . '/includes/init.php';
 require_once dirname(__DIR__) . '/api/notification_api.php';
+require_once dirname(__DIR__) . '/financial_calculator.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -139,23 +140,33 @@ try {
         throw new Exception('A recent order for the same customer and vehicle was already created. Order #' . $order['order_number'] . ' was placed recently. Please wait a few minutes or check the existing order.');
     }
     
+    // Calculate all financial values using FinancialCalculator
+    $calculator = new FinancialCalculator($connect);
+    $financials = $calculator->calculateAll($input);
+
     // Handle different client types - validation already done above
     if ($input['client_type'] === 'handled') {
         // For handled clients, customer_id and account_id already validated above
         // Generate order number if not provided
         $order_number = $input['order_number'] ?? generateOrderNumber();
-        
+
         // Create the order (transaction is already active)
         $stmt = $connect->prepare("
             INSERT INTO orders (
                 order_number, customer_id, sales_agent_id, vehicle_id, client_type,
                 vehicle_model, vehicle_variant, vehicle_color, model_year,
-                base_price, discount_amount, total_price, payment_method,
-                down_payment, financing_term, monthly_payment, order_status,
-                delivery_date, actual_delivery_date, delivery_address,
+                base_price, body_package_price, aircon_package_price, white_color_surcharge, other_charges,
+                total_unit_price, nominal_discount, promo_discount, discount_amount, amount_to_invoice, total_price,
+                payment_method, finance_percentage, amount_finance, down_payment_percentage, down_payment,
+                net_down_payment, financing_term, monthly_payment,
+                insurance_premium, cptl_premium, lto_registration, chattel_mortgage_fee, chattel_income, extended_warranty,
+                total_incidentals, reservation_fee, total_cash_outlay,
+                gross_dealer_incentive_pct, gross_dealer_incentive, sfm_retain, sfm_additional, net_dealer_incentive,
+                tipster_fee, accessories_cost, other_expenses, se_share, net_negative,
+                order_status, delivery_date, actual_delivery_date, delivery_address,
                 order_notes, special_instructions, warranty_package, insurance_details,
                 created_at, order_date
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
         ");
         
         $stmt->execute([
@@ -169,12 +180,43 @@ try {
             $input['vehicle_color'],
             $input['model_year'],
             $input['base_price'],
-            !empty($input['discount_amount']) ? $input['discount_amount'] : 0,
-            $input['total_price'],
+            $financials['body_package_price'],
+            $financials['aircon_package_price'],
+            $financials['white_color_surcharge'],
+            $financials['other_charges'],
+            $financials['total_unit_price'],
+            $financials['nominal_discount'],
+            $financials['promo_discount'],
+            $financials['discount_amount'],
+            $financials['amount_to_invoice'],
+            $financials['total_price'],
             $input['payment_method'],
-            !empty($input['down_payment']) ? $input['down_payment'] : null,
+            $financials['finance_percentage'],
+            $financials['amount_finance'],
+            $financials['down_payment_percentage'],
+            $financials['down_payment'],
+            $financials['net_down_payment'],
             !empty($input['financing_term']) ? $input['financing_term'] : null,
             !empty($input['monthly_payment']) ? $input['monthly_payment'] : null,
+            $financials['insurance_premium'],
+            $financials['cptl_premium'],
+            $financials['lto_registration'],
+            $financials['chattel_mortgage_fee'],
+            $financials['chattel_income'],
+            $financials['extended_warranty'],
+            $financials['total_incidentals'],
+            $financials['reservation_fee'],
+            $financials['total_cash_outlay'],
+            $financials['gross_dealer_incentive_pct'],
+            $financials['gross_dealer_incentive'],
+            $financials['sfm_retain'],
+            $financials['sfm_additional'],
+            $financials['net_dealer_incentive'],
+            $financials['tipster_fee'],
+            $financials['accessories_cost'],
+            $financials['other_expenses'],
+            $financials['se_share'],
+            $financials['net_negative'],
             $input['order_status'],
             !empty($input['delivery_date']) ? $input['delivery_date'] : null,
             !empty($input['actual_delivery_date']) ? $input['actual_delivery_date'] : null,
@@ -272,12 +314,18 @@ try {
             INSERT INTO orders (
                 order_number, customer_id, sales_agent_id, vehicle_id, client_type,
                 vehicle_model, vehicle_variant, vehicle_color, model_year,
-                base_price, discount_amount, total_price, payment_method,
-                down_payment, financing_term, monthly_payment, order_status,
-                delivery_date, actual_delivery_date, delivery_address,
+                base_price, body_package_price, aircon_package_price, white_color_surcharge, other_charges,
+                total_unit_price, nominal_discount, promo_discount, discount_amount, amount_to_invoice, total_price,
+                payment_method, finance_percentage, amount_finance, down_payment_percentage, down_payment,
+                net_down_payment, financing_term, monthly_payment,
+                insurance_premium, cptl_premium, lto_registration, chattel_mortgage_fee, chattel_income, extended_warranty,
+                total_incidentals, reservation_fee, total_cash_outlay,
+                gross_dealer_incentive_pct, gross_dealer_incentive, sfm_retain, sfm_additional, net_dealer_incentive,
+                tipster_fee, accessories_cost, other_expenses, se_share, net_negative,
+                order_status, delivery_date, actual_delivery_date, delivery_address,
                 order_notes, special_instructions, warranty_package, insurance_details,
                 created_at, order_date
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
         ");
         
         $stmt->execute([
@@ -291,12 +339,43 @@ try {
             $input['vehicle_color'],
             $input['model_year'],
             $input['base_price'],
-            !empty($input['discount_amount']) ? $input['discount_amount'] : 0,
-            $input['total_price'],
+            $financials['body_package_price'],
+            $financials['aircon_package_price'],
+            $financials['white_color_surcharge'],
+            $financials['other_charges'],
+            $financials['total_unit_price'],
+            $financials['nominal_discount'],
+            $financials['promo_discount'],
+            $financials['discount_amount'],
+            $financials['amount_to_invoice'],
+            $financials['total_price'],
             $input['payment_method'],
-            !empty($input['down_payment']) ? $input['down_payment'] : null,
+            $financials['finance_percentage'],
+            $financials['amount_finance'],
+            $financials['down_payment_percentage'],
+            $financials['down_payment'],
+            $financials['net_down_payment'],
             !empty($input['financing_term']) ? $input['financing_term'] : null,
             !empty($input['monthly_payment']) ? $input['monthly_payment'] : null,
+            $financials['insurance_premium'],
+            $financials['cptl_premium'],
+            $financials['lto_registration'],
+            $financials['chattel_mortgage_fee'],
+            $financials['chattel_income'],
+            $financials['extended_warranty'],
+            $financials['total_incidentals'],
+            $financials['reservation_fee'],
+            $financials['total_cash_outlay'],
+            $financials['gross_dealer_incentive_pct'],
+            $financials['gross_dealer_incentive'],
+            $financials['sfm_retain'],
+            $financials['sfm_additional'],
+            $financials['net_dealer_incentive'],
+            $financials['tipster_fee'],
+            $financials['accessories_cost'],
+            $financials['other_expenses'],
+            $financials['se_share'],
+            $financials['net_negative'],
             $input['order_status'],
             !empty($input['delivery_date']) ? $input['delivery_date'] : null,
             !empty($input['actual_delivery_date']) ? $input['actual_delivery_date'] : null,

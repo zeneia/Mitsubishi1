@@ -291,15 +291,16 @@ function approveRequest() {
         }
     }
     
-    $sql = "UPDATE test_drive_requests SET 
-                status = 'Approved', 
+    $sql = "UPDATE test_drive_requests SET
+                status = 'Approved',
                 approved_at = NOW(),
+                approved_by = ?,
                 instructor_agent = ?,
                 notes = ?
             WHERE id = ?";
-    
+
     $stmt = $connect->prepare($sql);
-    $result = $stmt->execute([$instructor_agent, $notes, $id]);
+    $result = $stmt->execute([currentUserId(), $instructor_agent, $notes, $id]);
     
     if ($result) {
         echo json_encode(['success' => true, 'message' => 'Test drive request approved successfully']);

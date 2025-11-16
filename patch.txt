@@ -3,4 +3,25 @@ Modified Files:
 
 1. pages/test_drive.php
 2. pages/test_drive_pdf.php
+3. pages/quote_request.php
+4. pages/quote_amortization.php
+5. api/sales-report.php
+6. pages/main/sales-report.php
+7. includes/components/sales_agent_dashboard.php
+8. pages/header_ex.php
+9. pages/test/test_drive_management.php
+10. includes/backend/test_drive_backend.php
+11. SYSTEM_REVISION_IMPLEMENTATION_GUIDE.md
+12. pages/main/orders.php
+13. includes/api/create_order.php
+14. pages/main/transaction-records.php
+15. pages/order_details.php
+16. includes/backend/order_backend.php
+
+Created Files:
+==============
+
+1. SYSTEM_REVISION_IMPLEMENTATION_GUIDE.md
+2. includes/database/add_financial_fields.sql
+3. includes/financial_calculator.php
 

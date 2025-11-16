@@ -75,12 +75,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $form_data = $_POST;
 
     try {
-        // Validate required fields
-        $required_fields = ['vehicle', 'preferredDate', 'preferredTime', 'licenseNumber', 'phone', 'age', 'experience'];
-        foreach ($required_fields as $field) {
-            if (empty($_POST[$field])) {
-                throw new Exception("Please fill in all required fields.");
-            }
+        // Validate vehicle selection
+        if (empty($_POST['vehicle'])) {
+            $error_field = 'vehicle';
+            throw new Exception("Please select a vehicle for your test drive.");
+        }
+
+        // Validate date and time
+        if (empty($_POST['preferredDate'])) {
+            $error_field = 'preferredDate';
+            throw new Exception("Please select your preferred date.");
+        }
+        if (empty($_POST['preferredTime'])) {
+            $error_field = 'preferredTime';
+            throw new Exception("Please select your preferred time.");
+        }
+
+        // Validate license number
+        if (empty($_POST['licenseNumber'])) {
+            $error_field = 'licenseNumber';
+            throw new Exception("Please enter your driver's license number.");
+        }
+
+        // Validate phone
+        if (empty($_POST['phone'])) {
+            $error_field = 'phone';
+            throw new Exception("Please enter your phone number.");
+        }
+
+        // Validate age
+        if (empty($_POST['age'])) {
+            $error_field = 'age';
+            throw new Exception("Please enter your age.");
+        }
+
+        // Validate experience
+        if (empty($_POST['experience'])) {
+            $error_field = 'experience';
+            throw new Exception("Please select your driving experience.");
         }
 
         // Handle driver's license file upload
@@ -88,6 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_FILES['licenseImage']) && $_FILES['licenseImage']['error'] === UPLOAD_ERR_OK) {
             $license_data = file_get_contents($_FILES['licenseImage']['tmp_name']);
         } else {
+            $error_field = 'licenseImage';
             throw new Exception("Please upload your driver's license image.");
         }
 
@@ -599,6 +632,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 0 20px rgba(255, 68, 68, 0.5) !important;
         }
 
+        /* Error styling for file upload wrapper */
+        .file-upload-wrapper.error-field {
+            border: 2px solid #ff4444 !important;
+            box-shadow: 0 0 10px rgba(255, 68, 68, 0.3) !important;
+            background: rgba(255, 68, 68, 0.05) !important;
+        }
+
         /* Custom scrollbar styling for better UX */
         ::-webkit-scrollbar {
             width: 8px;
@@ -724,13 +764,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label for="preferredDate">Preferred Date</label>
                             <input type="date" id="preferredDate" name="preferredDate" required
                                    value="<?php echo htmlspecialchars($form_data['preferredDate'] ?? ''); ?>"
-                                   class="<?php echo ($error_field === 'datetime') ? 'error-field' : ''; ?>">
+                                   class="<?php echo ($error_field === 'datetime' || $error_field === 'preferredDate') ? 'error-field' : ''; ?>">
                         </div>
                         <div class="form-group">
                             <label for="preferredTime">Preferred Time</label>
                             <div class="select-wrapper">
                                 <select id="preferredTime" name="preferredTime" required
-                                        class="<?php echo ($error_field === 'datetime') ? 'error-field' : ''; ?>">
+                                        class="<?php echo ($error_field === 'datetime' || $error_field === 'preferredTime') ? 'error-field' : ''; ?>">
                                     <option value="">Select time</option>
                                     <option value="09:00" <?php echo (isset($form_data['preferredTime']) && $form_data['preferredTime'] === '09:00') ? 'selected' : ''; ?>>9:00 AM</option>
                                     <option value="10:00" <?php echo (isset($form_data['preferredTime']) && $form_data['preferredTime'] === '10:00') ? 'selected' : ''; ?>>10:00 AM</option>
@@ -759,22 +799,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="form-group">
                             <label for="licenseNumber">Driver's License Number</label>
                             <input type="text" id="licenseNumber" name="licenseNumber" required placeholder="Enter license number"
-                                   value="<?php echo htmlspecialchars($form_data['licenseNumber'] ?? ''); ?>">
+                                   value="<?php echo htmlspecialchars($form_data['licenseNumber'] ?? ''); ?>"
+                                   class="<?php echo ($error_field === 'licenseNumber') ? 'error-field' : ''; ?>">
                         </div>
                         <div class="form-group">
                             <label for="licenseImage">Driver's License Image</label>
-                            <div class="file-upload-wrapper">
+                            <div class="file-upload-wrapper <?php echo ($error_field === 'licenseImage') ? 'error-field' : ''; ?>">
                                 <input type="file" id="licenseImage" name="licenseImage" accept="image/*" required>
                                 <div class="file-upload-display">
                                     <i class="fas fa-cloud-upload-alt"></i>
                                     <span class="file-upload-text">Choose license image</span>
                                 </div>
                             </div>
+                            <?php if ($error_field === 'licenseImage'): ?>
+                                <small style="color: #ff4444; font-size: 0.85rem; margin-top: 5px; display: block;">
+                                    <i class="fas fa-exclamation-circle"></i> Please upload your driver's license image again
+                                </small>
+                            <?php endif; ?>
                         </div>
                         <div class="form-group">
                             <label for="phone">Phone Number</label>
                             <input type="tel" id="phone" name="phone" required placeholder="(555) 123-4567"
                                    value="<?php echo htmlspecialchars($form_data['phone'] ?? $user['mobile_number'] ?? ''); ?>"
+                                   class="<?php echo ($error_field === 'phone') ? 'error-field' : ''; ?>"
                                    oninput="this.value = this.value.replace(/[^0-9()+\-\s]/g, '')"
                                    onkeydown="if(event.key === 'e' || event.key === 'E') event.preventDefault();" />
                         </div>
@@ -782,12 +829,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label for="age">Age</label>
                             <input type="number" id="age" name="age" min="18" max="100" required placeholder="18+"
                                    value="<?php echo htmlspecialchars($form_data['age'] ?? ''); ?>"
+                                   class="<?php echo ($error_field === 'age') ? 'error-field' : ''; ?>"
                                    onkeydown="if(['e','E','+','-','.'].includes(event.key)) event.preventDefault();"/>
                         </div>
                         <div class="form-group">
                             <label for="experience">Driving Experience</label>
                             <div class="select-wrapper">
-                                <select id="experience" name="experience" required>
+                                <select id="experience" name="experience" required
+                                        class="<?php echo ($error_field === 'experience') ? 'error-field' : ''; ?>">
                                     <option value="">Select experience</option>
                                     <option value="1-3" <?php echo (isset($form_data['experience']) && $form_data['experience'] === '1-3') ? 'selected' : ''; ?>>1-3 years</option>
                                     <option value="4-10" <?php echo (isset($form_data['experience']) && $form_data['experience'] === '4-10') ? 'selected' : ''; ?>>4-10 years</option>
@@ -822,9 +871,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Vehicle is pre-selected from URL parameter, no selection needed
 
         // Scroll to error field on page load if there's an error
-        <?php if ($error_field === 'datetime'): ?>
+        <?php if (!empty($error_field)): ?>
         window.addEventListener('DOMContentLoaded', function() {
-            const errorField = document.getElementById('preferredDate');
+            let errorFieldId = '<?php echo $error_field; ?>';
+            let errorField = null;
+
+            // Map error field to actual field ID
+            if (errorFieldId === 'datetime') {
+                errorField = document.getElementById('preferredDate');
+            } else if (errorFieldId === 'preferredDate') {
+                errorField = document.getElementById('preferredDate');
+            } else if (errorFieldId === 'preferredTime') {
+                errorField = document.getElementById('preferredTime');
+            } else if (errorFieldId === 'licenseNumber') {
+                errorField = document.getElementById('licenseNumber');
+            } else if (errorFieldId === 'licenseImage') {
+                errorField = document.getElementById('licenseImage');
+            } else if (errorFieldId === 'phone') {
+                errorField = document.getElementById('phone');
+            } else if (errorFieldId === 'age') {
+                errorField = document.getElementById('age');
+            } else if (errorFieldId === 'experience') {
+                errorField = document.getElementById('experience');
+            } else {
+                errorField = document.getElementById(errorFieldId);
+            }
+
             if (errorField) {
                 errorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 // Add a slight delay before focusing to ensure smooth scroll completes

@@ -734,7 +734,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
         <!-- Transaction Details Pane (Hidden by default) -->
         <div class="transaction-details" id="transactionDetails">
           <h3>Transaction Details: <span id="txnIdDisplay">TXN-2024-089</span></h3>
-          
+
           <div class="details-grid">
             <div class="detail-item">
               <div class="detail-label">Client Name</div>
@@ -775,6 +775,51 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
             <div class="detail-item">
               <div class="detail-label">Completion Date</div>
               <div class="detail-value">Mar 23, 2024</div>
+            </div>
+          </div>
+
+          <!-- Financial Breakdown Section -->
+          <h4 style="margin-top: 30px; margin-bottom: 15px; color: var(--primary-red);">💰 Financial Breakdown</h4>
+          <div class="details-grid">
+            <div class="detail-item">
+              <div class="detail-label">Base Price (SRP)</div>
+              <div class="detail-value" id="txn-base-price">-</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Total Unit Price</div>
+              <div class="detail-value" id="txn-total-unit-price">-</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Nominal Discount</div>
+              <div class="detail-value" id="txn-nominal-discount">-</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Promo Discount</div>
+              <div class="detail-value" id="txn-promo-discount">-</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Amount to Invoice</div>
+              <div class="detail-value" id="txn-amount-to-invoice" style="font-weight: bold;">-</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Down Payment</div>
+              <div class="detail-value" id="txn-down-payment">-</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Net Down Payment</div>
+              <div class="detail-value" id="txn-net-down-payment">-</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Total Incidentals</div>
+              <div class="detail-value" id="txn-total-incidentals">-</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Reservation Fee</div>
+              <div class="detail-value" id="txn-reservation-fee">-</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label" style="font-weight: bold; color: var(--primary-red);">Total Cash Outlay</div>
+              <div class="detail-value" id="txn-total-cash-outlay" style="font-weight: bold; color: var(--primary-red);">-</div>
             </div>
           </div>
 
@@ -1167,6 +1212,18 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
                 items[8].innerHTML = map.orderDate;
                 items[9].innerHTML = map.completionDate;
               }
+
+              // Populate financial breakdown fields
+              document.getElementById('txn-base-price').innerHTML = `₱${Number(d.base_price||0).toLocaleString(undefined,{maximumFractionDigits:2})}`;
+              document.getElementById('txn-total-unit-price').innerHTML = `₱${Number(d.total_unit_price||0).toLocaleString(undefined,{maximumFractionDigits:2})}`;
+              document.getElementById('txn-nominal-discount').innerHTML = `₱${Number(d.nominal_discount||0).toLocaleString(undefined,{maximumFractionDigits:2})}`;
+              document.getElementById('txn-promo-discount').innerHTML = `₱${Number(d.promo_discount||0).toLocaleString(undefined,{maximumFractionDigits:2})}`;
+              document.getElementById('txn-amount-to-invoice').innerHTML = `₱${Number(d.amount_to_invoice||0).toLocaleString(undefined,{maximumFractionDigits:2})}`;
+              document.getElementById('txn-down-payment').innerHTML = `₱${Number(d.down_payment||0).toLocaleString(undefined,{maximumFractionDigits:2})}`;
+              document.getElementById('txn-net-down-payment').innerHTML = `₱${Number(d.net_down_payment||0).toLocaleString(undefined,{maximumFractionDigits:2})}`;
+              document.getElementById('txn-total-incidentals').innerHTML = `₱${Number(d.total_incidentals||0).toLocaleString(undefined,{maximumFractionDigits:2})}`;
+              document.getElementById('txn-reservation-fee').innerHTML = `₱${Number(d.reservation_fee||0).toLocaleString(undefined,{maximumFractionDigits:2})}`;
+              document.getElementById('txn-total-cash-outlay').innerHTML = `₱${Number(d.total_cash_outlay||0).toLocaleString(undefined,{maximumFractionDigits:2})}`;
             }
           }
         } catch (e) {

@@ -1376,17 +1376,42 @@ if (!$customerProfile) {
                                 <p><strong>Color:</strong> ${order.vehicle_color || 'N/A'}</p>
                             </div>
                             <div class="overview-item">
-                                <h4>Pricing Details</h4>
-                                <p><strong>Base Price:</strong> ₱${parseFloat(order.base_price).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
-                                <p><strong>Discount:</strong> ₱${parseFloat(order.discount_amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
-                                <p><strong>Total Price:</strong> ₱${parseFloat(order.total_amount).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <h4>Unit Cost Breakdown</h4>
+                                <p><strong>Base Price (SRP):</strong> ₱${parseFloat(order.base_price || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p><strong>Body Package:</strong> ₱${parseFloat(order.body_package_price || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p><strong>Aircon Package:</strong> ₱${parseFloat(order.aircon_package_price || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p><strong>White Color Surcharge:</strong> ₱${parseFloat(order.white_color_surcharge || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p><strong>Other Charges:</strong> ₱${parseFloat(order.other_charges || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p style="border-top: 1px solid #ddd; padding-top: 5px; margin-top: 5px;"><strong>Total Unit Price:</strong> ₱${parseFloat(order.total_unit_price || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                            </div>
+                            <div class="overview-item">
+                                <h4>Discounts & Invoice</h4>
+                                <p><strong>Nominal Discount:</strong> ₱${parseFloat(order.nominal_discount || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p><strong>Promo Discount:</strong> ₱${parseFloat(order.promo_discount || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p><strong>Total Discount:</strong> ₱${parseFloat(order.discount_amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p style="border-top: 1px solid #ddd; padding-top: 5px; margin-top: 5px;"><strong>Amount to Invoice:</strong> ₱${parseFloat(order.amount_to_invoice || order.total_amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
                             </div>
                             <div class="overview-item">
                                 <h4>Payment Information</h4>
                                 <p><strong>Payment Method:</strong> ${order.payment_method}</p>
+                                <p><strong>Finance %:</strong> ${parseFloat(order.finance_percentage || 0).toFixed(2)}%</p>
+                                <p><strong>Amount to Finance:</strong> ₱${parseFloat(order.amount_finance || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p><strong>Down Payment %:</strong> ${parseFloat(order.down_payment_percentage || 0).toFixed(2)}%</p>
                                 <p><strong>Down Payment:</strong> ₱${parseFloat(order.down_payment || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p><strong>Net Down Payment:</strong> ₱${parseFloat(order.net_down_payment || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
                                 <p><strong>Monthly Payment:</strong> ₱${parseFloat(order.monthly_payment || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
                                 <p><strong>Financing Term:</strong> ${order.financing_term || 'N/A'}</p>
+                            </div>
+                            <div class="overview-item">
+                                <h4>Incidentals & Cash Outlay</h4>
+                                <p><strong>Insurance Premium:</strong> ₱${parseFloat(order.insurance_premium || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p><strong>CPTL Premium:</strong> ₱${parseFloat(order.cptl_premium || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p><strong>LTO Registration:</strong> ₱${parseFloat(order.lto_registration || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p><strong>Chattel Mortgage:</strong> ₱${parseFloat(order.chattel_mortgage_fee || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p><strong>Extended Warranty:</strong> ₱${parseFloat(order.extended_warranty || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p><strong>Total Incidentals:</strong> ₱${parseFloat(order.total_incidentals || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p><strong>Reservation Fee:</strong> ₱${parseFloat(order.reservation_fee || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                                <p style="border-top: 2px solid #c8102e; padding-top: 5px; margin-top: 5px; color: #c8102e;"><strong>TOTAL CASH OUTLAY:</strong> ₱${parseFloat(order.total_cash_outlay || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
                             </div>
                             <div class="overview-item">
                                 <h4>Delivery Information</h4>

@@ -363,6 +363,11 @@ function responsiveHeader() {
   const logoSection = document.getElementById('logoSection');
   const userSection = document.getElementById('userSection');
 
+  // Check if elements exist (some pages may have different header structure)
+  if (!header || !logo || !brand || !welcome || !logout || !logoSection || !userSection) {
+    return; // Exit if any required element is missing
+  }
+
   // --- Desktop / Laptop ---
   if (width > 1024) {
     header.style.flexDirection = 'row';

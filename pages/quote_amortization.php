@@ -152,6 +152,17 @@ $due_date = date('d/m/Y', strtotime($quote['RequestedAt'] . ' + 30 days'));
         .summary .label { font-size: 0.85rem; color: #666; }
         .summary .value { font-weight: 800; color: #b71c1c; font-size: 1.05rem; }
 
+        .payment-methods { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #eee; }
+        .payment-methods h3 { font-size: 1.1rem; color: #222; margin-bottom: 16px; font-weight: 700; }
+        .payment-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .payment-option { background: #fafafa; border: 2px solid #ddd; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.3s ease; text-align: center; }
+        .payment-option:hover { border-color: #b71c1c; background: #fff; }
+        .payment-option.selected { border-color: #b71c1c; background: #fff3f3; }
+        .payment-option input[type="radio"] { display: none; }
+        .payment-option .icon { font-size: 2rem; color: #b71c1c; margin-bottom: 8px; }
+        .payment-option .title { font-weight: 700; color: #222; margin-bottom: 4px; }
+        .payment-option .description { font-size: 0.85rem; color: #666; }
+
         .table-wrap { background: white; border-radius: 8px; overflow: hidden; border: 1px solid #eee; }
         table { width: 100%; border-collapse: collapse; }
         thead { background: #b71c1c; color: white; }
@@ -168,6 +179,7 @@ $due_date = date('d/m/Y', strtotime($quote['RequestedAt'] . ' + 30 days'));
             .info-grid { grid-template-columns: 1fr; }
             .summary { grid-template-columns: 1fr; }
             .actions { grid-template-columns: 1fr; }
+            .payment-options { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -228,6 +240,31 @@ $due_date = date('d/m/Y', strtotime($quote['RequestedAt'] . ' + 30 days'));
                     </div>
                 <?php endif; ?>
 
+                <!-- Payment Methods Section -->
+                <div class="payment-methods">
+                    <h3><i class="fas fa-credit-card"></i> Select Payment Method</h3>
+                    <div class="payment-options">
+                        <label class="payment-option selected" data-method="in-house">
+                            <input type="radio" name="payment_method" value="in-house" checked>
+                            <div class="icon"><i class="fas fa-money-bill-wave"></i></div>
+                            <div class="title">In-House</div>
+                            <div class="description">Direct cash payment at dealership</div>
+                        </label>
+                        <label class="payment-option" data-method="bank_transfer">
+                            <input type="radio" name="payment_method" value="bank_transfer">
+                            <div class="icon"><i class="fas fa-university"></i></div>
+                            <div class="title">Bank Transfer</div>
+                            <div class="description">Transfer to dealership account</div>
+                        </label>
+                        <label class="payment-option" data-method="financing">
+                            <input type="radio" name="payment_method" value="financing">
+                            <div class="icon"><i class="fas fa-calculator"></i></div>
+                            <div class="title">Financing</div>
+                            <div class="description">Monthly installment plan</div>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="summary">
                     <div class="box">
                         <div class="label">Vehicle Price</div>
@@ -287,5 +324,35 @@ $due_date = date('d/m/Y', strtotime($quote['RequestedAt'] . ' + 30 days'));
             </div>
         </div>
     </div>
+
+    <script>
+        // Payment method selection handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const paymentOptions = document.querySelectorAll('.payment-option');
+
+            paymentOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selected class from all options
+                    paymentOptions.forEach(opt => opt.classList.remove('selected'));
+
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+
+                    // Check the radio button
+                    const radio = this.querySelector('input[type="radio"]');
+                    if (radio) {
+                        radio.checked = true;
+                    }
+
+                    // Get selected payment method
+                    const selectedMethod = this.dataset.method;
+                    console.log('Selected payment method:', selectedMethod);
+
+                    // You can add additional logic here based on the selected method
+                    // For example, show/hide additional fields or update calculations
+                });
+            });
+        });
+    </script>
 </body>
 </html>

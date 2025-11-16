@@ -190,6 +190,68 @@ function getTestDrivePriority($selectedDate)
   return ['label' => 'Normal', 'class' => 'normal'];
 }
 
+// Fetch quote requests data from database
+$all_quotes = [];
+$recent_quotes = [];
+$quote_stats = ['total' => 0, 'this_week' => 0, 'this_month' => 0];
+
+if (isset($pdo) && $pdo) {
+  try {
+    $agentId = $_SESSION['user_id'] ?? null;
+    if (!$agentId) {
+      throw new Exception('Sales agent not authenticated');
+    }
+
+    // Fetch all quote requests for this agent's customers
+    $stmt = $pdo->prepare("
+      SELECT q.*,
+             v.model_name, v.variant, v.year_model, v.base_price, v.promotional_price,
+             a.FirstName, a.LastName, a.Email,
+             ci.firstname as customer_first, ci.lastname as customer_last, ci.mobile_number
+      FROM quotes q
+      LEFT JOIN vehicles v ON q.VehicleId = v.id
+      LEFT JOIN accounts a ON q.AccountId = a.Id
+      LEFT JOIN customer_information ci ON q.AccountId = ci.account_id
+      WHERE ci.agent_id = ?
+      ORDER BY q.RequestedAt DESC
+      LIMIT 100
+    ");
+    $stmt->execute([$agentId]);
+    $all_quotes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Fetch recent quotes (last 30 days)
+    $stmt = $pdo->prepare("
+      SELECT q.*,
+             v.model_name, v.variant, v.year_model, v.base_price, v.promotional_price,
+             a.FirstName, a.LastName, a.Email,
+             ci.firstname as customer_first, ci.lastname as customer_last, ci.mobile_number
+      FROM quotes q
+      LEFT JOIN vehicles v ON q.VehicleId = v.id
+      LEFT JOIN accounts a ON q.AccountId = a.Id
+      LEFT JOIN customer_information ci ON q.AccountId = ci.account_id
+      WHERE ci.agent_id = ?
+        AND q.RequestedAt >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+      ORDER BY q.RequestedAt DESC
+    ");
+    $stmt->execute([$agentId]);
+    $recent_quotes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Calculate statistics
+    $quote_stats['total'] = count($all_quotes);
+    foreach ($all_quotes as $quote) {
+      $requestDate = strtotime($quote['RequestedAt']);
+      if ($requestDate >= strtotime('-7 days')) {
+        $quote_stats['this_week']++;
+      }
+      if ($requestDate >= strtotime('-30 days')) {
+        $quote_stats['this_month']++;
+      }
+    }
+  } catch (Exception $e) {
+    error_log("Error fetching quote requests: " . $e->getMessage());
+  }
+}
+
 // Fetch inquiry data from database
 $new_inquiries = [];
 $recent_inquiries = [];
@@ -312,7 +374,10 @@ foreach ($new_inquiries as $inquiry) {
     <i class="fas fa-credit-card"></i>
     Payment Transactions
   </button>
-
+  <button class="action-btn" id="quoteRequestBtn">
+    <i class="fas fa-file-invoice-dollar"></i>
+    Quote Requests
+  </button>
   <button class="action-btn" id="inquiryBtn">
     <i class="fas fa-question-circle"></i>
     Inquiry Management
@@ -872,6 +937,148 @@ foreach ($new_inquiries as $inquiry) {
   </div>
 </div>
 
+<!-- Quote Requests Interface -->
+<div class="interface-container" id="quoteRequestInterface">
+  <div class="interface-header">
+    <h2 class="interface-title">
+      <i class="fas fa-file-invoice-dollar"></i>
+      Instant Quote Requests
+    </h2>
+    <button class="interface-close" id="closeQuoteRequest">&times;</button>
+  </div>
+
+  <div class="tab-navigation">
+    <button class="tab-button active" data-tab="quote-recent">Recent (30 days)</button>
+    <button class="tab-button" data-tab="quote-all">All Quotes</button>
+  </div>
+
+  <div class="tab-content active" id="quote-recent">
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="info-card-title">This Week</div>
+        <div class="info-card-value"><?php echo $quote_stats['this_week']; ?></div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">This Month</div>
+        <div class="info-card-value"><?php echo $quote_stats['this_month']; ?></div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">Total Quotes</div>
+        <div class="info-card-value"><?php echo $quote_stats['total']; ?></div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="data-table responsive-table">
+        <thead>
+          <tr>
+            <th>Quote ID</th>
+            <th>Customer</th>
+            <th>Contact</th>
+            <th>Vehicle</th>
+            <th>Financing Details</th>
+            <th>Timeframe</th>
+            <th>Requested</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($recent_quotes)): ?>
+            <tr>
+              <td colspan="7" class="text-center">No recent quote requests found</td>
+            </tr>
+          <?php else: ?>
+            <?php foreach ($recent_quotes as $quote): ?>
+              <tr>
+                <td>Q-<?php echo str_pad($quote['Id'], 5, '0', STR_PAD_LEFT); ?></td>
+                <td>
+                  <?php echo htmlspecialchars($quote['FirstName'] . ' ' . $quote['LastName']); ?>
+                  <br><small><?php echo htmlspecialchars($quote['Email']); ?></small>
+                </td>
+                <td><?php echo htmlspecialchars($quote['PhoneNumber']); ?></td>
+                <td>
+                  <?php echo htmlspecialchars($quote['model_name']); ?>
+                  <?php if ($quote['variant']): ?>
+                    <br><small><?php echo htmlspecialchars($quote['variant']); ?></small>
+                  <?php endif; ?>
+                  <br><small><?php echo $quote['year_model']; ?></small>
+                </td>
+                <td>
+                  <?php if ($quote['payment_plan_calculated']): ?>
+                    <strong>Down Payment:</strong> ₱<?php echo number_format($quote['down_payment'], 2); ?><br>
+                    <strong>Term:</strong> <?php echo $quote['financing_term']; ?> months<br>
+                    <strong>Monthly:</strong> ₱<?php echo number_format($quote['monthly_payment'], 2); ?>
+                  <?php else: ?>
+                    <span class="text-muted">No financing details</span>
+                  <?php endif; ?>
+                </td>
+                <td><?php echo htmlspecialchars($quote['PurchaseTimeframe']); ?></td>
+                <td><?php echo date('M d, Y H:i', strtotime($quote['RequestedAt'])); ?></td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="tab-content" id="quote-all">
+    <div class="table-container">
+      <table class="data-table responsive-table">
+        <thead>
+          <tr>
+            <th>Quote ID</th>
+            <th>Customer</th>
+            <th>Vehicle</th>
+            <th>Location</th>
+            <th>Timeframe</th>
+            <th>Requested</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($all_quotes)): ?>
+            <tr>
+              <td colspan="7" class="text-center">No quote requests found</td>
+            </tr>
+          <?php else: ?>
+            <?php foreach ($all_quotes as $quote): ?>
+              <tr>
+                <td>Q-<?php echo str_pad($quote['Id'], 5, '0', STR_PAD_LEFT); ?></td>
+                <td>
+                  <?php echo htmlspecialchars($quote['FirstName'] . ' ' . $quote['LastName']); ?>
+                  <br><small><?php echo htmlspecialchars($quote['Email']); ?></small>
+                </td>
+                <td>
+                  <?php echo htmlspecialchars($quote['model_name']); ?>
+                  <?php if ($quote['variant']): ?>
+                    <?php echo htmlspecialchars($quote['variant']); ?>
+                  <?php endif; ?>
+                  (<?php echo $quote['year_model']; ?>)
+                </td>
+                <td><?php echo htmlspecialchars($quote['PreferredLocation'] ?? 'N/A'); ?></td>
+                <td><?php echo htmlspecialchars($quote['PurchaseTimeframe']); ?></td>
+                <td><?php echo date('M d, Y', strtotime($quote['RequestedAt'])); ?></td>
+                <td>
+                  <?php
+                    $status = $quote['QuoteStatus'] ?? 'Pending';
+                    $badgeClass = 'badge-warning';
+                    if ($status == 'Completed') $badgeClass = 'badge-success';
+                    elseif ($status == 'In Progress') $badgeClass = 'badge-info';
+                    elseif ($status == 'Expired') $badgeClass = 'badge-danger';
+                  ?>
+                  <span class="badge <?php echo $badgeClass; ?>">
+                    <?php echo htmlspecialchars($status); ?>
+                  </span>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <!-- Inquiry Management Interface -->
 <div class="interface-container" id="inquiryInterface">
   <div class="interface-header">
@@ -1095,16 +1302,19 @@ foreach ($new_inquiries as $inquiry) {
     const testDriveBtn = document.getElementById('testDriveBtn');
     const paymentTransactionBtn = document.getElementById('paymentTransactionBtn');
     const amortizationBtn = document.getElementById('amortizationBtn');
+    const quoteRequestBtn = document.getElementById('quoteRequestBtn');
     const inquiryBtn = document.getElementById('inquiryBtn');
 
     const testDriveInterface = document.getElementById('testDriveInterface');
     const paymentTransactionInterface = document.getElementById('paymentTransactionInterface');
     const amortizationInterface = document.getElementById('amortizationInterface');
+    const quoteRequestInterface = document.getElementById('quoteRequestInterface');
     const inquiryInterface = document.getElementById('inquiryInterface');
 
     const closeTestDrive = document.getElementById('closeTestDrive');
     const closePaymentTransaction = document.getElementById('closePaymentTransaction');
     const closeAmortization = document.getElementById('closeAmortization');
+    const closeQuoteRequest = document.getElementById('closeQuoteRequest');
     const closeInquiry = document.getElementById('closeInquiry');
 
     // Hide all interfaces
@@ -1112,6 +1322,7 @@ foreach ($new_inquiries as $inquiry) {
       if (testDriveInterface) testDriveInterface.style.display = 'none';
       if (paymentTransactionInterface) paymentTransactionInterface.style.display = 'none';
       if (amortizationInterface) amortizationInterface.style.display = 'none';
+      if (quoteRequestInterface) quoteRequestInterface.style.display = 'none';
       if (inquiryInterface) inquiryInterface.style.display = 'none';
     }
 
@@ -1149,6 +1360,13 @@ foreach ($new_inquiries as $inquiry) {
       });
     }
 
+    if (quoteRequestBtn) {
+      quoteRequestBtn.addEventListener('click', function() {
+        hideAllInterfaces();
+        quoteRequestInterface.style.display = 'block';
+      });
+    }
+
     if (inquiryBtn) {
       inquiryBtn.addEventListener('click', function() {
         hideAllInterfaces();
@@ -1172,6 +1390,12 @@ foreach ($new_inquiries as $inquiry) {
     if (closeAmortization) {
       closeAmortization.addEventListener('click', function() {
         amortizationInterface.style.display = 'none';
+      });
+    }
+
+    if (closeQuoteRequest) {
+      closeQuoteRequest.addEventListener('click', function() {
+        quoteRequestInterface.style.display = 'none';
       });
     }
 

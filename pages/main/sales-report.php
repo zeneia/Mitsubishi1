@@ -866,6 +866,90 @@ if (!$pdo) {
         </div>
       </div>
 
+      <!-- Yearly Sales Comparison Section -->
+      <div class="performance-section report-section">
+        <div class="section-header-enhanced">
+          <h2 class="section-title-enhanced">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Yearly Sales Comparison</span>
+          </h2>
+          <div class="section-actions">
+            <button class="btn-small-enhanced" style="background: #e67e22; color: white;" onclick="refreshYearlyComparison()">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="chart-card" style="margin-top: 20px;">
+          <div class="chart-header">
+            <div>
+              <h3 class="chart-title">Year-over-Year Revenue Comparison</h3>
+              <p class="chart-subtitle" id="yearComparisonSubtitle">Comparing current year with previous year</p>
+            </div>
+          </div>
+          <div class="chart-container" style="height: 400px;">
+            <canvas id="yearlyComparisonChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Yearly Summary Cards -->
+        <div class="kpi-grid" style="margin-top: 24px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+          <div class="kpi-card" style="border-left-color: #3498db;">
+            <div class="kpi-header">
+              <div>
+                <div class="kpi-value" id="currentYearRevenue">₱0</div>
+                <div class="kpi-label" id="currentYearLabel">Current Year Revenue</div>
+              </div>
+              <div class="kpi-icon" style="background: #3498db;">
+                <i class="fas fa-chart-line"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="kpi-card" style="border-left-color: #95a5a6;">
+            <div class="kpi-header">
+              <div>
+                <div class="kpi-value" id="previousYearRevenue">₱0</div>
+                <div class="kpi-label" id="previousYearLabel">Previous Year Revenue</div>
+              </div>
+              <div class="kpi-icon" style="background: #95a5a6;">
+                <i class="fas fa-chart-line"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="kpi-card" style="border-left-color: #27ae60;">
+            <div class="kpi-header">
+              <div>
+                <div class="kpi-value" id="yearlyRevenueGrowth">0%</div>
+                <div class="kpi-label">Revenue Growth</div>
+                <div class="kpi-change" id="yearlyRevenueGrowthIndicator">
+                  <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+              </div>
+              <div class="kpi-icon" style="background: #27ae60;">
+                <i class="fas fa-percentage"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="kpi-card" style="border-left-color: #9b59b6;">
+            <div class="kpi-header">
+              <div>
+                <div class="kpi-value" id="yearlyUnitsGrowth">0%</div>
+                <div class="kpi-label">Units Growth</div>
+                <div class="kpi-change" id="yearlyUnitsGrowthIndicator">
+                  <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+              </div>
+              <div class="kpi-icon" style="background: #9b59b6;">
+                <i class="fas fa-car"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Sales Agent Performance Section -->
       <div class="performance-section report-section">
         <div class="section-header-enhanced">
@@ -938,7 +1022,8 @@ if (!$pdo) {
     // Global variables for charts
     let salesByModelChart = null;
     let revenueChart = null;
-    
+    let yearlyComparisonChart = null;
+
     // Helper function to get filter parameters
     function getFilterParams() {
       const year = document.getElementById('report-year').value;
@@ -979,7 +1064,8 @@ if (!$pdo) {
           loadKPIData(),
           loadChartData(),
           loadPerformanceTable(),
-          loadAgentPerformance()
+          loadAgentPerformance(),
+          loadYearlyComparison()
         ]);
 
         console.log('Dashboard data loaded successfully');
@@ -1230,6 +1316,244 @@ if (!$pdo) {
       }).catch(error => {
         console.error('Error refreshing agent data:', error);
       });
+    }
+
+    // Load yearly comparison data
+    async function loadYearlyComparison() {
+      try {
+        const { year } = getFilterParams();
+        const response = await fetch(`../../api/sales-report.php?action=yearly-comparison&year=${year}`);
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        // Update summary cards
+        updateYearlySummary(data.summary);
+
+        // Initialize chart
+        initializeYearlyComparisonChart(data.months);
+
+      } catch (error) {
+        console.error('Error loading yearly comparison:', error);
+        showYearlyComparisonError();
+      }
+    }
+
+    // Update yearly summary cards
+    function updateYearlySummary(summary) {
+      // Update labels
+      document.getElementById('currentYearLabel').textContent = `${summary.current_year} Revenue`;
+      document.getElementById('previousYearLabel').textContent = `${summary.previous_year} Revenue`;
+      document.getElementById('yearComparisonSubtitle').textContent =
+        `Comparing ${summary.current_year} with ${summary.previous_year}`;
+
+      // Update values
+      document.getElementById('currentYearRevenue').textContent = formatCurrency(summary.current_total_revenue);
+      document.getElementById('previousYearRevenue').textContent = formatCurrency(summary.previous_total_revenue);
+      document.getElementById('yearlyRevenueGrowth').textContent = summary.total_revenue_growth + '%';
+      document.getElementById('yearlyUnitsGrowth').textContent = summary.total_units_growth + '%';
+
+      // Update growth indicators
+      const revenueGrowthClass = summary.total_revenue_growth >= 0 ? 'positive' : 'negative';
+      const revenueGrowthIcon = summary.total_revenue_growth >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+      document.getElementById('yearlyRevenueGrowthIndicator').innerHTML = `
+        <i class="fas ${revenueGrowthIcon}"></i> ${Math.abs(summary.total_revenue_growth)}% vs ${summary.previous_year}
+      `;
+      document.getElementById('yearlyRevenueGrowthIndicator').className = `kpi-change ${revenueGrowthClass}`;
+
+      const unitsGrowthClass = summary.total_units_growth >= 0 ? 'positive' : 'negative';
+      const unitsGrowthIcon = summary.total_units_growth >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+      document.getElementById('yearlyUnitsGrowthIndicator').innerHTML = `
+        <i class="fas ${unitsGrowthIcon}"></i> ${Math.abs(summary.total_units_growth)}% vs ${summary.previous_year}
+      `;
+      document.getElementById('yearlyUnitsGrowthIndicator').className = `kpi-change ${unitsGrowthClass}`;
+    }
+
+    // Initialize yearly comparison chart
+    function initializeYearlyComparisonChart(data) {
+      const ctx = document.getElementById('yearlyComparisonChart').getContext('2d');
+
+      // Destroy existing chart if it exists
+      if (yearlyComparisonChart) {
+        yearlyComparisonChart.destroy();
+      }
+
+      // Prepare chart data
+      const labels = data.map(item => item.month_name);
+      const currentYearData = data.map(item => item.current_revenue / 1000000); // Convert to millions
+      const previousYearData = data.map(item => item.previous_revenue / 1000000);
+
+      yearlyComparisonChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: data[0].current_year + ' Revenue',
+              data: currentYearData,
+              borderColor: '#3498db',
+              backgroundColor: 'rgba(52, 152, 219, 0.1)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4,
+              pointRadius: 5,
+              pointHoverRadius: 7,
+              pointBackgroundColor: '#3498db',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2
+            },
+            {
+              label: data[0].previous_year + ' Revenue',
+              data: previousYearData,
+              borderColor: '#95a5a6',
+              backgroundColor: 'rgba(149, 165, 166, 0.1)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4,
+              pointRadius: 5,
+              pointHoverRadius: 7,
+              pointBackgroundColor: '#95a5a6',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2,
+              borderDash: [5, 5]
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                boxWidth: 12,
+                padding: 15,
+                font: {
+                  size: 12,
+                  weight: '600'
+                }
+              }
+            },
+            tooltip: {
+              enabled: true,
+              backgroundColor: 'rgba(44, 62, 80, 0.95)',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+              titleFont: {
+                size: 13,
+                weight: 'bold'
+              },
+              bodyFont: {
+                size: 12
+              },
+              padding: 12,
+              borderColor: '#3498db',
+              borderWidth: 2,
+              displayColors: true,
+              callbacks: {
+                label: function(context) {
+                  const value = context.raw.toFixed(2);
+                  return `${context.dataset.label}: ₱${value}M`;
+                },
+                afterLabel: function(context) {
+                  // Calculate growth percentage
+                  const currentIndex = context.dataIndex;
+                  const currentValue = currentYearData[currentIndex];
+                  const previousValue = previousYearData[currentIndex];
+
+                  if (previousValue > 0) {
+                    const growth = ((currentValue - previousValue) / previousValue * 100).toFixed(1);
+                    const arrow = growth >= 0 ? '↑' : '↓';
+                    const color = growth >= 0 ? '+' : '';
+                    return `${arrow} ${color}${growth}% YoY`;
+                  }
+                  return '';
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)',
+                drawBorder: false
+              },
+              ticks: {
+                callback: function(value) {
+                  return '₱' + value.toFixed(1) + 'M';
+                },
+                font: {
+                  size: 11
+                },
+                color: '#7f8c8d'
+              }
+            },
+            x: {
+              grid: {
+                display: false,
+                drawBorder: false
+              },
+              ticks: {
+                font: {
+                  size: 11
+                },
+                color: '#7f8c8d'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Refresh yearly comparison data
+    function refreshYearlyComparison() {
+      loadYearlyComparison().then(() => {
+        showNotification('Yearly comparison data refreshed successfully!', '#e67e22');
+      }).catch(error => {
+        console.error('Error refreshing yearly comparison:', error);
+      });
+    }
+
+    // Show yearly comparison error
+    function showYearlyComparisonError() {
+      console.error('Failed to load yearly comparison data');
+    }
+
+    // Helper function to show notifications
+    function showNotification(message, color) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${color};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 6px;
+        font-size: 14px;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      `;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+
+      // Animate in
+      setTimeout(() => notification.style.opacity = '1', 100);
+
+      // Remove after 3 seconds
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => document.body.removeChild(notification), 300);
+      }, 3000);
     }
 
     // Centralized export function for all reports

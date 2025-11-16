@@ -413,6 +413,38 @@ try {
             </div>
           </div>
 
+          <!-- Unit Cost Breakdown Section -->
+          <div class="form-section">
+            <h3>Unit Cost Breakdown</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="body_package_price">Body Package (₱)</label>
+                <input type="number" id="body_package_price" name="body_package_price" class="form-control" step="0.01" value="0">
+              </div>
+              <div class="form-group">
+                <label for="aircon_package_price">Aircon Package (₱)</label>
+                <input type="number" id="aircon_package_price" name="aircon_package_price" class="form-control" step="0.01" value="0">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="white_color_surcharge">White Color Surcharge (₱)</label>
+                <input type="number" id="white_color_surcharge" name="white_color_surcharge" class="form-control" step="0.01" value="0">
+              </div>
+              <div class="form-group">
+                <label for="other_charges">Other Charges (₱)</label>
+                <input type="number" id="other_charges" name="other_charges" class="form-control" step="0.01" value="0">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="total_unit_price">Total Unit Price (₱)</label>
+                <input type="number" id="total_unit_price" name="total_unit_price" class="form-control" step="0.01" readonly style="background-color: #f0f0f0; font-weight: bold;">
+                <small class="form-text text-muted">Auto-calculated: SRP + Body + Aircon + White Color + Others</small>
+              </div>
+            </div>
+          </div>
+
           <div class="form-section">
             <h3>Order Details</h3>
             <div class="form-row">
@@ -439,16 +471,39 @@ try {
                 <input type="number" id="order_base_price" name="base_price" class="form-control" step="0.01" readonly>
               </div>
               <div class="form-group">
-                <label for="discount_amount">Discount Amount (₱)</label>
-                <input type="number" id="discount_amount" name="discount_amount" class="form-control" step="0.01" value="0">
+                <label for="nominal_discount">Nominal Discount (₱)</label>
+                <input type="number" id="nominal_discount" name="nominal_discount" class="form-control" step="0.01" value="0">
+                <small class="form-text text-muted">Standard/regular discount</small>
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
-                <label for="total_price">Total Price (₱)</label>
-                <input type="number" id="total_price" name="total_price" class="form-control" step="0.01" readonly>
+                <label for="promo_discount">Promo Discount (₱)</label>
+                <input type="number" id="promo_discount" name="promo_discount" class="form-control" step="0.01" value="0">
+                <small class="form-text text-muted">Promotional/seasonal discount</small>
               </div>
+              <div class="form-group">
+                <label for="discount_amount">Total Discount (₱)</label>
+                <input type="number" id="discount_amount" name="discount_amount" class="form-control" step="0.01" readonly style="background-color: #f0f0f0;">
+                <small class="form-text text-muted">Nominal + Promo</small>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="amount_to_invoice">Amount to be Invoiced (₱)</label>
+                <input type="number" id="amount_to_invoice" name="amount_to_invoice" class="form-control" step="0.01" readonly style="background-color: #f0f0f0; font-weight: bold;">
+                <small class="form-text text-muted">Total Unit Price - Discounts</small>
+              </div>
+              <div class="form-group">
+                <label for="total_price">Total Price (₱)</label>
+                <input type="number" id="total_price" name="total_price" class="form-control" step="0.01" readonly style="background-color: #f0f0f0;">
+                <small class="form-text text-muted">Same as Amount to Invoice</small>
+              </div>
+            </div>
+
+            <div class="form-row">
               <div class="form-group">
                 <label for="payment_method">Payment Method</label>
                 <select id="payment_method" name="payment_method" class="form-control" required>
@@ -465,11 +520,33 @@ try {
             <div id="financingDetails" style="display: none;">
               <div class="form-row">
                 <div class="form-group">
-                  <label for="down_payment">Down Payment (₱)</label>
-                  <input type="number" id="down_payment" name="down_payment" class="form-control" step="0.01">
+                  <label for="finance_percentage">Finance Percentage (%)</label>
+                  <input type="number" id="finance_percentage" name="finance_percentage" class="form-control" step="0.01" min="0" max="100" value="80">
                 </div>
                 <div class="form-group">
-                  <label for="financing_term">Financing Term</label> <select id="financing_term" name="financing_term" class="form-control">
+                  <label for="amount_finance">Amount to Finance (₱)</label>
+                  <input type="number" id="amount_finance" name="amount_finance" class="form-control" step="0.01" readonly style="background-color: #f0f0f0;">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="down_payment_percentage">Down Payment (%)</label>
+                  <input type="number" id="down_payment_percentage" name="down_payment_percentage" class="form-control" step="0.01" min="0" max="100" value="20">
+                </div>
+                <div class="form-group">
+                  <label for="down_payment">Down Payment (₱)</label>
+                  <input type="number" id="down_payment" name="down_payment" class="form-control" step="0.01" readonly style="background-color: #f0f0f0;">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="net_down_payment">Net Down Payment (₱)</label>
+                  <input type="number" id="net_down_payment" name="net_down_payment" class="form-control" step="0.01" readonly style="background-color: #f0f0f0; font-weight: bold;">
+                  <small class="form-text text-muted">Down Payment - Discounts</small>
+                </div>
+                <div class="form-group">
+                  <label for="financing_term">Financing Term</label>
+                  <select id="financing_term" name="financing_term" class="form-control">
                     <option value="">Select Term</option>
                     <option value="12 months">12 months</option>
                     <option value="24 months">24 months</option>
@@ -483,11 +560,121 @@ try {
               <div class="form-row">
                 <div class="form-group">
                   <label for="monthly_payment">Monthly Payment (₱)</label>
-                  <input type="number" id="monthly_payment" name="monthly_payment" class="form-control" step="0.01" readonly>
+                  <input type="number" id="monthly_payment" name="monthly_payment" class="form-control" step="0.01" readonly style="background-color: #f0f0f0;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Incidentals Section -->
+            <div class="form-section">
+              <h3>Incidentals (Government & Service Fees)</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="insurance_premium">Insurance Premium (₱)</label>
+                  <input type="number" id="insurance_premium" name="insurance_premium" class="form-control" step="0.01" value="0">
                 </div>
                 <div class="form-group">
-                  <label for="warranty_package">Warranty Package</label>
-                  <input type="text" id="warranty_package" name="warranty_package" class="form-control" placeholder="e.g., 3-year extended warranty">
+                  <label for="cptl_premium">CPTL Premium (₱)</label>
+                  <input type="number" id="cptl_premium" name="cptl_premium" class="form-control" step="0.01" value="0">
+                  <small class="form-text text-muted">Compulsory Third-Party Liability</small>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="lto_registration">LTO Registration (₱)</label>
+                  <input type="number" id="lto_registration" name="lto_registration" class="form-control" step="0.01" value="0">
+                </div>
+                <div class="form-group">
+                  <label for="chattel_mortgage_fee">Chattel Mortgage Fee (₱)</label>
+                  <input type="number" id="chattel_mortgage_fee" name="chattel_mortgage_fee" class="form-control" step="0.01" value="0">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="chattel_income">Chattel Income (₱)</label>
+                  <input type="number" id="chattel_income" name="chattel_income" class="form-control" step="0.01" value="0">
+                </div>
+                <div class="form-group">
+                  <label for="extended_warranty">Extended Warranty (₱)</label>
+                  <input type="number" id="extended_warranty" name="extended_warranty" class="form-control" step="0.01" value="0">
+                  <small class="form-text text-muted">2-year extended warranty</small>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="total_incidentals">Total Incidentals (₱)</label>
+                  <input type="number" id="total_incidentals" name="total_incidentals" class="form-control" step="0.01" readonly style="background-color: #f0f0f0; font-weight: bold;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Customer Cash Requirement Section -->
+            <div class="form-section" style="background-color: #fff3cd; padding: 15px; border-radius: 5px; border: 2px solid #ffc107;">
+              <h3 style="color: #856404;">💰 Customer Cash Requirement</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="reservation_fee">Reservation Fee (₱)</label>
+                  <input type="number" id="reservation_fee" name="reservation_fee" class="form-control" step="0.01" value="0">
+                </div>
+                <div class="form-group">
+                  <label for="total_cash_outlay" style="font-weight: bold; font-size: 1.1em;">TOTAL CASH OUTLAY (₱)</label>
+                  <input type="number" id="total_cash_outlay" name="total_cash_outlay" class="form-control" step="0.01" readonly style="background-color: #ffc107; font-weight: bold; font-size: 1.2em; color: #000;">
+                  <small class="form-text text-muted">Net Down Payment + Incidentals - Reservation</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dealer & Expenses Section (Admin Only) -->
+            <div class="form-section" id="dealerExpensesSection" style="display: none;">
+              <h3>🏢 Dealer Incentives & Expenses (Admin Only)</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="gross_dealer_incentive_pct">Dealer Incentive (%)</label>
+                  <input type="number" id="gross_dealer_incentive_pct" name="gross_dealer_incentive_pct" class="form-control" step="0.01" value="0">
+                </div>
+                <div class="form-group">
+                  <label for="gross_dealer_incentive">Gross Dealer Incentive (₱)</label>
+                  <input type="number" id="gross_dealer_incentive" name="gross_dealer_incentive" class="form-control" step="0.01" readonly style="background-color: #f0f0f0;">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="sfm_retain">SFM Retain (₱)</label>
+                  <input type="number" id="sfm_retain" name="sfm_retain" class="form-control" step="0.01" value="0">
+                </div>
+                <div class="form-group">
+                  <label for="sfm_additional">SFM Additional (₱)</label>
+                  <input type="number" id="sfm_additional" name="sfm_additional" class="form-control" step="0.01" value="0">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="net_dealer_incentive">Net Dealer Incentive (₱)</label>
+                  <input type="number" id="net_dealer_incentive" name="net_dealer_incentive" class="form-control" step="0.01" readonly style="background-color: #f0f0f0;">
+                </div>
+                <div class="form-group">
+                  <label for="tipster_fee">Tipster Fee (₱)</label>
+                  <input type="number" id="tipster_fee" name="tipster_fee" class="form-control" step="0.01" value="0">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="accessories_cost">Accessories Cost (₱)</label>
+                  <input type="number" id="accessories_cost" name="accessories_cost" class="form-control" step="0.01" value="0">
+                </div>
+                <div class="form-group">
+                  <label for="other_expenses">Other Expenses (₱)</label>
+                  <input type="number" id="other_expenses" name="other_expenses" class="form-control" step="0.01" value="0">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="se_share">SE Share (₱)</label>
+                  <input type="number" id="se_share" name="se_share" class="form-control" step="0.01" value="0">
+                </div>
+                <div class="form-group">
+                  <label for="net_negative">Net Profit/Loss (₱)</label>
+                  <input type="number" id="net_negative" name="net_negative" class="form-control" step="0.01" readonly style="background-color: #f0f0f0; font-weight: bold;">
                 </div>
               </div>
             </div>
@@ -518,7 +705,12 @@ try {
             </div>
 
             <div class="form-group">
-              <label for="insurance_details">Insurance Details</label>
+              <label for="warranty_package">Warranty Package</label>
+              <input type="text" id="warranty_package" name="warranty_package" class="form-control" placeholder="e.g., 3-year extended warranty">
+            </div>
+
+            <div class="form-group">
+              <label for="insurance_details">Insurance Details (Notes)</label>
               <textarea id="insurance_details" name="insurance_details" class="form-control" rows="2" placeholder="Insurance provider and policy details"></textarea>
             </div>
           </div>
@@ -820,25 +1012,122 @@ try {
     }
 
 
-    // Calculation functions
-    function calculateTotalPrice() {
-      // Get base price from the order details section
+    // Show/hide dealer expenses section based on user role
+    document.addEventListener('DOMContentLoaded', function() {
+      const userRole = '<?php echo $_SESSION['user_role'] ?? ''; ?>';
+      if (userRole === 'Admin') {
+        document.getElementById('dealerExpensesSection').style.display = 'block';
+      }
+
+      // Attach event listeners to all financial input fields
+      const financialInputs = [
+        'body_package_price', 'aircon_package_price', 'white_color_surcharge', 'other_charges',
+        'nominal_discount', 'promo_discount', 'finance_percentage', 'down_payment_percentage',
+        'insurance_premium', 'cptl_premium', 'lto_registration', 'chattel_mortgage_fee',
+        'chattel_income', 'extended_warranty', 'reservation_fee', 'gross_dealer_incentive_pct',
+        'sfm_retain', 'sfm_additional', 'tipster_fee', 'accessories_cost', 'other_expenses', 'se_share'
+      ];
+
+      financialInputs.forEach(inputId => {
+        const element = document.getElementById(inputId);
+        if (element) {
+          element.addEventListener('input', calculateFinancials);
+        }
+      });
+    });
+
+    // Comprehensive financial calculations
+    function calculateFinancials() {
+      // Get all input values
       const basePrice = parseFloat(document.getElementById('order_base_price').value) || 0;
-      const discountAmount = parseFloat(document.getElementById('discount_amount').value) || 0;
-      const totalPrice = basePrice - discountAmount;
-      document.getElementById('total_price').value = Math.max(0, totalPrice);
+      const bodyPackage = parseFloat(document.getElementById('body_package_price').value) || 0;
+      const airconPackage = parseFloat(document.getElementById('aircon_package_price').value) || 0;
+      const whiteColor = parseFloat(document.getElementById('white_color_surcharge').value) || 0;
+      const otherCharges = parseFloat(document.getElementById('other_charges').value) || 0;
+
+      const nominalDiscount = parseFloat(document.getElementById('nominal_discount').value) || 0;
+      const promoDiscount = parseFloat(document.getElementById('promo_discount').value) || 0;
+
+      const financePercentage = parseFloat(document.getElementById('finance_percentage').value) || 0;
+      const downPaymentPercentage = parseFloat(document.getElementById('down_payment_percentage').value) || 0;
+
+      const insurance = parseFloat(document.getElementById('insurance_premium').value) || 0;
+      const cptl = parseFloat(document.getElementById('cptl_premium').value) || 0;
+      const lto = parseFloat(document.getElementById('lto_registration').value) || 0;
+      const chattelFee = parseFloat(document.getElementById('chattel_mortgage_fee').value) || 0;
+      const chattelIncome = parseFloat(document.getElementById('chattel_income').value) || 0;
+      const warranty = parseFloat(document.getElementById('extended_warranty').value) || 0;
+
+      const reservationFee = parseFloat(document.getElementById('reservation_fee').value) || 0;
+
+      const dealerIncentivePct = parseFloat(document.getElementById('gross_dealer_incentive_pct').value) || 0;
+      const sfmRetain = parseFloat(document.getElementById('sfm_retain').value) || 0;
+      const sfmAdditional = parseFloat(document.getElementById('sfm_additional').value) || 0;
+      const tipsterFee = parseFloat(document.getElementById('tipster_fee').value) || 0;
+      const accessoriesCost = parseFloat(document.getElementById('accessories_cost').value) || 0;
+      const otherExpenses = parseFloat(document.getElementById('other_expenses').value) || 0;
+      const seShare = parseFloat(document.getElementById('se_share').value) || 0;
+
+      // Formula #1: Total Unit Price
+      const totalUnitPrice = basePrice + bodyPackage + airconPackage + whiteColor + otherCharges;
+      document.getElementById('total_unit_price').value = totalUnitPrice.toFixed(2);
+
+      // Formula #2: Amount to Invoice
+      const amountToInvoice = totalUnitPrice - nominalDiscount - promoDiscount;
+      document.getElementById('amount_to_invoice').value = Math.max(0, amountToInvoice).toFixed(2);
+
+      // Formula #3: Amount Finance
+      const amountFinance = totalUnitPrice * (financePercentage / 100);
+      document.getElementById('amount_finance').value = amountFinance.toFixed(2);
+
+      // Formula #4: Down Payment
+      const downPayment = totalUnitPrice * (downPaymentPercentage / 100);
+      document.getElementById('down_payment').value = downPayment.toFixed(2);
+
+      // Formula #6: Net Down Payment
+      const netDownPayment = downPayment - nominalDiscount - promoDiscount;
+      document.getElementById('net_down_payment').value = Math.max(0, netDownPayment).toFixed(2);
+
+      // Formula #7: Total Incidentals
+      const totalIncidentals = insurance + cptl + lto + chattelFee + chattelIncome + warranty;
+      document.getElementById('total_incidentals').value = totalIncidentals.toFixed(2);
+
+      // Formula #8: Total Cash Outlay
+      const totalCashOutlay = Math.max(0, netDownPayment) + totalIncidentals - reservationFee;
+      document.getElementById('total_cash_outlay').value = Math.max(0, totalCashOutlay).toFixed(2);
+
+      // Formula #9: Gross Dealer Incentive
+      const grossDealerIncentive = amountFinance * (dealerIncentivePct / 100);
+      document.getElementById('gross_dealer_incentive').value = grossDealerIncentive.toFixed(2);
+
+      // Formula #10: Net Dealer Incentive
+      const netDealerIncentive = grossDealerIncentive - sfmRetain;
+      document.getElementById('net_dealer_incentive').value = netDealerIncentive.toFixed(2);
+
+      // Formula #13: Net Negative (simplified - full formula in backend)
+      const totalExpenses = nominalDiscount + promoDiscount + sfmAdditional + totalIncidentals + tipsterFee + accessoriesCost + otherExpenses;
+      const netNegative = totalExpenses + seShare;
+      document.getElementById('net_negative').value = netNegative.toFixed(2);
+
+      // Update legacy fields for backward compatibility
+      document.getElementById('discount_amount').value = (nominalDiscount + promoDiscount).toFixed(2);
+      document.getElementById('total_price').value = Math.max(0, amountToInvoice).toFixed(2);
+    }
+
+    // Legacy function for backward compatibility
+    function calculateTotalPrice() {
+      calculateFinancials();
     }
 
     async function calculateMonthlyPayment() {
-      const totalPrice = parseFloat(document.getElementById('total_price').value) || 0;
-      const downPayment = parseFloat(document.getElementById('down_payment').value) || 0;
+      const amountFinance = parseFloat(document.getElementById('amount_finance').value) || 0;
       const financingTerm = document.getElementById('financing_term').value;
 
-      if (totalPrice > 0 && downPayment >= 0 && financingTerm) {
+      if (amountFinance > 0 && financingTerm) {
         const months = parseInt(financingTerm.split(' ')[0]);
-        
+
         try {
-          // Use centralized payment calculator
+          // Use centralized payment calculator with amount_finance
           const response = await fetch('../../includes/payment_calculator.php', {
             method: 'POST',
             headers: {
@@ -846,8 +1135,8 @@ try {
             },
             body: JSON.stringify({
               action: 'calculate',
-              vehicle_price: totalPrice,
-              down_payment: downPayment,
+              vehicle_price: amountFinance,
+              down_payment: 0, // Already factored into amount_finance
               financing_term: months
             })
           });
