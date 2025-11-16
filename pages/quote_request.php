@@ -319,8 +319,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: #ffd700;
-            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+            border-color: #E60012;
+            box-shadow: 0 0 0 2px rgba(165, 16, 16, 0.6);
         }
 
         input::placeholder, textarea::placeholder {
@@ -471,8 +471,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .payment-summary {
-            background: rgba(255, 215, 0, 0.1);
-            border: 1px solid rgba(255, 215, 0, 0.3);
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(104, 103, 103, 1);
             border-radius: 10px;
             padding: 20px;
             margin-top: 20px;
@@ -493,7 +493,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .summary-item label {
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(0, 0, 0, 0.8);
             font-size: 0.9rem;
             margin: 0;
             text-transform: none;
@@ -662,19 +662,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         
                         <div id="paymentSummary" class="payment-summary" style="display: none;">
-                            <h4 style="color: #fff; margin-bottom: 15px;">Payment Summary</h4>
+                            <h4 style="color: #E60012; margin-bottom: 15px;">Payment Summary</h4>
                             <div class="summary-grid">
                                 <div class="summary-item">
                                     <label>Vehicle Price:</label>
-                                    <span id="displayVehiclePrice">₱<?php echo number_format($vehicle['promotional_price'] > 0 && $vehicle['promotional_price'] < $vehicle['base_price'] ? $vehicle['promotional_price'] : $vehicle['base_price'], 2); ?></span>
+                                    <span style="color: #E60012;" id="displayVehiclePrice">₱<?php echo number_format($vehicle['promotional_price'] > 0 && $vehicle['promotional_price'] < $vehicle['base_price'] ? $vehicle['promotional_price'] : $vehicle['base_price'], 2); ?></span>
                                 </div>
                                 <div class="summary-item">
                                     <label>Down Payment:</label>
-                                    <span id="displayDownPayment">₱0.00</span>
+                                    <span style="color: #E60012;" id="displayDownPayment">₱0.00</span>
                                 </div>
                                 <div class="summary-item">
                                     <label>Amount to Finance:</label>
-                                    <span id="amountToFinance">₱0.00</span>
+                                    <span style="color: #E60012;" id="amountToFinance">₱0.00</span>
                                 </div>
                                 <div class="summary-item">
                                     <label>Monthly Payment:</label>
@@ -682,11 +682,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                                 <div class="summary-item">
                                     <label>Total Amount:</label>
-                                    <span id="totalPayable">₱0.00</span>
+                                    <span style="color: #E60012;" id="totalPayable">₱0.00</span>
                                 </div>
                                 <div class="summary-item">
                                     <label>Total Interest:</label>
-                                    <span id="totalInterest">₱0.00</span>
+                                    <span style="color: #E60012;" id="totalInterest">₱0.00</span>
                                 </div>
                             </div>
                         </div>
