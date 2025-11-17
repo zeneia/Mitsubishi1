@@ -18,6 +18,8 @@ Modified Files:
 15. pages/order_details.php
 16. includes/backend/order_backend.php
 17. pages/test_drive_success.php
+18. pages/pms_record.php
+19. pages/customer.php
 
 Created Files:
 ==============
@@ -25,4 +27,9 @@ Created Files:
 1. SYSTEM_REVISION_IMPLEMENTATION_GUIDE.md
 2. includes/database/add_financial_fields.sql
 3. includes/financial_calculator.php
+4. includes/database/create_pms_inquiry_tables.sql
+5. pages/my_pms_inquiries.php
+6. pages/pms_inquiry_chat.php
+7. pages/agent_pms_inquiries.php
+8. pages/agent_pms_chat.php
 
