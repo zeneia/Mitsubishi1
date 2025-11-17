@@ -19,20 +19,40 @@ if (!$request_id) {
 }
 
 try {
-    // Fetch test drive request details
+    // Fetch test drive request details with approver information
     $stmt = $connect->prepare("
-        SELECT tdr.*, v.model_name, v.variant, v.year_model
-        FROM test_drive_requests tdr 
-        LEFT JOIN vehicles v ON tdr.vehicle_id = v.id 
+        SELECT tdr.*,
+               v.model_name,
+               v.variant,
+               v.year_model,
+               CONCAT(approver.FirstName, ' ', approver.LastName) as approved_by_name,
+               CONCAT(agent.FirstName, ' ', agent.LastName) as agent_name
+        FROM test_drive_requests tdr
+        LEFT JOIN vehicles v ON tdr.vehicle_id = v.id
+        LEFT JOIN accounts approver ON tdr.approved_by = approver.Id
+        LEFT JOIN customer_information ci ON tdr.account_id = ci.account_id
+        LEFT JOIN accounts agent ON ci.agent_id = agent.Id
         WHERE tdr.id = ? AND tdr.account_id = ?
     ");
     $stmt->execute([$request_id, $_SESSION['user_id']]);
     $request = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     if (!$request) {
         header("Location: customer.php");
         exit;
     }
+
+    // Extract license number from notes if available (same logic as PDF)
+    $license_number = 'N/A';
+    if (!empty($request['notes'])) {
+        if (preg_match('/License Number:\s*(.+?)(?:\n|$)/i', $request['notes'], $matches)) {
+            $license_number = trim($matches[1]);
+        }
+    }
+
+    // Determine who approved (use approved_by if available, otherwise use agent)
+    $approver_name = !empty($request['approved_by_name']) ? $request['approved_by_name'] :
+                     (!empty($request['agent_name']) ? $request['agent_name'] : 'Pending Approval');
 } catch (PDOException $e) {
     error_log("Database error: " . $e->getMessage());
     header("Location: customer.php");
@@ -350,14 +370,18 @@ $instructor_agent = 'Reo Remos';
                                 <span class="field-value"><?php echo htmlspecialchars($request['customer_name']); ?></span>
                             </div>
                             <div class="gate-pass-field">
+                                <span class="field-label">License Number:</span>
+                                <span class="field-value"><?php echo htmlspecialchars($license_number); ?></span>
+                            </div>
+                            <div class="gate-pass-field">
                                 <span class="field-label">Vehicle:</span>
                                 <span class="field-value">
-                                    <?php 
+                                    <?php
                                     $vehicleInfo = [];
                                     if (!empty($request['model_name'])) $vehicleInfo[] = $request['model_name'];
                                     if (!empty($request['variant'])) $vehicleInfo[] = $request['variant'];
                                     if (!empty($request['year_model'])) $vehicleInfo[] = $request['year_model'];
-                                    echo htmlspecialchars(implode(' ', $vehicleInfo)); 
+                                    echo htmlspecialchars(implode(' ', $vehicleInfo));
                                     ?>
                                 </span>
                             </div>
@@ -378,6 +402,10 @@ $instructor_agent = 'Reo Remos';
                             <div class="gate-pass-field">
                                 <span class="field-label">Instructor:</span>
                                 <span class="field-value"><?php echo !empty($request['instructor_agent']) ? htmlspecialchars($request['instructor_agent']) : 'To be assigned'; ?></span>
+                            </div>
+                            <div class="gate-pass-field">
+                                <span class="field-label">Approved By:</span>
+                                <span class="field-value"><?php echo htmlspecialchars($approver_name); ?></span>
                             </div>
                         </div>
                     </div>

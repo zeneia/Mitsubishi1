@@ -60,6 +60,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 				// Generate gate pass number
 				$gate_pass_number = 'MAG-' . strtoupper(substr(md5(time() . $request_id), 0, 8));
 
+				// Preserve original notes so details like License Number are not lost
+				$existingNotesStmt = $pdo->prepare("SELECT notes FROM test_drive_requests WHERE id = ?");
+				$existingNotesStmt->execute([$request_id]);
+				$existingNotesRow = $existingNotesStmt->fetch(PDO::FETCH_ASSOC);
+				$existingNotes = $existingNotesRow['notes'] ?? '';
+
+				$combinedNotes = $existingNotes;
+				if ($notes !== '') {
+					if ($combinedNotes !== '') {
+						$combinedNotes .= "\n\n--- Approval Notes ---\n" . $notes;
+					} else {
+						$combinedNotes = $notes;
+					}
+				}
+
 				$stmt = $pdo->prepare("
                     UPDATE test_drive_requests
                     SET status = 'Approved',
@@ -71,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         gatepass_generated_at = NOW()
                     WHERE id = ?
                 ");
-				$stmt->execute([$_SESSION['user_id'], $instructor, $notes, $gate_pass_number, $request_id]);
+				$stmt->execute([$_SESSION['user_id'], $instructor, $combinedNotes, $gate_pass_number, $request_id]);
 
 				// --- Notification Logic (In-app) ---
 				require_once '../../includes/api/notification_api.php';
