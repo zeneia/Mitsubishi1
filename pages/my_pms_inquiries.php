@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 include_once(dirname(__DIR__) . '/includes/init.php');
 
@@ -31,7 +34,10 @@ if (!empty($user['ProfileImage'])) {
 // Fetch customer's PMS inquiries
 $inquiries = [];
 $table_exists = true;
+$query_error = null;
+
 try {
+    // Simplified query without subqueries first
     $stmt_inquiries = $pdo->prepare("
         SELECT
             pi.id as inquiry_id,
@@ -46,8 +52,6 @@ try {
             cpr.pms_date,
             cpr.customer_needs,
             cpr.current_odometer,
-            (SELECT COUNT(*) FROM pms_messages WHERE inquiry_id = pi.id AND is_read = 0 AND sender_type = 'Agent') as unread_messages,
-            (SELECT COUNT(*) FROM pms_messages WHERE inquiry_id = pi.id) as total_messages,
             CONCAT(COALESCE(a.FirstName, ''), ' ', COALESCE(a.LastName, '')) as agent_name
         FROM pms_inquiries pi
         LEFT JOIN car_pms_records cpr ON pi.pms_id = cpr.pms_id
@@ -57,12 +61,32 @@ try {
     ");
     $stmt_inquiries->execute([$_SESSION['user_id']]);
     $inquiries = $stmt_inquiries->fetchAll(PDO::FETCH_ASSOC);
+
+    // Now add message counts separately
+    foreach ($inquiries as &$inquiry) {
+        try {
+            $msg_stmt = $pdo->prepare("SELECT COUNT(*) as unread FROM pms_messages WHERE inquiry_id = ? AND is_read = 0 AND sender_type = 'Agent'");
+            $msg_stmt->execute([$inquiry['inquiry_id']]);
+            $inquiry['unread_messages'] = $msg_stmt->fetchColumn();
+
+            $total_stmt = $pdo->prepare("SELECT COUNT(*) as total FROM pms_messages WHERE inquiry_id = ?");
+            $total_stmt->execute([$inquiry['inquiry_id']]);
+            $inquiry['total_messages'] = $total_stmt->fetchColumn();
+        } catch (Exception $e) {
+            $inquiry['unread_messages'] = 0;
+            $inquiry['total_messages'] = 0;
+        }
+    }
 } catch (PDOException $e) {
     $table_exists = false;
-    error_log("Database error: " . $e->getMessage());
+    $query_error = $e->getMessage();
+    error_log("Database error in my_pms_inquiries.php: " . $query_error);
 }
 
 $success_message = isset($_GET['success']) ? "Your PMS inquiry has been submitted successfully!" : '';
+
+// Debug: Log that we reached this point
+error_log("DEBUG: my_pms_inquiries.php - Reached line 72, about to output HTML");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -72,6 +96,8 @@ $success_message = isset($_GET['success']) ? "Your PMS inquiry has been submitte
     <title>My PMS Inquiries - Mitsubishi Motors</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Basic styles to ensure page is visible */
+        html, body { width: 100%; height: 100%; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
         body { background: #f5f5f5; color: #333; min-height: 100vh; }
         .header { background: #000; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 215, 0, 0.2); }
@@ -146,6 +172,9 @@ $success_message = isset($_GET['success']) ? "Your PMS inquiry has been submitte
         <?php if (!$table_exists): ?>
             <div class="alert" style="background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                 <i class="fas fa-exclamation-triangle"></i> <strong>Database Setup Required:</strong> The PMS inquiry system tables have not been created yet. Please execute the SQL queries in phpMyAdmin to enable this feature. Contact your administrator for assistance.
+                <?php if ($query_error): ?>
+                    <br><small>Error: <?php echo htmlspecialchars($query_error); ?></small>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
 
