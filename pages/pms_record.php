@@ -1,7 +1,6 @@
 <?php
 session_start();
 include_once(dirname(__DIR__) . '/includes/init.php');
-include_once(dirname(__DIR__) . '/pages/header_ex.php');
 
 // Check if user is logged in and is a customer
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'Customer') {
@@ -24,6 +23,17 @@ $stmt = $connect->prepare("SELECT * FROM accounts WHERE Id = ?");
 $stmt->execute([$_SESSION['user_id']]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username'];
+
+// Prepare profile image HTML
+$profile_image_html = '';
+if (!empty($user['ProfileImage'])) {
+    $imageData = base64_encode($user['ProfileImage']);
+    $imageMimeType = 'image/jpeg';
+    $profile_image_html = '<img src="data:' . $imageMimeType . ';base64,' . $imageData . '" alt="User Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">';
+} else {
+    // Show initial if no profile image
+    $profile_image_html = strtoupper(substr($displayName, 0, 1));
+}
 
 // Get vehicle ID if passed from car_details page
 $selected_vehicle_id = isset($_GET['vehicle_id']) ? (int)$_GET['vehicle_id'] : null;
@@ -399,7 +409,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
-
+    <div class="header">
+        <div class="logo-section">
+            <img src="../includes/images/mitsubishi_logo.png" alt="Mitsubishi Logo" class="logo">
+            <div class="brand-text">MITSUBISHI MOTORS</div>
+        </div>
+        <div class="user-section">
+            <div class="user-avatar"><?php echo $profile_image_html; ?></div>
+            <span class="welcome-text">Welcome, <?php echo htmlspecialchars($displayName); ?>!</span>
+            <button class="logout-btn" onclick="window.location.href='logout.php'">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
 
     <div class="container">
         <a href="<?php echo $selected_vehicle_id ? 'car_details.php?id=' . $selected_vehicle_id : 'car_menu.php'; ?>" class="back-btn">

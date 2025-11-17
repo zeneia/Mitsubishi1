@@ -18,7 +18,7 @@ Modified Files:
 15. pages/order_details.php
 16. includes/backend/order_backend.php
 17. pages/test_drive_success.php
-18. pages/pms_record.php (Updated with error handling for missing tables)
+18. pages/pms_record.php (Removed header_ex.php include, added header HTML, fixed redirect issue)
 19. pages/customer.php
 20. pages/my_pms_inquiries.php (Fixed: removed header_ex.php include, simplified query, added error display)
 21. pages/pms_inquiry_chat.php (Fixed: removed header_ex.php include)
