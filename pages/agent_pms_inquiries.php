@@ -37,6 +37,7 @@ try {
         SELECT
             pi.id as inquiry_id,
             pi.pms_id,
+            pi.customer_id,
             pi.status,
             pi.created_at,
             pi.updated_at,
@@ -51,7 +52,7 @@ try {
             acc.PhoneNumber
         FROM pms_inquiries pi
         LEFT JOIN car_pms_records cpr ON pi.pms_id = cpr.pms_id
-        LEFT JOIN accounts acc ON cpr.customer_id = acc.Id
+        LEFT JOIN accounts acc ON pi.customer_id = acc.Id
         ORDER BY pi.created_at DESC
     ");
     $stmt_inquiries->execute();
@@ -173,13 +174,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             </div>
         <?php else: ?>
             <?php foreach ($inquiries as $inquiry): ?>
+                <?php
+                // Handle NULL values
+                $model = $inquiry['model'] ?? 'Unknown Model';
+                $pms_info = $inquiry['pms_info'] ?? 'PMS Service';
+                $plate_number = $inquiry['plate_number'] ?? 'N/A';
+                $customer_name = trim(($inquiry['FirstName'] ?? '') . ' ' . ($inquiry['LastName'] ?? ''));
+                if (empty($customer_name)) {
+                    $customer_name = 'Unknown Customer';
+                }
+                $email = $inquiry['Email'] ?? 'N/A';
+                ?>
                 <div class="inquiry-card">
                     <div class="inquiry-header">
                         <div>
                             <div class="inquiry-title">
-                                <?php echo htmlspecialchars($inquiry['model'] . ' - ' . $inquiry['pms_info']); ?>
+                                <?php echo htmlspecialchars($model . ' - ' . $pms_info); ?>
                             </div>
-                            <small style="color: #999;">Plate: <?php echo htmlspecialchars($inquiry['plate_number']); ?></small>
+                            <small style="color: #999;">Plate: <?php echo htmlspecialchars($plate_number); ?></small>
                         </div>
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <span class="inquiry-status status-<?php echo strtolower(str_replace(' ', '-', $inquiry['status'])); ?>">
@@ -187,15 +199,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             </span>
                         </div>
                     </div>
-                    
+
                     <div class="inquiry-details">
                         <div class="detail-item">
                             <span class="detail-label">Customer</span>
-                            <span class="detail-value"><?php echo htmlspecialchars($inquiry['FirstName'] . ' ' . $inquiry['LastName']); ?></span>
+                            <span class="detail-value"><?php echo htmlspecialchars($customer_name); ?></span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Contact</span>
-                            <span class="detail-value"><?php echo htmlspecialchars($inquiry['Email']); ?></span>
+                            <span class="detail-value"><?php echo htmlspecialchars($email); ?></span>
                         </div>
                     </div>
 
