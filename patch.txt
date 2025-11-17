@@ -30,6 +30,9 @@ Modified Files:
 27. pages/agent_pms_inquiries.php (Fixed: Added assigned_agent_id to SELECT query)
 28. includes/components/sales_agent_dashboard.php (Fixed: Added assigned_agent_id to SELECT query)
 29. pages/agent_pms_inquiries.php (CRITICAL FIX: Changed JOIN from cpr.customer_id to pi.customer_id, added NULL value handling)
+30. pages/debug_pms_inquiries.php (Fixed: Changed JOIN from cpr.customer_id to pi.customer_id)
+31. pages/debug_agent_pms.php (Fixed: Changed JOIN from cpr.customer_id to pi.customer_id)
+32. includes/components/sales_agent_dashboard.php (Fixed: Changed JOIN from cpr.customer_id to pi.customer_id)
 
 Created Files:
 ==============

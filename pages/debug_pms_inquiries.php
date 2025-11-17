@@ -30,13 +30,13 @@ try {
 echo "<h2>All PMS Inquiries:</h2>";
 try {
     $stmt = $pdo->query("
-        SELECT 
+        SELECT
             pi.id, pi.pms_id, pi.customer_id, pi.assigned_agent_id, pi.status, pi.created_at,
             cpr.plate_number, cpr.model,
             acc.FirstName, acc.LastName
         FROM pms_inquiries pi
         LEFT JOIN car_pms_records cpr ON pi.pms_id = cpr.pms_id
-        LEFT JOIN accounts acc ON cpr.customer_id = acc.Id
+        LEFT JOIN accounts acc ON pi.customer_id = acc.Id
         ORDER BY pi.created_at DESC
     ");
     $inquiries = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -66,13 +66,13 @@ try {
 echo "<h2>Inquiries for Agent $agent_id:</h2>";
 try {
     $stmt = $pdo->prepare("
-        SELECT 
+        SELECT
             pi.id, pi.pms_id, pi.customer_id, pi.assigned_agent_id, pi.status, pi.created_at,
             cpr.plate_number, cpr.model,
             acc.FirstName, acc.LastName
         FROM pms_inquiries pi
         LEFT JOIN car_pms_records cpr ON pi.pms_id = cpr.pms_id
-        LEFT JOIN accounts acc ON cpr.customer_id = acc.Id
+        LEFT JOIN accounts acc ON pi.customer_id = acc.Id
         WHERE pi.assigned_agent_id = ? OR pi.assigned_agent_id IS NULL
         ORDER BY pi.created_at DESC
     ");

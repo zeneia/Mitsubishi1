@@ -25,6 +25,7 @@ try {
         SELECT
             pi.id as inquiry_id,
             pi.pms_id,
+            pi.customer_id,
             pi.status,
             pi.created_at,
             pi.updated_at,
@@ -39,7 +40,7 @@ try {
             acc.PhoneNumber
         FROM pms_inquiries pi
         LEFT JOIN car_pms_records cpr ON pi.pms_id = cpr.pms_id
-        LEFT JOIN accounts acc ON cpr.customer_id = acc.Id
+        LEFT JOIN accounts acc ON pi.customer_id = acc.Id
         ORDER BY pi.created_at DESC
     ");
     $stmt_inquiries->execute();

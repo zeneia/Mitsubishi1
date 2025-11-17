@@ -318,6 +318,7 @@ if (isset($pdo) && $pdo) {
     $stmt = $pdo->prepare("
       SELECT
         pi.id as inquiry_id,
+        pi.customer_id,
         pi.status,
         pi.created_at,
         pi.assigned_agent_id,
@@ -328,7 +329,7 @@ if (isset($pdo) && $pdo) {
         (SELECT COUNT(*) FROM pms_messages WHERE inquiry_id = pi.id AND is_read = 0 AND sender_type = 'Customer') as unread_messages
       FROM pms_inquiries pi
       LEFT JOIN car_pms_records cpr ON pi.pms_id = cpr.pms_id
-      LEFT JOIN accounts acc ON cpr.customer_id = acc.Id
+      LEFT JOIN accounts acc ON pi.customer_id = acc.Id
       WHERE pi.assigned_agent_id = ? OR pi.assigned_agent_id IS NULL
       ORDER BY pi.created_at DESC
       LIMIT 100
