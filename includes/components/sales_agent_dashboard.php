@@ -430,7 +430,7 @@ foreach ($new_inquiries as $inquiry) {
     <i class="fas fa-question-circle"></i>
     Inquiry Management
   </button>
-  <a href="pages/agent_pms_inquiries.php" class="action-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+  <a href="/pages/agent_pms_inquiries.php" class="action-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
     <i class="fas fa-wrench"></i>
     PMS Inquiries Management
   </a>
