@@ -1,7 +1,6 @@
 <?php
 session_start();
 include_once(dirname(__DIR__) . '/includes/init.php');
-include_once(dirname(__DIR__) . '/pages/header_ex.php');
 
 // Check if user is logged in and is a customer
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'Customer') {
@@ -30,9 +29,11 @@ if (!empty($user['ProfileImage'])) {
 }
 
 // Fetch customer's PMS inquiries
+$inquiries = [];
+$table_exists = true;
 try {
     $stmt_inquiries = $pdo->prepare("
-        SELECT 
+        SELECT
             pi.id as inquiry_id,
             pi.pms_id,
             pi.status,
@@ -57,7 +58,7 @@ try {
     $stmt_inquiries->execute([$_SESSION['user_id']]);
     $inquiries = $stmt_inquiries->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    $inquiries = [];
+    $table_exists = false;
     error_log("Database error: " . $e->getMessage());
 }
 
@@ -139,6 +140,12 @@ $success_message = isset($_GET['success']) ? "Your PMS inquiry has been submitte
         <?php if ($success_message): ?>
             <div class="alert alert-success">
                 <i class="fas fa-check-circle"></i> <?php echo $success_message; ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!$table_exists): ?>
+            <div class="alert" style="background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Database Setup Required:</strong> The PMS inquiry system tables have not been created yet. Please execute the SQL queries in phpMyAdmin to enable this feature. Contact your administrator for assistance.
             </div>
         <?php endif; ?>
 

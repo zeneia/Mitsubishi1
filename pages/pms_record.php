@@ -107,16 +107,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Get the inserted PMS record ID
         $pms_id = $connect->lastInsertId();
 
-        // Create a PMS inquiry record
-        $stmt_inquiry = $connect->prepare("
-            INSERT INTO pms_inquiries (pms_id, customer_id, inquiry_type, status, created_at)
-            VALUES (?, ?, 'PMS', 'Open', NOW())
-        ");
-        $stmt_inquiry->execute([$pms_id, $_SESSION['user_id']]);
+        // Create a PMS inquiry record (if table exists)
+        try {
+            $stmt_inquiry = $connect->prepare("
+                INSERT INTO pms_inquiries (pms_id, customer_id, inquiry_type, status, created_at)
+                VALUES (?, ?, 'PMS', 'Open', NOW())
+            ");
+            $stmt_inquiry->execute([$pms_id, $_SESSION['user_id']]);
 
-        // Redirect to My PMS Inquiries page
-        header("Location: my_pms_inquiries.php?success=1");
-        exit;
+            // Redirect to My PMS Inquiries page
+            header("Location: my_pms_inquiries.php?success=1");
+            exit;
+        } catch (PDOException $e) {
+            // If pms_inquiries table doesn't exist, show success message instead
+            error_log("PMS Inquiry table error: " . $e->getMessage());
+            $success_message = "PMS request has been submitted successfully! Please execute the database SQL queries to enable the inquiry tracking system.";
+        }
         
     } catch (Exception $e) {
         $error_message = $e->getMessage();

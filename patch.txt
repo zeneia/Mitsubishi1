@@ -18,8 +18,9 @@ Modified Files:
 15. pages/order_details.php
 16. includes/backend/order_backend.php
 17. pages/test_drive_success.php
-18. pages/pms_record.php
+18. pages/pms_record.php (Updated with error handling for missing tables)
 19. pages/customer.php
+20. pages/my_pms_inquiries.php (Updated with error handling for missing tables)
 
 Created Files:
 ==============
@@ -32,4 +33,7 @@ Created Files:
 6. pages/pms_inquiry_chat.php
 7. pages/agent_pms_inquiries.php
 8. pages/agent_pms_chat.php
+9. PMS_SYSTEM_IMPLEMENTATION_SUMMARY.md
+10. DATABASE_SETUP_INSTRUCTIONS.md
+11. QUICK_SQL_SETUP.sql
 
