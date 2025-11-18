@@ -7,7 +7,7 @@ Modified Files:
 4. pages/quote_amortization.php
 5. api/sales-report.php
 6. pages/main/sales-report.php
-7. includes/components/sales_agent_dashboard.php
+7. includes/components/sales_agent_dashboard.php (Added PMS Inquiries card and button to dashboard)
 8. pages/header_ex.php
 9. pages/test/test_drive_management.php
 10. includes/backend/test_drive_backend.php
@@ -18,6 +18,25 @@ Modified Files:
 15. pages/order_details.php
 16. includes/backend/order_backend.php
 17. pages/test_drive_success.php
+18. pages/pms_record.php (Removed header_ex.php include, added header HTML, fixed redirect issue)
+19. pages/customer.php
+20. pages/my_pms_inquiries.php (Fixed: removed header_ex.php include, simplified query, added error display)
+21. pages/pms_inquiry_chat.php (Fixed: removed header_ex.php include)
+22. pages/agent_pms_inquiries.php (Fixed: removed header_ex.php include)
+23. pages/agent_pms_chat.php (Fixed: removed header_ex.php include)
+24. includes/css/dashboard-styles.css (Added orange color class for PMS card icon)
+25. pages/agent_pms_inquiries.php (Fixed: Changed query to show ALL PMS inquiries, not just assigned/unassigned)
+26. pages/pms_record.php (Fixed: Now assigns PMS inquiry to customer's assigned agent when created)
+27. pages/agent_pms_inquiries.php (Fixed: Added assigned_agent_id to SELECT query)
+28. includes/components/sales_agent_dashboard.php (Fixed: Added assigned_agent_id to SELECT query)
+29. pages/agent_pms_inquiries.php (CRITICAL FIX: Changed JOIN from cpr.customer_id to pi.customer_id, added NULL value handling)
+30. pages/debug_pms_inquiries.php (Fixed: Changed JOIN from cpr.customer_id to pi.customer_id)
+31. pages/debug_agent_pms.php (Fixed: Changed JOIN from cpr.customer_id to pi.customer_id)
+32. includes/components/sales_agent_dashboard.php (Fixed: Changed JOIN from cpr.customer_id to pi.customer_id)
+33. pages/agent_pms_inquiries.php (Fixed: Added customer_information JOIN to get mobile_number, changed PhoneNumber to use ci.mobile_number)
+34. pages/debug_agent_pms.php (Fixed: Added customer_information JOIN to get mobile_number)
+35. includes/components/sales_agent_dashboard.php (Fixed: Added customer_information JOIN to get mobile_number)
+36. pages/agent_pms_chat.php (Fixed: Changed JOIN from cpr.customer_id to pi.customer_id, added customer_information JOIN, added NULL value handling)
 
 Created Files:
 ==============
@@ -25,4 +44,16 @@ Created Files:
 1. SYSTEM_REVISION_IMPLEMENTATION_GUIDE.md
 2. includes/database/add_financial_fields.sql
 3. includes/financial_calculator.php
+4. includes/database/create_pms_inquiry_tables.sql
+5. pages/my_pms_inquiries.php
+6. pages/pms_inquiry_chat.php
+7. pages/agent_pms_inquiries.php
+8. pages/agent_pms_chat.php
+9. PMS_SYSTEM_IMPLEMENTATION_SUMMARY.md
+10. DATABASE_SETUP_INSTRUCTIONS.md
+11. QUICK_SQL_SETUP.sql
+12. pages/debug_pms.php (Debug page to check database structure)
+13. pages/test_pms_simple.php (Simple test page to verify PMS system)
+14. PMS_AGENT_GUIDE.md (Guide for sales agents on how to use PMS messaging system)
+15. pages/debug_agent_pms.php (Debug page to test agent PMS inquiries query)
 

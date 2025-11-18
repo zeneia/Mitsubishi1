@@ -1,7 +1,6 @@
 <?php
 session_start();
 include_once(dirname(__DIR__) . '/includes/init.php');
-include_once(dirname(__DIR__) . '/pages/header_ex.php');
 
 // Check if user is logged in and is a customer
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'Customer') {
@@ -24,6 +23,17 @@ $stmt = $connect->prepare("SELECT * FROM accounts WHERE Id = ?");
 $stmt->execute([$_SESSION['user_id']]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 $displayName = !empty($user['FirstName']) ? $user['FirstName'] : $user['Username'];
+
+// Prepare profile image HTML
+$profile_image_html = '';
+if (!empty($user['ProfileImage'])) {
+    $imageData = base64_encode($user['ProfileImage']);
+    $imageMimeType = 'image/jpeg';
+    $profile_image_html = '<img src="data:' . $imageMimeType . ';base64,' . $imageData . '" alt="User Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">';
+} else {
+    // Show initial if no profile image
+    $profile_image_html = strtoupper(substr($displayName, 0, 1));
+}
 
 // Get vehicle ID if passed from car_details page
 $selected_vehicle_id = isset($_GET['vehicle_id']) ? (int)$_GET['vehicle_id'] : null;
@@ -63,13 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $current_odometer = preg_replace('/\D/', '', $_POST['current_odometer']);
         $current_odometer = $current_odometer === '' ? 0 : intval($current_odometer);
 
-        // Handle checkboxes
-        $service_oil_change = isset($_POST['service_oil_change']) ? 1 : 0;
-        $service_oil_filter_replacement = isset($_POST['service_oil_filter_replacement']) ? 1 : 0;
-        $service_air_filter_replacement = isset($_POST['service_air_filter_replacement']) ? 1 : 0;
-        $service_tire_rotation = isset($_POST['service_tire_rotation']) ? 1 : 0;
-        $service_fluid_top_up = isset($_POST['service_fluid_top_up']) ? 1 : 0;
-        $service_spark_plug_check = isset($_POST['service_spark_plug_check']) ? 1 : 0;
+        // Get customer needs/problem description
+        $customer_needs = $_POST['customer_needs'] ?? null;
         
         // Handle file upload
         $uploaded_receipt = null;
@@ -88,13 +93,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt_insert = $connect->prepare("
             INSERT INTO car_pms_records (
                 customer_id, plate_number, model, transmission, engine_type, color, current_odometer,
-                pms_info, pms_date, next_pms_due, service_oil_change, service_oil_filter_replacement,
-                service_air_filter_replacement, service_tire_rotation, service_fluid_top_up,
-                service_spark_plug_check, service_others, service_notes_findings, uploaded_receipt,
+                pms_info, pms_date, next_pms_due, customer_needs, service_notes_findings, uploaded_receipt,
                 request_status, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', NOW(), NOW())
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', NOW(), NOW())
         ");
-        
+
         $stmt_insert->execute([
             $_SESSION['user_id'], // Add customer_id
             $_POST['plate_number'],
@@ -106,21 +109,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST['pms_info'],
             $_POST['pms_date'],
             $_POST['next_pms_due'] ?? null,
-            $service_oil_change,
-            $service_oil_filter_replacement,
-            $service_air_filter_replacement,
-            $service_tire_rotation,
-            $service_fluid_top_up,
-            $service_spark_plug_check,
-            $_POST['service_others'] ?? null,
+            $customer_needs,
             $_POST['service_notes_findings'] ?? null,
             $uploaded_receipt
         ]);
-        
-        $success_message = "PMS request has been submitted successfully and is pending approval! You will be notified once the request is processed.";
-        
-        // Clear form data after successful submission
-        $_POST = [];
+
+        // Get the inserted PMS record ID
+        $pms_id = $connect->lastInsertId();
+
+        // Create a PMS inquiry record (if table exists)
+        try {
+            // Get the assigned agent for this customer
+            $stmt_agent = $connect->prepare("
+                SELECT agent_id FROM customer_information WHERE account_id = ?
+            ");
+            $stmt_agent->execute([$_SESSION['user_id']]);
+            $customer_info = $stmt_agent->fetch(PDO::FETCH_ASSOC);
+            $assigned_agent_id = $customer_info['agent_id'] ?? null;
+
+            $stmt_inquiry = $connect->prepare("
+                INSERT INTO pms_inquiries (pms_id, customer_id, inquiry_type, status, assigned_agent_id, created_at)
+                VALUES (?, ?, 'PMS', 'Open', ?, NOW())
+            ");
+            $stmt_inquiry->execute([$pms_id, $_SESSION['user_id'], $assigned_agent_id]);
+
+            // Redirect to My PMS Inquiries page
+            header("Location: my_pms_inquiries.php?success=1");
+            exit;
+        } catch (PDOException $e) {
+            // If pms_inquiries table doesn't exist, show success message instead
+            error_log("PMS Inquiry table error: " . $e->getMessage());
+            $success_message = "PMS request has been submitted successfully! Please execute the database SQL queries to enable the inquiry tracking system.";
+        }
         
     } catch (Exception $e) {
         $error_message = $e->getMessage();
@@ -397,7 +417,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
-
+    <div class="header">
+        <div class="logo-section">
+            <img src="../includes/images/mitsubishi_logo.png" alt="Mitsubishi Logo" class="logo">
+            <div class="brand-text">MITSUBISHI MOTORS</div>
+        </div>
+        <div class="user-section">
+            <div class="user-avatar"><?php echo $profile_image_html; ?></div>
+            <span class="welcome-text">Welcome, <?php echo htmlspecialchars($displayName); ?>!</span>
+            <button class="logout-btn" onclick="window.location.href='logout.php'">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
 
     <div class="container">
         <a href="<?php echo $selected_vehicle_id ? 'car_details.php?id=' . $selected_vehicle_id : 'car_menu.php'; ?>" class="back-btn">
@@ -498,49 +530,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
 
-                    <!-- Performed Services -->
+                    <!-- Customer Needs / Problem Description -->
                     <div class="form-section">
                         <h3 class="section-title">
-                            <i class="fas fa-tools"></i>
-                            Performed Services
+                            <i class="fas fa-comment-dots"></i>
+                            State Your Needs or Problem
                         </h3>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-group">
-                                <input type="checkbox" name="service_oil_change" value="1" id="oil_change"
-                                       <?php echo isset($_POST['service_oil_change']) ? 'checked' : ''; ?>>
-                                <label for="oil_change">Oil Change</label>
-                            </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" name="service_fluid_top_up" value="1" id="fluid_top_up"
-                                       <?php echo isset($_POST['service_fluid_top_up']) ? 'checked' : ''; ?>>
-                                <label for="fluid_top_up">Fluid Top-Up (Coolant, Brake, Power Steering)</label>
-                            </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" name="service_oil_filter_replacement" value="1" id="oil_filter"
-                                       <?php echo isset($_POST['service_oil_filter_replacement']) ? 'checked' : ''; ?>>
-                                <label for="oil_filter">Oil Filter Replacement</label>
-                            </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" name="service_spark_plug_check" value="1" id="spark_plug"
-                                       <?php echo isset($_POST['service_spark_plug_check']) ? 'checked' : ''; ?>>
-                                <label for="spark_plug">Spark Plug Check</label>
-                            </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" name="service_air_filter_replacement" value="1" id="air_filter"
-                                       <?php echo isset($_POST['service_air_filter_replacement']) ? 'checked' : ''; ?>>
-                                <label for="air_filter">Air Filter Cleaning/Replacement</label>
-                            </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" name="service_tire_rotation" value="1" id="tire_rotation"
-                                       <?php echo isset($_POST['service_tire_rotation']) ? 'checked' : ''; ?>>
-                                <label for="tire_rotation">Tire Rotation</label>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Others</label>
-                            <input type="text" name="service_others" class="form-input" 
-                                   value="<?php echo htmlspecialchars($_POST['service_others'] ?? ''); ?>"
-                                   placeholder="Any other services performed">
+                        <div class="form-group full-width">
+                            <label class="form-label required">Describe your vehicle issues or maintenance needs</label>
+                            <textarea name="customer_needs" class="form-textarea" rows="5"
+                                      placeholder="Please describe any issues, problems, or maintenance needs you're experiencing with your vehicle. Be as detailed as possible to help our service team assist you better."
+                                      required><?php echo htmlspecialchars($_POST['customer_needs'] ?? ''); ?></textarea>
                         </div>
                     </div>
 

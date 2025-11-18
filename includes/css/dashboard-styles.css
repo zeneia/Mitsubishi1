@@ -88,6 +88,9 @@ body {
 .card-icon.green {
   background: linear-gradient(135deg, var(--success-green), #1e7e34);
 }
+.card-icon.orange {
+  background: linear-gradient(135deg, var(--warning-orange), #e65100);
+}
 
 .card-title {
   font-size: 18px;

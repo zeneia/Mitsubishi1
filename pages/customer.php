@@ -460,6 +460,21 @@ try {
             <div class="card">
                 <div class="card-header">
                     <div class="card-icon">
+                        <i class="fas fa-wrench"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>PMS Request</h3>
+                    <p>Submit a Preventive Maintenance Service request for your vehicle. Describe any issues or maintenance needs you're experiencing.</p>
+                    <button class="card-btn" onclick="window.location.href='pms_record.php'">
+                        <i class="fas fa-plus"></i> Submit PMS Request
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
                         <i class="fas fa-headset"></i>
                     </div>
                 </div>
@@ -495,6 +510,21 @@ try {
                     </p>
                     <button class="card-btn" onclick="window.location.href='my_inquiries.php'">
                         <i class="fas fa-search"></i> View My Inquiries
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>My PMS Inquiries</h3>
+                    <p>Track your Preventive Maintenance Service requests and communicate with our service team about your vehicle needs.</p>
+                    <button class="card-btn" onclick="window.location.href='my_pms_inquiries.php'">
+                        <i class="fas fa-comments"></i> View PMS Inquiries
                     </button>
                 </div>
             </div>

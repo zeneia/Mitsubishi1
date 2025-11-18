@@ -8,9 +8,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'Customer') {
 }
 
 // Fetch user details for pre-filling
-$stmt = $connect->prepare("SELECT a.*, ci.firstname, ci.lastname, ci.mobile_number 
-                          FROM accounts a 
-                          LEFT JOIN customer_information ci ON a.Id = ci.account_id 
+$stmt = $connect->prepare("SELECT a.*, ci.firstname, ci.lastname, ci.mobile_number
+                          FROM accounts a
+                          LEFT JOIN customer_information ci ON a.Id = ci.account_id
                           WHERE a.Id = ?");
 $stmt->execute([$_SESSION['user_id']]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -133,15 +133,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error_field = 'datetime'; // Mark date/time fields as having error
             throw new Exception("Sorry, the selected date and time slot is already booked. Please choose a different time slot.");
         }
-        
+
         // Map form fields to database fields
         $customer_name = ($user['firstname'] ?? $user['FirstName'] ?? '') . ' ' . ($user['lastname'] ?? $user['LastName'] ?? '');
         $customer_name = trim($customer_name) ?: $user['Username'];
-        
+
         // Get vehicle details for notes
         $vehicle_id = (int)$_POST['vehicle'];
         $vehicle_info = "Unknown Vehicle";
-        
+
         if ($vehicle_id > 0) {
             try {
                 $vehicle_stmt = $connect->prepare("SELECT model_name, variant FROM vehicles WHERE id = ?");
@@ -157,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 error_log("Failed to fetch vehicle details: " . $e->getMessage());
             }
         }
-        
+
         // Build notes with additional info
         $notes = "Test Drive Request Details:\n";
         $notes .= "Vehicle: " . $vehicle_info . "\n";
@@ -168,13 +168,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($_POST['specialRequests'])) {
             $notes .= "Special Requests: " . $_POST['specialRequests'] . "\n";
         }
-        
-        $stmt_insert = $connect->prepare("INSERT INTO test_drive_requests 
-            (account_id, vehicle_id, customer_name, mobile_number, 
-             selected_date, selected_time_slot, test_drive_location, 
-             drivers_license, notes, terms_accepted, status, requested_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 'Pending', NOW())");
-        
+
+        $stmt_insert = $connect->prepare("INSERT INTO test_drive_requests
+            (account_id, vehicle_id, customer_name, mobile_number,
+             selected_date, selected_time_slot, test_drive_location,
+             drivers_license, license_number, notes, terms_accepted, status, requested_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 'Pending', NOW())");
+
         $stmt_insert->execute([
             $_SESSION['user_id'],
             $vehicle_id,
@@ -184,16 +184,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST['preferredTime'],
             "San Pablo branch",
             $license_data,
+            $_POST['licenseNumber'],
+
             $notes
         ]);
-        
+
         $request_id = $connect->lastInsertId();
-        
+
         // Set success message and redirect
         $_SESSION['success_message'] = "Test drive request submitted successfully! You will receive a notification once your request is approved.";
         header("Location: test_drive_success.php?request_id=" . $request_id);
         exit;
-        
+
     } catch (Exception $e) {
         $error_message = $e->getMessage();
         error_log("Test drive submission error: " . $e->getMessage());
@@ -222,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background-size: cover; /* scales image to cover the whole area */
             background-position: center; /* centers the image */
             background-repeat: no-repeat;
-            
+
             min-height: 100vh;
             color: white;
             overflow: visible !important;
@@ -643,16 +645,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ::-webkit-scrollbar {
             width: 8px;
         }
-        
+
         ::-webkit-scrollbar-track {
             background: rgba(0, 0, 0, 0.1);
         }
-        
+
         ::-webkit-scrollbar-thumb {
             background: rgba(255, 215, 0, 0.6);
             border-radius: 4px;
         }
-        
+
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 215, 0, 0.8);
         }
@@ -721,7 +723,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="fas fa-exclamation-triangle"></i> <?php echo htmlspecialchars($error_message); ?>
                 </div>
             <?php endif; ?>
-            
+
             <form method="POST" id="testDriveForm" enctype="multipart/form-data">
                 <div class="form-section">
                     <div class="section-title">
@@ -911,9 +913,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.getElementById('testDriveForm').addEventListener('submit', function(e) {
             let isValid = true;
             let firstError = null;
-            
+
             // Vehicle is pre-selected from URL, no need to check selection
-            
+
             // Validate phone number format
             const phone = document.getElementById('phone');
             const phoneRegex = /^[\d\s\(\)\+\-]{10,}$/;
@@ -924,7 +926,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 clearFieldError(phone);
             }
-            
+
             // Validate age
             const age = document.getElementById('age');
             const ageValue = parseInt(age.value);
@@ -935,7 +937,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 clearFieldError(age);
             }
-            
+
             // Validate license number
             const license = document.getElementById('licenseNumber');
             if (license.value.trim().length < 5) {
@@ -945,7 +947,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 clearFieldError(license);
             }
-            
+
             // Validate license image
             const licenseImage = document.getElementById('licenseImage');
             if (!licenseImage.files || licenseImage.files.length === 0) {
@@ -968,7 +970,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     clearFieldError(licenseImage);
                 }
             }
-            
+
             // Validate required fields
             const requiredFields = ['preferredDate', 'preferredTime', 'dealership', 'duration', 'experience'];
             requiredFields.forEach(fieldId => {
@@ -981,7 +983,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     clearFieldError(field);
                 }
             });
-            
+
             if (!isValid) {
                 e.preventDefault();
                 if (firstError) {
@@ -990,28 +992,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 return false;
             }
-            
+
             // Show loading state
             const submitBtn = this.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Request...';
-            
+
             showNotification('Submitting your test drive request...', 'info');
-            
+
             return true;
         });
-        
+
         // File upload functionality
         document.getElementById('licenseImage').addEventListener('change', function(e) {
             const fileInput = e.target;
             const fileDisplay = fileInput.nextElementSibling;
             const fileText = fileDisplay.querySelector('.file-upload-text');
             const fileIcon = fileDisplay.querySelector('i');
-            
+
             if (fileInput.files && fileInput.files[0]) {
                 const fileName = fileInput.files[0].name;
                 const fileSize = (fileInput.files[0].size / 1024 / 1024).toFixed(2);
-                
+
                 fileText.textContent = `${fileName} (${fileSize} MB)`;
                 fileIcon.className = 'fas fa-check-circle';
                 fileDisplay.style.borderColor = '#28a745';
@@ -1023,13 +1025,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 fileDisplay.style.color = '';
             }
         });
-        
+
         // Enhanced field validation feedback
         function showFieldError(field, message) {
             clearFieldError(field);
             field.style.borderColor = '#ff4444';
             field.style.boxShadow = '0 0 10px rgba(255, 68, 68, 0.3)';
-            
+
             const errorDiv = document.createElement('div');
             errorDiv.className = 'field-error';
             errorDiv.textContent = message;
@@ -1042,20 +1044,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 gap: 5px;
             `;
             errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
-            
+
             field.parentNode.appendChild(errorDiv);
         }
-        
+
         function clearFieldError(field) {
             field.style.borderColor = '';
             field.style.boxShadow = '';
-            
+
             const existingError = field.parentNode.querySelector('.field-error');
             if (existingError) {
                 existingError.remove();
             }
         }
-        
+
         // Notification system
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
@@ -1074,24 +1076,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 max-width: 300px;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             `;
-            
+
             const colors = {
                 success: '#28a745',
                 error: '#dc3545',
                 info: '#17a2b8',
                 warning: '#ffc107'
             };
-            
+
             notification.style.backgroundColor = colors[type] || colors.info;
             notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info'}-circle"></i> ${message}`;
-            
+
             document.body.appendChild(notification);
-            
+
             // Animate in
             setTimeout(() => {
                 notification.style.transform = 'translateX(0)';
             }, 100);
-            
+
             // Auto remove
             setTimeout(() => {
                 notification.style.transform = 'translateX(100%)';
@@ -1113,23 +1115,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             e.target.value = value;
         });
-        
+
         // Add smooth focus transitions for all form elements
         document.querySelectorAll('input, select, textarea').forEach(element => {
             element.addEventListener('focus', function() {
                 this.parentNode.style.transform = 'translateY(-2px)';
             });
-            
+
             element.addEventListener('blur', function() {
                 this.parentNode.style.transform = 'translateY(0)';
             });
         });
-        
+
         // Check for date/time conflicts
         function checkTimeSlotAvailability() {
             const dateInput = document.getElementById('preferredDate');
             const timeInput = document.getElementById('preferredTime');
-            
+
             if (dateInput.value && timeInput.value) {
                 fetch('check_availability.php', {
                     method: 'POST',
@@ -1144,7 +1146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (conflictMessage) {
                         conflictMessage.remove();
                     }
-                    
+
                     if (data.conflict) {
                         const message = document.createElement('div');
                         message.id = 'conflict-message';
@@ -1159,7 +1161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         `;
                         message.innerHTML = '<i class="fas fa-exclamation-triangle"></i> This time slot is already booked. Please select a different time.';
                         timeInput.parentNode.parentNode.appendChild(message);
-                        
+
                         // Disable submit button
                         const submitBtn = document.querySelector('button[type="submit"]');
                         submitBtn.disabled = true;
@@ -1176,7 +1178,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 });
             }
         }
-        
+
         // Add event listeners for date and time changes
         document.getElementById('preferredDate').addEventListener('change', checkTimeSlotAvailability);
         document.getElementById('preferredTime').addEventListener('change', checkTimeSlotAvailability);

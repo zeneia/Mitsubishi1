@@ -312,6 +312,48 @@ if (isset($pdo) && $pdo) {
   } catch (Exception $e) {
     error_log("Error fetching inquiry data: " . $e->getMessage());
   }
+
+  // Fetch PMS inquiries for this agent
+  try {
+    $stmt = $pdo->prepare("
+      SELECT
+        pi.id as inquiry_id,
+        pi.customer_id,
+        pi.status,
+        pi.created_at,
+        pi.assigned_agent_id,
+        cpr.plate_number,
+        cpr.model,
+        acc.FirstName,
+        acc.LastName,
+        ci.mobile_number,
+        (SELECT COUNT(*) FROM pms_messages WHERE inquiry_id = pi.id AND is_read = 0 AND sender_type = 'Customer') as unread_messages
+      FROM pms_inquiries pi
+      LEFT JOIN car_pms_records cpr ON pi.pms_id = cpr.pms_id
+      LEFT JOIN accounts acc ON pi.customer_id = acc.Id
+      LEFT JOIN customer_information ci ON pi.customer_id = ci.account_id
+      WHERE pi.assigned_agent_id = ? OR pi.assigned_agent_id IS NULL
+      ORDER BY pi.created_at DESC
+      LIMIT 100
+    ");
+    $stmt->execute([$agentId]);
+    $pms_inquiries = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  } catch (Exception $e) {
+    $pms_inquiries = [];
+    error_log("Error fetching PMS inquiry data: " . $e->getMessage());
+  }
+}
+
+// Calculate PMS statistics
+$pms_open_count = 0;
+$pms_unread_count = 0;
+foreach ($pms_inquiries as $pms) {
+  if ($pms['status'] === 'Open') {
+    $pms_open_count++;
+  }
+  if ($pms['unread_messages'] > 0) {
+    $pms_unread_count++;
+  }
 }
 
 // Calculate inquiry statistics
@@ -363,6 +405,16 @@ foreach ($new_inquiries as $inquiry) {
     </div>
     <p>Handle customer questions and provide excellent support services.</p>
   </div>
+
+  <div class="dashboard-card">
+    <div class="card-header">
+      <div class="card-icon orange">
+        <i class="fas fa-wrench"></i>
+      </div>
+      <div class="card-title">PMS Inquiries</div>
+    </div>
+    <p>Manage customer preventive maintenance service requests and communicate with customers.</p>
+  </div>
 </div>
 
 <div class="action-buttons">
@@ -382,6 +434,10 @@ foreach ($new_inquiries as $inquiry) {
     <i class="fas fa-question-circle"></i>
     Inquiry Management
   </button>
+  <a href="/pages/agent_pms_inquiries.php" class="action-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+    <i class="fas fa-wrench"></i>
+    PMS Inquiries Management
+  </a>
 </div>
 
 <!-- Sales Agent Test Drive Interface -->
