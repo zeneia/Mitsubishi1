@@ -131,7 +131,7 @@ try {
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #ffd700; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; }
         .welcome-text { color: #fff; font-size: 1rem; }
         .logout-btn { background: #E60012; color: #fff; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; }
-        .container { max-width: 900px; margin: 0 20px 0 auto; padding: 20px; display: flex; gap: 20px; height: calc(100vh - 100px); }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; display: flex; gap: 20px; height: calc(100vh - 100px); }
         .sidebar { background: #fff; border-radius: 12px; padding: 20px; width: 300px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-y: auto; }
         .sidebar-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; color: #333; }
         .inquiry-info { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; }
@@ -142,7 +142,7 @@ try {
         .chat-title { font-size: 1.2rem; font-weight: 600; color: #333; }
         .chat-subtitle { font-size: 0.9rem; color: #666; margin-top: 5px; }
         .messages-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .message { display: flex; gap: 10px; margin-bottom: 10px; }
+        .message { display: flex; gap: 10px; margin-bottom: 10px; width: 100%; }
         .message.agent { justify-content: flex-end; }
         .message-bubble { max-width: 70%; padding: 12px 16px; border-radius: 12px; word-wrap: break-word; }
         .message.agent .message-bubble { background: #E60012; color: #fff; }

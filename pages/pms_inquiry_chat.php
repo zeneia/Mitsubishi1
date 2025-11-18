@@ -130,7 +130,7 @@ try {
         .chat-title { font-size: 1.2rem; font-weight: 600; color: #333; }
         .chat-subtitle { font-size: 0.9rem; color: #666; margin-top: 5px; }
         .messages-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .message { display: flex; gap: 10px; margin-bottom: 10px; }
+        .message { display: flex; gap: 10px; margin-bottom: 10px; width: 100%; }
         .message.customer { justify-content: flex-end; }
         .message-bubble { max-width: 70%; padding: 12px 16px; border-radius: 12px; word-wrap: break-word; }
         .message.customer .message-bubble { background: #E60012; color: #fff; }
