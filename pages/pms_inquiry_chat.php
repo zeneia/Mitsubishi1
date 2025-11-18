@@ -114,7 +114,7 @@ try {
         .header { background: #000; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 215, 0, 0.2); }
         .logo-section { display: flex; align-items: center; gap: 20px; }
         .logo { width: 60px; height: auto; }
-        .brand-text { font-size: 1.4rem; font-weight: 700; color: #ffd700; }
+        .brand-text { font-size: 1.4rem; font-weight: 700; color: #ffffff; }
         .user-section { display: flex; align-items: center; gap: 20px; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #ffd700; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; }
         .welcome-text { color: #fff; font-size: 1rem; }

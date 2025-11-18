@@ -1,6 +1,7 @@
 <?php
 session_start();
 include_once(dirname(__DIR__) . '/includes/database/db_conn.php');
+include_once(dirname(__DIR__) . '/pages/header_ex.php');
 
 // Check if user is logged in and is a customer
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'Customer') {
@@ -93,7 +94,7 @@ $due_date = date('d/m/Y', strtotime($quote['RequestedAt'] . ' + 30 days'));
         
         .container { max-width: 900px; margin: 0 auto; padding: 30px 20px; position: relative; z-index: 5; }
         .back-btn { display: inline-block; margin-bottom: 20px; background: rgba(255, 255, 255, 0.1); color: #ffd700; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; font-size: 0.9rem; }
-        .back-btn:hover { background: #ffd700; color: #1a1a1a; }
+        .back-btn:hover { background: #E60012; color: #ffffff; }
 
         .quote-document {
             background: white;
@@ -464,17 +465,17 @@ $due_date = date('d/m/Y', strtotime($quote['RequestedAt'] . ' + 30 days'));
     </style>
 </head>
 <body>
-    <header class="header">
+    <!--<header class="header">
         <div class="logo-section">
             <img src="../includes/images/mitsubishi_logo.png" alt="Mitsubishi Logo" class="logo">
             <div class="brand-text">MITSUBISHI MOTORS</div>
         </div>
         <div class="user-section">
-            <!--<div class="user-avatar"><?php echo strtoupper(substr($displayName, 0, 1)); ?></div>-->
+            <div class="user-avatar"><?php echo strtoupper(substr($displayName, 0, 1)); ?></div>
             <span class="welcome-text">Welcome, <?php echo htmlspecialchars($displayName); ?>!</span>
             <button class="logout-btn" onclick="window.location.href='logout.php'"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
-    </header>
+    </header>-->
 
     <div class="container">
         <a href="quote_success.php?quote_id=<?php echo $quote['Id']; ?>" class="back-btn">

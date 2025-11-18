@@ -330,7 +330,7 @@ $instructor_agent = 'Reo Remos';
     </style>
 </head>
 <body>
-    <header class="header">
+    <!--<header class="header">
         <div class="logo-section">
             <img src="../includes/images/mitsubishi_logo.png" alt="Mitsubishi Logo" class="logo">
             <div class="brand-text">MITSUBISHI MOTORS</div>
@@ -340,7 +340,7 @@ $instructor_agent = 'Reo Remos';
             <span class="welcome-text">Welcome, <?php echo htmlspecialchars($displayName); ?>!</span>
             <button class="logout-btn" onclick="window.location.href='logout.php'"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
-    </header>
+    </header>-->
 
     <div class="container">
         <div class="success-message">

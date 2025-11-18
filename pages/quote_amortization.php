@@ -156,8 +156,8 @@ $due_date = date('d/m/Y', strtotime($quote['RequestedAt'] . ' + 30 days'));
         .payment-methods h3 { font-size: 1.1rem; color: #222; margin-bottom: 16px; font-weight: 700; }
         .payment-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .payment-option { background: #fafafa; border: 2px solid #ddd; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.3s ease; text-align: center; }
-        .payment-option:hover { border-color: #b71c1c; background: #fff; }
-        .payment-option.selected { border-color: #b71c1c; background: #fff3f3; }
+        /*.payment-option:hover { border-color: #b71c1c; background: #fff; }*/
+        /*.payment-option.selected { border-color: #b71c1c; background: #fff3f3; }*/
         .payment-option input[type="radio"] { display: none; }
         .payment-option .icon { font-size: 2rem; color: #b71c1c; margin-bottom: 8px; }
         .payment-option .title { font-weight: 700; color: #222; margin-bottom: 4px; }
@@ -242,7 +242,7 @@ $due_date = date('d/m/Y', strtotime($quote['RequestedAt'] . ' + 30 days'));
 
                 <!-- Payment Methods Section -->
                 <div class="payment-methods">
-                    <h3><i class="fas fa-credit-card"></i> Select Payment Method</h3>
+                    <h3><i class="fas fa-credit-card"></i> Payment Method</h3>
                     <div class="payment-options">
                         <label class="payment-option selected" data-method="in-house">
                             <input type="radio" name="payment_method" value="in-house" checked>
